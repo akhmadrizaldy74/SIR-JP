@@ -451,3 +451,110 @@ body.sidebar-collapsed .app-main {
     display: block;
   }
 }
+
+
+/* ==========================================================================
+   SweetAlert2 Custom Styling - Matching SIR-JP & Government Enterprise Theme
+   ========================================================================== */
+div:where(.swal2-container) div:where(.swal2-popup) {
+  border-radius: 14px !important;
+  padding: 2.25rem 2rem 2rem !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+div:where(.swal2-container) .swal2-close {
+  color: #94a3b8 !important;
+  font-size: 1.5rem !important;
+  top: 12px !important;
+  right: 14px !important;
+  transition: color 0.2s ease !important;
+}
+
+div:where(.swal2-container) .swal2-close:hover {
+  color: #1e293b !important;
+}
+
+div:where(.swal2-container) .swal2-icon.swal2-success {
+  border-color: #A7F3D0 !important;
+  color: #0D9488 !important;
+  margin: 0.5rem auto 1.25rem !important;
+}
+
+div:where(.swal2-container) .swal2-icon.swal2-success [class^=swal2-success-line] {
+  background-color: #0D9488 !important;
+}
+
+div:where(.swal2-container) .swal2-icon.swal2-success .swal2-success-ring {
+  border: 4px solid rgba(167, 243, 208, 0.6) !important;
+}
+
+div:where(.swal2-container) .swal2-icon.swal2-warning {
+  border-color: #FDE68A !important;
+  color: #D97706 !important;
+  margin: 0.5rem auto 1.25rem !important;
+}
+
+div:where(.swal2-container) .swal2-icon.swal2-error {
+  border-color: #FECACA !important;
+  color: #DC2626 !important;
+  margin: 0.5rem auto 1.25rem !important;
+}
+
+div:where(.swal2-container) .swal2-icon.swal2-error [class^=swal2-x-mark-line] {
+  background-color: #DC2626 !important;
+}
+
+div:where(.swal2-container) .swal2-title {
+  font-size: 1.4rem !important;
+  font-weight: 600 !important;
+  color: #1E293B !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+div:where(.swal2-container) .swal2-html-container {
+  font-size: 1.05rem !important;
+  color: #475569 !important;
+  margin-bottom: 1.75rem !important;
+  line-height: 1.5 !important;
+}
+
+div:where(.swal2-container) .swal2-actions {
+  margin-top: 0.5rem !important;
+  gap: 0.75rem !important;
+}
+
+div:where(.swal2-container) .swal2-confirm {
+  background-color: #183B65 !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  padding: 0.6rem 2.25rem !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  border: none !important;
+  box-shadow: 0 4px 6px -1px rgba(24, 59, 101, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+div:where(.swal2-container) .swal2-confirm:hover {
+  background-color: #0F2542 !important;
+  transform: translateY(-1px) !important;
+}
+
+div:where(.swal2-container) .swal2-cancel {
+  background-color: #F1F5F9 !important;
+  color: #475569 !important;
+  border: 1px solid #CBD5E1 !important;
+  border-radius: 8px !important;
+  padding: 0.6rem 2rem !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  transition: all 0.2s ease !important;
+}
+
+div:where(.swal2-container) .swal2-cancel:hover {
+  background-color: #E2E8F0 !important;
+  color: #1E293B !important;
+}

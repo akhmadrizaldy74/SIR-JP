@@ -552,7 +552,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Reset form modal
                 document.getElementById('formQuickPengajar').reset();
 
-                alert(data.message);
+                SirAlert.success(data.message, 'Informasi !');
             } else {
                 quickAlert.textContent = data.message || 'Gagal mendaftarkan pengajar.';
                 quickAlert.classList.remove('d-none');

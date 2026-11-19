@@ -106,11 +106,12 @@ class OktoberExcelFormatVerificationTest extends TestCase
     public function test_quick_store_pengajar_api(): void
     {
         $this->actingAs($this->user);
+        $uniqueNik = '317101' . rand(1000000000, 9999999999);
 
         $response = $this->postJson('/api/pengajar-quick-store', [
             'jenis_pengajar' => 'Narasumber',
             'nama_lengkap' => 'Prof. Dr. Bambang Sudirman',
-            'nik' => '3171019999990001',
+            'nik' => $uniqueNik,
             'gelar' => 'M.Sc.',
             'instansi' => 'Badan Riset dan Inovasi Nasional (BRIN)',
         ]);
@@ -121,7 +122,7 @@ class OktoberExcelFormatVerificationTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('narasumbers', [
-            'nik' => '3171019999990001',
+            'nik' => $uniqueNik,
             'nama_lengkap' => 'Prof. Dr. Bambang Sudirman',
         ]);
     }

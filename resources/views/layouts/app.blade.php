@@ -67,6 +67,8 @@
     <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
     <!-- Chart.js -->
     <script src="{{ asset('assets/js/chart.umd.min.js') }}"></script>
+    <!-- SweetAlert2 Notification Engine -->
+    <script src="{{ asset('assets/js/sweetalert2.all.min.js') }}"></script>
     <!-- Custom Vanilla App JS -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
 
