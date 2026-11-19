@@ -42,8 +42,10 @@
                 <a class="nav-link px-4 py-3 {{ $tab == 'peserta' ? 'active fw-bold text-primary border-bottom border-primary border-3' : 'text-secondary' }}" 
                    href="{{ route('kelas-mapel.show', ['kelas_mapel' => $kelasMapel->id, 'tab' => 'peserta']) }}">
                     <i class="bi bi-people me-1"></i> Peserta Kelas
-                    @if($kelasMapel->pesertas->count() > 0)
-                        <span class="badge bg-success-subtle text-success ms-1">{{ $kelasMapel->pesertas->count() }}</span>
+                    @if(isset($pesertas) && $pesertas->count() > 0)
+                        <span class="badge bg-success text-white ms-1">{{ $pesertas->count() }}</span>
+                    @elseif($kelasMapel->pesertas->count() > 0)
+                        <span class="badge bg-success text-white ms-1">{{ $kelasMapel->pesertas->count() }}</span>
                     @endif
                 </a>
             </li>
@@ -443,7 +445,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($kelasMapel->pesertas as $i => $pst)
+                        @forelse($pesertas ?? $kelasMapel->pesertas as $i => $pst)
                             <tr>
                                 <td class="text-center">{{ $i + 1 }}</td>
                                 <td class="fw-semibold text-dark">{{ $pst->nip }}</td>

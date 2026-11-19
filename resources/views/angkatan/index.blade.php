@@ -77,7 +77,9 @@
                             <div class="text-muted small"><i class="bi bi-geo-alt me-1"></i>{{ $ang->lokasi ?? 'Kampus PPSDM' }}</div>
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-light text-dark border">{{ $ang->jumlah_peserta }} Orang</span>
+                            <a href="{{ route('peserta.index', ['angkatan_id' => $ang->id]) }}" class="badge bg-light text-primary border text-decoration-none py-1 px-2" title="Lihat Peserta Diklat">
+                                <i class="bi bi-people me-1"></i>{{ $ang->jumlah_peserta }} Orang
+                            </a>
                         </td>
                         <td class="text-center">
                             <span class="badge bg-light text-primary border">{{ $ang->mata_pelatihans_count }} MP</span>

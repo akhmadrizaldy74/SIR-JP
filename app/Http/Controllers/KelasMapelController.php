@@ -20,7 +20,7 @@ class KelasMapelController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $query = KelasMapel::with(['pelatihan', 'angkatan', 'mataPelatihan', 'ruangan']);
+        $query = KelasMapel::with(['pelatihan', 'angkatan', 'mataPelatihan', 'ruangan', 'pesertas']);
 
         if ($search) {
             $query->where('nama_kelas', 'like', "%{$search}%")
@@ -90,6 +90,12 @@ class KelasMapelController extends Controller
             ->orderBy('tanggal')
             ->get();
 
+        // Peserta Diklat (baik yang langsung terhubung ke kelas mapel ini atau angkatan yang sama)
+        $pesertas = Peserta::where(function($q) use ($kelasMapel) {
+            $q->where('kelas_mapel_id', $kelasMapel->id)
+              ->orWhere('angkatan_id', $kelasMapel->angkatan_id);
+        })->orderBy('id')->get();
+
         return view('kelas_mapel.show', compact(
             'kelasMapel',
             'tab',
@@ -99,7 +105,8 @@ class KelasMapelController extends Controller
             'mataPelatihans',
             'widyaiswaras',
             'narasumbers',
-            'jadwals'
+            'jadwals',
+            'pesertas'
         ));
     }
 

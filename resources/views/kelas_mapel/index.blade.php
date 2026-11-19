@@ -76,6 +76,11 @@
                         <td>
                             <div class="fw-semibold text-primary">{{ $km->mataPelatihan->nama_mata_pelatihan ?? '-' }}</div>
                             <span class="text-muted small">Kelas: {{ $km->nama_kelas }} &bull; <strong>{{ $km->jp }} JP</strong></span>
+                            <div class="mt-1">
+                                <a href="{{ route('kelas-mapel.show', ['kelas_mapel' => $km->id, 'tab' => 'peserta']) }}" class="badge bg-primary-subtle text-primary border border-primary-subtle text-decoration-none" title="Lihat Daftar Peserta">
+                                    <i class="bi bi-people-fill me-1"></i> {{ $km->pesertas->count() }} Peserta
+                                </a>
+                            </div>
                         </td>
                         <td>
                             <div class="small fw-semibold text-dark">{{ $km->ruangan->nama_ruangan ?? 'Online' }}</div>
@@ -86,6 +91,9 @@
                         </td>
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
+                                <a href="{{ route('kelas-mapel.show', ['kelas_mapel' => $km->id, 'tab' => 'peserta']) }}" class="btn btn-outline-success" title="Lihat Peserta (Tab 4)">
+                                    <i class="bi bi-people"></i>
+                                </a>
                                 <a href="{{ route('kelas-mapel.show', $km->id) }}" class="btn btn-outline-info" title="Kelola Kelas (4 Tab KCLC)">
                                     <i class="bi bi-eye"></i>
                                 </a>
