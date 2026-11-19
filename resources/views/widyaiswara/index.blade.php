@@ -114,11 +114,13 @@
     </div>
 
     @if($widyaiswaras->hasPages())
-        <div class="p-3 border-top d-flex justify-content-between align-items-center">
+        <div class="table-pagination-footer">
             <span class="text-muted small">
                 Menampilkan {{ $widyaiswaras->firstItem() }} - {{ $widyaiswaras->lastItem() }} dari {{ $widyaiswaras->total() }} data
             </span>
-            {{ $widyaiswaras->links() }}
+            <div>
+                {{ $widyaiswaras->links() }}
+            </div>
         </div>
     @endif
 </div>

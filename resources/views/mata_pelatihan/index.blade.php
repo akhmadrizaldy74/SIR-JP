@@ -118,11 +118,13 @@
     </div>
 
     @if($mataPelatihans->hasPages())
-        <div class="p-3 border-top d-flex justify-content-between align-items-center">
+        <div class="table-pagination-footer">
             <span class="text-muted small">
                 Menampilkan {{ $mataPelatihans->firstItem() }} - {{ $mataPelatihans->lastItem() }} dari {{ $mataPelatihans->total() }} data
             </span>
-            {{ $mataPelatihans->links() }}
+            <div>
+                {{ $mataPelatihans->links() }}
+            </div>
         </div>
     @endif
 </div>

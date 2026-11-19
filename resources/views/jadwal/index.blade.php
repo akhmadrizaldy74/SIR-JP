@@ -236,11 +236,13 @@
         </div>
 
         @if($jadwals->hasPages())
-            <div class="p-3 border-top d-flex justify-content-between align-items-center">
+            <div class="table-pagination-footer">
                 <span class="text-muted small">
                     Menampilkan {{ $jadwals->firstItem() }} - {{ $jadwals->lastItem() }} dari {{ $jadwals->total() }} data
                 </span>
-                {{ $jadwals->links() }}
+                <div>
+                    {{ $jadwals->links() }}
+                </div>
             </div>
         @endif
     @endif

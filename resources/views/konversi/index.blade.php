@@ -131,11 +131,13 @@
     </div>
 
     @if($konversis->hasPages())
-        <div class="p-3 border-top d-flex justify-content-between align-items-center">
+        <div class="table-pagination-footer">
             <span class="text-muted small">
                 Menampilkan {{ $konversis->firstItem() }} - {{ $konversis->lastItem() }} dari {{ $konversis->total() }} data
             </span>
-            {{ $konversis->links() }}
+            <div>
+                {{ $konversis->links() }}
+            </div>
         </div>
     @endif
 </div>

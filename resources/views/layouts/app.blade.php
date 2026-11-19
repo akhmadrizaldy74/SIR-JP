@@ -19,6 +19,8 @@
     <div class="app-wrapper">
         <!-- Sidebar Navigation -->
         @include('partials.sidebar')
+        <!-- Mobile Sidebar Backdrop -->
+        <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
 
         <!-- Main Workspace -->
         <div class="app-main">
