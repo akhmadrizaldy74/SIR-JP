@@ -126,4 +126,39 @@ class OktoberExcelFormatVerificationTest extends TestCase
             'nama_lengkap' => 'Prof. Dr. Bambang Sudirman',
         ]);
     }
+
+    public function test_widyaiswara_excel_formatting_structure(): void
+    {
+        $wi = Widyaiswara::first();
+        $rekap = $this->service->hitungWidyaiswara($wi->id, 10, 2026);
+
+        \Maatwebsite\Excel\Facades\Excel::store(new WidyaiswaraIndividuExport($rekap, 10, 2026), 'test_verify_format.xlsx', 'local');
+        $path = \Illuminate\Support\Facades\Storage::disk('local')->path('test_verify_format.xlsx');
+        $this->assertFileExists($path);
+
+        $ss = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
+        $sheet = $ss->getActiveSheet();
+
+        // 1. Title merges A1:H1 and A2:H2
+        $merges = $sheet->getMergeCells();
+        $this->assertArrayHasKey('A1:H1', $merges);
+        $this->assertArrayHasKey('A2:H2', $merges);
+
+        // 2. Col G is hidden (0-width / setVisible false)
+        $this->assertFalse($sheet->getColumnDimension('G')->getVisible());
+
+        // 3. Col H is visible and has ample width
+        $this->assertTrue($sheet->getColumnDimension('H')->getVisible());
+        $this->assertGreaterThanOrEqual(20, $sheet->getColumnDimension('H')->getWidth());
+
+        // 4. Verify signature merge exists across D to H
+        $hasSignatureMerge = false;
+        foreach ($merges as $range => $cell) {
+            if (preg_match('/^D\d+:H\d+$/', $range)) {
+                $hasSignatureMerge = true;
+                break;
+            }
+        }
+        $this->assertTrue($hasSignatureMerge, 'Signature must be merged across columns D to H');
+    }
 }
