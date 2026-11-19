@@ -3,33 +3,9 @@
 @section('title', 'Dashboard KCLC & SIR-JP')
 @section('page_title', 'HOME')
 
-@section('breadcrumb')
+@section('breadcrumb_custom')
     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">home</a></li>
     <li class="breadcrumb-item active" aria-current="page">Home</li>
-@endsection
-
-@section('page_actions')
-    <form method="GET" action="{{ route('dashboard') }}" class="d-flex align-items-center gap-2 bg-white p-2 rounded border shadow-sm">
-        <div class="d-flex align-items-center gap-1">
-            <i class="bi bi-calendar-event text-primary"></i>
-            <span class="small fw-semibold text-muted">Periode JP:</span>
-        </div>
-        <select name="bulan" class="form-select form-select-sm" style="width: 140px;">
-            @for($m = 1; $m <= 12; $m++)
-                <option value="{{ $m }}" {{ $bulan == $m ? 'selected' : '' }}>
-                    {{ (new \App\Services\JPRecapitulationService)->getNamaBulan($m) }}
-                </option>
-            @endfor
-        </select>
-        <select name="tahun" class="form-select form-select-sm" style="width: 100px;">
-            @for($y = date('Y') - 2; $y <= date('Y') + 1; $y++)
-                <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
-            @endfor
-        </select>
-        <button type="submit" class="btn btn-sm btn-navy px-3">
-            <i class="bi bi-filter"></i> Filter
-        </button>
-    </form>
 @endsection
 
 @section('content')
@@ -44,23 +20,25 @@
         </div>
         <div class="col-md-4 text-end d-none d-md-block position-relative">
             <!-- Ilustrasi Workspace Meja & Laptop Presisi Gambar KCLC 10 -->
-            <svg width="220" height="100" viewBox="0 0 220 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <ellipse cx="170" cy="50" rx="45" ry="45" stroke="#E2E8F0" stroke-width="1.5" stroke-dasharray="3 3"/>
-                <ellipse cx="170" cy="50" rx="70" ry="70" stroke="#F1F5F9" stroke-width="1.5"/>
-                <rect x="90" y="70" width="110" height="5" rx="2.5" fill="#64748B"/>
-                <rect x="105" y="75" width="5" height="22" rx="2" fill="#94A3B8"/>
-                <rect x="180" y="75" width="5" height="22" rx="2" fill="#94A3B8"/>
-                <rect x="135" y="38" width="38" height="25" rx="3" fill="#1E293B"/>
-                <rect x="137" y="40" width="34" height="21" rx="2" fill="#38BDF8"/>
-                <rect x="152" y="63" width="4" height="7" fill="#64748B"/>
-                <rect x="146" y="69" width="16" height="2" rx="1" fill="#475569"/>
-                <circle cx="115" cy="43" r="8" fill="#FBBF24"/>
-                <path d="M106 64 C106 55, 124 55, 124 64 Z" fill="#0D9488"/>
-                <rect x="103" y="62" width="24" height="4" rx="2" fill="#059669"/>
-                <rect x="114" y="66" width="2" height="15" fill="#475569"/>
-                <path d="M108 81 L122 81" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M190 65 Q192 60 195 62 Q197 64 194 67 Z" fill="#10B981"/>
-                <rect x="190" y="66" width="5" height="4" rx="1" fill="#F59E0B"/>
+            <svg width="240" height="110" viewBox="0 0 240 110" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-height: 110px;">
+                <circle cx="190" cy="55" r="50" stroke="#E2E8F0" stroke-width="1.2" stroke-dasharray="4 3"/>
+                <circle cx="190" cy="55" r="75" stroke="#F1F5F9" stroke-width="1.5"/>
+                <circle cx="190" cy="55" r="100" stroke="#F8FAFC" stroke-width="1.5"/>
+                <rect x="80" y="74" width="135" height="5" rx="2.5" fill="#475569"/>
+                <rect x="95" y="79" width="4" height="26" rx="2" fill="#94A3B8"/>
+                <rect x="195" y="79" width="4" height="26" rx="2" fill="#94A3B8"/>
+                <rect x="135" y="36" width="46" height="30" rx="4" fill="#0284C7"/>
+                <rect x="138" y="39" width="40" height="24" rx="2" fill="#E0F2FE"/>
+                <rect x="156" y="66" width="4" height="8" fill="#64748B"/>
+                <rect x="148" y="73" width="20" height="2" rx="1" fill="#475569"/>
+                <circle cx="112" cy="42" r="9" fill="#F59E0B"/>
+                <path d="M107 40 H117" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                <path d="M100 66 C100 54, 124 54, 124 66 Z" fill="#059669"/>
+                <rect x="96" y="64" width="28" height="5" rx="2.5" fill="#10B981"/>
+                <rect x="108" y="69" width="4" height="18" fill="#64748B"/>
+                <path d="M100 87 L120 87" stroke="#64748B" stroke-width="3" stroke-linecap="round"/>
+                <path d="M200 68 C200 62, 206 62, 206 68 Z" fill="#10B981"/>
+                <rect x="201" y="68" width="4" height="6" rx="1" fill="#F59E0B"/>
             </svg>
         </div>
     </div>
@@ -300,11 +278,32 @@
 <!-- ============================================================== -->
 <!-- SISTEM INFORMASI REKAPITULASI JP (SIR-JP)                     -->
 <!-- ============================================================== -->
-<div class="d-flex align-items-center justify-content-between mb-3 pt-3 border-top">
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3 pt-4 border-top">
     <div>
         <h5 class="fw-bold text-dark mb-0"><i class="bi bi-calculator text-primary me-2"></i>Rekapitulasi Jam Pelajaran Widyaiswara &amp; Narasumber</h5>
         <span class="text-muted small">Perhitungan beban kerja mengajar dan pencapaian target minimum 32 JP bulanan</span>
     </div>
+    <form method="GET" action="{{ route('dashboard') }}" class="d-flex align-items-center gap-2 bg-white p-2 rounded border shadow-sm">
+        <div class="d-flex align-items-center gap-1">
+            <i class="bi bi-calendar-event text-primary"></i>
+            <span class="small fw-semibold text-muted">Periode:</span>
+        </div>
+        <select name="bulan" class="form-select form-select-sm" style="width: 130px;">
+            @for($m = 1; $m <= 12; $m++)
+                <option value="{{ $m }}" {{ $bulan == $m ? 'selected' : '' }}>
+                    {{ (new \App\Services\JPRecapitulationService)->getNamaBulan($m) }}
+                </option>
+            @endfor
+        </select>
+        <select name="tahun" class="form-select form-select-sm" style="width: 90px;">
+            @for($y = date('Y') - 2; $y <= date('Y') + 1; $y++)
+                <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
+            @endfor
+        </select>
+        <button type="submit" class="btn btn-sm btn-navy px-3">
+            <i class="bi bi-filter"></i> Filter
+        </button>
+    </form>
 </div>
 
 <!-- Filter Info Banner -->

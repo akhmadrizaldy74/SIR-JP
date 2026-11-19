@@ -173,7 +173,7 @@ body.sidebar-collapsed .app-sidebar {
 body.sidebar-collapsed .sidebar-brand-text,
 body.sidebar-collapsed .sidebar-section-title,
 body.sidebar-collapsed .nav-text {
-  display: none;
+  display: none !important;
 }
 
 body.sidebar-collapsed .sidebar-brand {

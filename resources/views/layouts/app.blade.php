@@ -33,9 +33,13 @@
                     <div>
                         <h1 class="page-title">@yield('page_title', 'Dashboard')</h1>
                         <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="bi bi-house-door"></i> Home</a></li>
-                                @yield('breadcrumb')
+                            <ol class="breadcrumb mb-0">
+                                @if(trim($__env->yieldContent('breadcrumb_custom')))
+                                    @yield('breadcrumb_custom')
+                                @else
+                                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="bi bi-house-door"></i> Home</a></li>
+                                    @yield('breadcrumb')
+                                @endif
                             </ol>
                         </nav>
                     </div>
