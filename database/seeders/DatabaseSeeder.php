@@ -51,13 +51,14 @@ class DatabaseSeeder extends Seeder
 
         // 3. Pengaturan Sistem & Instansi
         $settings = [
-            ['key' => 'instansi_nama', 'value' => 'Pusat Pengembangan Sumber Daya Manusia (PPSDM)', 'label' => 'Nama Instansi', 'tipe' => 'text'],
-            ['key' => 'instansi_alamat', 'value' => 'Jl. TMP Kalibata No. 17, Pancoran, Jakarta Selatan', 'label' => 'Alamat Instansi', 'tipe' => 'textarea'],
-            ['key' => 'instansi_telepon', 'value' => '(021) 7982345', 'label' => 'Nomor Telepon', 'tipe' => 'text'],
-            ['key' => 'instansi_email', 'value' => 'info@ppsdm.go.id', 'label' => 'Email Instansi', 'tipe' => 'text'],
-            ['key' => 'pimpinan_nama', 'value' => 'Dr. H. Hendra Sukmana, M.Si', 'label' => 'Nama Pimpinan', 'tipe' => 'text'],
-            ['key' => 'pimpinan_nip', 'value' => '19750815 199903 1 003', 'label' => 'NIP Pimpinan', 'tipe' => 'text'],
-            ['key' => 'pimpinan_jabatan', 'value' => 'Kepala Pusat Pengembangan Sumber Daya Manusia', 'label' => 'Jabatan Pimpinan', 'tipe' => 'text'],
+            ['key' => 'instansi_nama', 'value' => 'Pusat Pengembangan SDM Ketenagakerjaan', 'label' => 'Nama Instansi', 'tipe' => 'text'],
+            ['key' => 'instansi_sub', 'value' => 'Ketenagakerjaan', 'label' => 'Sub Nama Instansi', 'tipe' => 'text'],
+            ['key' => 'instansi_alamat', 'value' => 'Jl. Pengesahan No. 1, Jakarta Timur', 'label' => 'Alamat Instansi', 'tipe' => 'textarea'],
+            ['key' => 'instansi_telepon', 'value' => '(021) 87654321', 'label' => 'Nomor Telepon', 'tipe' => 'text'],
+            ['key' => 'instansi_email', 'value' => 'info@kemnaker.go.id', 'label' => 'Email Instansi', 'tipe' => 'text'],
+            ['key' => 'pimpinan_nama', 'value' => 'Dr. Narsih, S.Pd., M.M.', 'label' => 'Nama Pimpinan', 'tipe' => 'text'],
+            ['key' => 'pimpinan_nip', 'value' => '197202111998032002', 'label' => 'NIP Pimpinan', 'tipe' => 'text'],
+            ['key' => 'pimpinan_jabatan', 'value' => 'Kepala Pusat Pengembangan SDM Ketenagakerjaan', 'label' => 'Jabatan Pimpinan', 'tipe' => 'text'],
             ['key' => 'pimpinan_kota', 'value' => 'Jakarta', 'label' => 'Kota Penandatanganan', 'tipe' => 'text'],
             ['key' => 'minimum_jp_bulanan', 'value' => '32', 'label' => 'Minimum JP Widyaiswara / Bulan', 'tipe' => 'number'],
         ];

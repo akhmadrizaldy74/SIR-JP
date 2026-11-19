@@ -2,36 +2,68 @@
 
 namespace App\Exports;
 
-use Illuminate\Contracts\View\View;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\FromView;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use App\Models\Widyaiswara;
+use App\Services\JPRecapitulationService;
 
-class RekapSemuaWidyaiswaraExport implements FromView, ShouldAutoSize
+class RekapSemuaWidyaiswaraExport implements WithMultipleSheets
 {
-    protected Collection $rekap;
+    protected Collection $rekapSummary;
     protected int $bulan;
     protected int $tahun;
     protected string $namaBulan;
     protected float $minimumJp;
 
-    public function __construct(Collection $rekap, int $bulan, int $tahun, string $namaBulan, float $minimumJp)
+    public function __construct(Collection $rekapSummary, int $bulan, int $tahun, string $namaBulan, float $minimumJp)
     {
-        $this->rekap = $rekap;
+        $this->rekapSummary = $rekapSummary;
         $this->bulan = $bulan;
         $this->tahun = $tahun;
         $this->namaBulan = $namaBulan;
         $this->minimumJp = $minimumJp;
     }
 
-    public function view(): View
+    public function sheets(): array
     {
-        return view('exports.rekap_semua_widyaiswara_excel', [
-            'rekap' => $this->rekap,
-            'bulan' => $this->bulan,
-            'tahun' => $this->tahun,
-            'namaBulan' => $this->namaBulan,
-            'minimumJp' => $this->minimumJp,
-        ]);
+        $sheets = [];
+
+        // Sheet 1: Master Summary of all Widyaiswaras
+        $sheets[] = new RekapSummarySheetExport(
+            $this->rekapSummary,
+            $this->bulan,
+            $this->tahun,
+            $this->namaBulan,
+            $this->minimumJp
+        );
+
+        // Sheet 2 to N: Individual sheet for each Widyaiswara
+        $service = app(JPRecapitulationService::class);
+        $widyaiswaras = Widyaiswara::where('status', 'Aktif')->orderBy('id', 'asc')->get();
+
+        $usedTitles = ['REKAPITULASI' => true];
+
+        foreach ($widyaiswaras as $wi) {
+            $individualRekap = $service->hitungWidyaiswara($wi->id, $this->bulan, $this->tahun);
+
+            // Clean title: first name or short name
+            $cleanName = preg_replace('/^(Dr\.|Drs\.|Ir\.|Prof\.)\s*/i', '', trim($wi->nama_lengkap));
+            $firstName = explode(' ', trim($cleanName))[0];
+            $cleanTitle = preg_replace('/[\\\\\/\?\*\:\[\]]/', '', $firstName);
+            $sheetTitle = strtoupper(substr($cleanTitle, 0, 20)) ?: 'WI-' . $wi->id;
+
+            // Ensure unique title
+            $baseTitle = $sheetTitle;
+            $counter = 1;
+            while (isset($usedTitles[$sheetTitle])) {
+                $sheetTitle = substr($baseTitle, 0, 18) . '-' . $counter;
+                $counter++;
+            }
+            $usedTitles[$sheetTitle] = true;
+
+            $sheets[] = new WidyaiswaraIndividuExport($individualRekap, $this->bulan, $this->tahun, $sheetTitle);
+        }
+
+        return $sheets;
     }
 }
