@@ -1,17 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Administrasi')
-@section('page_title', 'Dashboard')
+@section('title', 'Dashboard KCLC & SIR-JP')
+@section('page_title', 'HOME')
 
 @section('breadcrumb')
-    <li class="breadcrumb-item active" aria-current="page">Dashboard Ringkasan</li>
+    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Home</li>
 @endsection
 
 @section('page_actions')
     <form method="GET" action="{{ route('dashboard') }}" class="d-flex align-items-center gap-2 bg-white p-2 rounded border shadow-sm">
         <div class="d-flex align-items-center gap-1">
             <i class="bi bi-calendar-event text-primary"></i>
-            <span class="small fw-semibold text-muted">Periode:</span>
+            <span class="small fw-semibold text-muted">Periode JP:</span>
         </div>
         <select name="bulan" class="form-select form-select-sm" style="width: 140px;">
             @for($m = 1; $m <= 12; $m++)
@@ -33,201 +34,262 @@
 
 @section('content')
 <!-- Banner KCLC Learning Center Sesuai Gambar 10 -->
-<div class="card border-0 shadow-sm mb-4 overflow-hidden" style="background: linear-gradient(135deg, #183B65 0%, #1e40af 100%); color: white; border-radius: 12px;">
-    <div class="card-body p-4 position-relative">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge bg-warning text-dark fw-bold px-3 py-1">KCLC Kemnaker Corpu</span>
-                    <span class="badge bg-white-50 text-white">Platform Pembelajaran Digital</span>
+<div class="card bg-white border-0 shadow-sm rounded-4 mb-4 p-4 position-relative overflow-hidden">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h4 class="fw-bold text-dark mb-1" style="font-size: 1.45rem; letter-spacing: -0.3px;">Dashboard KCLC Learning Center</h4>
+            <p class="text-muted mb-0" style="font-size: 0.95rem;">
+                Platform Pembelajaran Digital PPSDM Kementerian Ketenagakerjaan
+            </p>
+        </div>
+        <div class="col-md-4 text-end d-none d-md-block position-relative">
+            <!-- Ilustrasi Workspace Meja & Laptop Presisi Gambar KCLC 10 -->
+            <svg width="220" height="100" viewBox="0 0 220 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="170" cy="50" rx="45" ry="45" stroke="#E2E8F0" stroke-width="1.5" stroke-dasharray="3 3"/>
+                <ellipse cx="170" cy="50" rx="70" ry="70" stroke="#F1F5F9" stroke-width="1.5"/>
+                <rect x="90" y="70" width="110" height="5" rx="2.5" fill="#64748B"/>
+                <rect x="105" y="75" width="5" height="22" rx="2" fill="#94A3B8"/>
+                <rect x="180" y="75" width="5" height="22" rx="2" fill="#94A3B8"/>
+                <rect x="135" y="38" width="38" height="25" rx="3" fill="#1E293B"/>
+                <rect x="137" y="40" width="34" height="21" rx="2" fill="#38BDF8"/>
+                <rect x="152" y="63" width="4" height="7" fill="#64748B"/>
+                <rect x="146" y="69" width="16" height="2" rx="1" fill="#475569"/>
+                <circle cx="115" cy="43" r="8" fill="#FBBF24"/>
+                <path d="M106 64 C106 55, 124 55, 124 64 Z" fill="#0D9488"/>
+                <rect x="103" y="62" width="24" height="4" rx="2" fill="#059669"/>
+                <rect x="114" y="66" width="2" height="15" fill="#475569"/>
+                <path d="M108 81 L122 81" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M190 65 Q192 60 195 62 Q197 64 194 67 Z" fill="#10B981"/>
+                <rect x="190" y="66" width="5" height="4" rx="1" fill="#F59E0B"/>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<!-- Section: Statistik KCLC Learning Center (10 Cards Sesuai Gambar 10) -->
+<div class="mb-3">
+    <h5 class="fw-bold text-dark mb-1" style="font-size: 1.15rem;">Statistik KCLC Learning Center</h5>
+    <div class="text-muted small">Ringkasan data dan aktivitas sistem pembelajaran</div>
+</div>
+
+<!-- Row 1: 3 Cards -->
+<div class="row g-3 mb-3">
+    <div class="col-lg-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #EEF2FF; color: #4F46E5;">
+                        <i class="bi bi-easel fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Pelatihan Diklat</div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_pelatihan'] }}</h3>
+                    </div>
                 </div>
-                <h3 class="fw-bold mb-1 text-white">Dashboard KCLC Learning Center</h3>
-                <p class="mb-3 text-white-50" style="font-size: 0.95rem;">
-                    Platform Pembelajaran Digital Terintegrasi &bull; Pusat Pengembangan Sumber Daya Manusia Kementerian Ketenagakerjaan
-                </p>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{{ route('kelas-mapel.index') }}" class="btn btn-sm btn-light fw-semibold text-primary">
-                        <i class="bi bi-grid-3x3-gap-fill me-1"></i> Kelola Kelas Mapel
-                    </a>
-                    <a href="{{ route('ruangan.index') }}" class="btn btn-sm btn-outline-light">
-                        <i class="bi bi-door-open me-1"></i> Ruangan Kelas
-                    </a>
-                    <a href="{{ route('sikap-form.index') }}" class="btn btn-sm btn-outline-light">
-                        <i class="bi bi-ui-checks me-1"></i> Form Sikap
-                    </a>
-                    <a href="{{ route('evaluasi-form.index') }}" class="btn btn-sm btn-outline-light">
-                        <i class="bi bi-file-earmark-check me-1"></i> Form Evaluasi
-                    </a>
-                    <a href="{{ route('rekapitulasi.index') }}" class="btn btn-sm btn-warning text-dark fw-bold">
-                        <i class="bi bi-calculator-fill me-1"></i> Rekapitulasi JP (32 JP)
-                    </a>
-                </div>
+                <span class="badge rounded-pill fw-medium" style="background-color: #EEF2FF; color: #4F46E5; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Pelatihan</span>
             </div>
-            <div class="col-lg-4 text-end d-none d-lg-block">
-                <i class="bi bi-laptop fs-1 text-white-50" style="font-size: 5.5rem !important;"></i>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #E0F2FE; color: #0284C7;">
+                        <i class="bi bi-journal-text fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Kelas</div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_kelas'] }}</h3>
+                    </div>
+                </div>
+                <span class="badge rounded-pill fw-medium" style="background-color: #E0F2FE; color: #0284C7; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Kelas</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #ECFDF5; color: #059669;">
+                        <i class="bi bi-door-open fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Ruangan</div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_ruangan'] }}</h3>
+                    </div>
+                </div>
+                <span class="badge rounded-pill fw-medium" style="background-color: #D1FAE5; color: #059669; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Ruangan</span>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Statistik KCLC Learning Center (9 Cards Sesuai Gambar 10) -->
-<div class="d-flex align-items-center justify-content-between mb-3">
-    <div>
-        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-speedometer2 text-primary me-2"></i>Statistik KCLC Learning Center</h5>
-        <span class="text-muted small">Ringkasan data dan aktivitas sistem pembelajaran</span>
+<!-- Row 2: 3 Cards -->
+<div class="row g-3 mb-3">
+    <div class="col-lg-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #FEF3C7; color: #D97706;">
+                        <i class="bi bi-card-checklist fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Form Aspek Penilaian Sikap</div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_sikap'] }}</h3>
+                    </div>
+                </div>
+                <span class="badge rounded-pill fw-medium" style="background-color: #FEF3C7; color: #D97706; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Penilaian</span>
+            </div>
+        </div>
     </div>
-    <span class="badge bg-primary px-3 py-2">Terintegrasi KCLC &amp; SIR-JP</span>
+
+    <div class="col-lg-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #FEE2E2; color: #DC2626;">
+                        <i class="bi bi-file-earmark-check fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Form Evaluasi</div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_evaluasi'] }}</h3>
+                    </div>
+                </div>
+                <span class="badge rounded-pill fw-medium" style="background-color: #FEE2E2; color: #DC2626; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Evaluasi</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #EEF2FF; color: #4F46E5;">
+                        <i class="bi bi-people-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Angkatan</div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_angkatan'] }}</h3>
+                    </div>
+                </div>
+                <span class="badge rounded-pill fw-medium" style="background-color: #EEF2FF; color: #4F46E5; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Angkatan</span>
+            </div>
+        </div>
+    </div>
 </div>
 
+<!-- Row 3: 4 Cards -->
 <div class="row g-3 mb-4">
-    <div class="col-xl-4 col-md-6">
-        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <span class="text-muted small">Pelatihan Diklat</span>
-                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['total_pelatihan'] }}</h3>
+    <div class="col-lg-3 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #EEF2FF; color: #4F46E5;">
+                    <i class="bi bi-easel fs-4"></i>
                 </div>
-                <span class="badge bg-light text-primary border">Pelatihan</span>
+                <div>
+                    <div class="text-muted small fw-medium">Pelatihan Diklat</div>
+                    <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_pelatihan'] }}</h3>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-xl-4 col-md-6">
-        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <span class="text-muted small">Kelas</span>
-                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['total_kelas'] }}</h3>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #E0F2FE; color: #0284C7;">
+                    <i class="bi bi-person-fill fs-4"></i>
                 </div>
-                <span class="badge bg-light text-info border">Kelas</span>
+                <div>
+                    <div class="text-muted small fw-medium">Peserta</div>
+                    <h3 class="fw-bold text-dark mb-0 lh-1">{{ number_format($kclcStats['total_peserta']) }}</h3>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-xl-4 col-md-6">
-        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <span class="text-muted small">Ruangan</span>
-                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['total_ruangan'] }}</h3>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #ECFDF5; color: #059669;">
+                    <i class="bi bi-check-circle-fill fs-4"></i>
                 </div>
-                <span class="badge bg-light text-success border">Ruangan</span>
+                <div>
+                    <div class="text-muted small fw-medium">Presensi Hadir</div>
+                    <h3 class="fw-bold text-dark mb-0 lh-1">{{ number_format($kclcStats['total_presensi']) }}</h3>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-xl-4 col-md-6">
-        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <span class="text-muted small">Form Aspek Penilaian Sikap</span>
-                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['total_sikap'] }}</h3>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #FEF3C7; color: #D97706;">
+                    <i class="bi bi-clipboard2-check fs-4"></i>
                 </div>
-                <span class="badge bg-light text-warning border">Penilaian</span>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-4 col-md-6">
-        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
-            <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <span class="text-muted small">Form Evaluasi</span>
-                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['total_evaluasi'] }}</h3>
+                    <div class="text-muted small fw-medium">Evaluasi Selesai</div>
+                    <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['evaluasi_selesai'] }}</h3>
                 </div>
-                <span class="badge bg-light text-danger border">Evaluasi</span>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-4 col-md-6">
-        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <span class="text-muted small">Angkatan</span>
-                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['total_angkatan'] }}</h3>
-                </div>
-                <span class="badge bg-light text-primary border">Angkatan</span>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-4 col-md-6">
-        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <span class="text-muted small">Peserta</span>
-                    <h3 class="fw-bold text-dark mb-0">{{ number_format($kclcStats['total_peserta']) }}</h3>
-                </div>
-                <i class="bi bi-people text-primary fs-3"></i>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-4 col-md-6">
-        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <span class="text-muted small">Presensi Hadir</span>
-                    <h3 class="fw-bold text-success mb-0">{{ number_format($kclcStats['total_presensi']) }}</h3>
-                </div>
-                <i class="bi bi-check-circle-fill text-success fs-3"></i>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-4 col-md-6">
-        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <span class="text-muted small">Evaluasi Selesai</span>
-                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['evaluasi_selesai'] }}</h3>
-                </div>
-                <i class="bi bi-journal-check text-warning fs-3"></i>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Tabel Statistik Pelatihan Sesuai Gambar 11 -->
-<div class="card card-custom mb-5">
-    <div class="card-custom-header">
-        <div>
-            <h5 class="card-custom-title">
-                <i class="bi bi-table text-primary"></i> Statistik Pelatihan
-            </h5>
-            <span class="text-muted small">Ringkasan aktivitas setiap pelatihan pada platform pembelajaran</span>
-        </div>
+<!-- ============================================================== -->
+<!-- TABEL: STATISTIK PELATIHAN (PRESISI 100% SESUAI GAMBAR 11 KCLC)-->
+<!-- ============================================================== -->
+<div class="card bg-white border shadow-sm rounded-3 p-4 mb-5">
+    <div class="mb-3">
+        <h5 class="fw-bold text-dark mb-1" style="font-size: 1.15rem;">Statistik Pelatihan</h5>
+        <div class="text-muted small">Ringkasan aktivitas setiap pelatihan</div>
     </div>
     <div class="table-responsive">
-        <table class="table table-custom">
-            <thead>
-                <tr>
-                    <th>Pelatihan</th>
-                    <th class="text-center">Peserta</th>
-                    <th class="text-center">Presensi</th>
-                    <th class="text-center">Pretest</th>
-                    <th class="text-center">Posttest</th>
-                    <th class="text-center">Kuis</th>
-                    <th class="text-center">Tugas</th>
-                    <th class="text-center">Evaluasi</th>
+        <table class="table table-hover align-middle mb-0" style="border-collapse: separate; border-spacing: 0;">
+            <thead style="background-color: #F8FAFC;">
+                <tr class="text-dark fw-bold" style="font-size: 0.9rem;">
+                    <th class="ps-3 py-3" style="border-top-left-radius: 8px; border-bottom: 1px solid #E2E8F0;">Pelatihan</th>
+                    <th class="text-center py-3" style="border-bottom: 1px solid #E2E8F0;">Peserta</th>
+                    <th class="text-center py-3" style="border-bottom: 1px solid #E2E8F0;">Presensi</th>
+                    <th class="text-center py-3" style="border-bottom: 1px solid #E2E8F0;">Pretest</th>
+                    <th class="text-center py-3" style="border-bottom: 1px solid #E2E8F0;">Posttest</th>
+                    <th class="text-center py-3" style="border-bottom: 1px solid #E2E8F0;">Kuis</th>
+                    <th class="text-center py-3" style="border-bottom: 1px solid #E2E8F0;">Tugas</th>
+                    <th class="text-center pe-3 py-3" style="border-top-right-radius: 8px; border-bottom: 1px solid #E2E8F0;">Evaluasi</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($pelatihanStats as $ps)
-                    <tr>
-                        <td class="fw-semibold text-dark">{{ $ps['nama'] }}</td>
-                        <td class="text-center">{{ $ps['peserta'] }}</td>
-                        <td class="text-center">
-                            @if($ps['presensi'] > 0)
-                                <span class="badge bg-success-subtle text-success px-2 py-1">{{ number_format($ps['presensi']) }}</span>
-                            @else
-                                <span class="text-muted">0</span>
-                            @endif
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="ps-3 py-3 text-dark fw-semibold" style="font-size: 0.925rem;">
+                            {{ $ps['nama'] }}
                         </td>
-                        <td class="text-center text-muted">{{ $ps['pretest'] }}</td>
-                        <td class="text-center text-muted">{{ $ps['posttest'] }}</td>
-                        <td class="text-center text-muted">{{ $ps['kuis'] }}</td>
-                        <td class="text-center">
-                            @if($ps['tugas'] > 0)
-                                <span class="badge bg-primary-subtle text-primary px-2 py-1">{{ $ps['tugas'] }}</span>
-                            @else
-                                <span class="text-muted">0</span>
-                            @endif
+                        <td class="text-center py-3 text-secondary" style="font-size: 0.925rem;">
+                            {{ $ps['peserta'] }}
                         </td>
-                        <td class="text-center text-muted">{{ $ps['evaluasi'] }}</td>
+                        <td class="text-center py-3">
+                            <span class="badge rounded-pill fw-medium" style="background-color: #E6FFFA; color: #0D9488; font-size: 0.85rem; padding: 0.35rem 0.75rem;">
+                                {{ number_format($ps['presensi']) }}
+                            </span>
+                        </td>
+                        <td class="text-center py-3 text-secondary" style="font-size: 0.925rem;">
+                            {{ $ps['pretest'] }}
+                        </td>
+                        <td class="text-center py-3 text-secondary" style="font-size: 0.925rem;">
+                            {{ $ps['posttest'] }}
+                        </td>
+                        <td class="text-center py-3 text-secondary" style="font-size: 0.925rem;">
+                            {{ $ps['kuis'] }}
+                        </td>
+                        <td class="text-center py-3 text-secondary" style="font-size: 0.925rem;">
+                            {{ $ps['tugas'] }}
+                        </td>
+                        <td class="text-center pe-3 py-3 text-secondary" style="font-size: 0.925rem;">
+                            {{ $ps['evaluasi'] }}
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

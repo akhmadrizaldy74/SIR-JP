@@ -132,6 +132,13 @@ class KCLCIntegrationTest extends TestCase
         $response->assertSee('Dashboard KCLC Learning Center');
         $response->assertSee('Statistik KCLC Learning Center');
         $response->assertSee('Statistik Pelatihan');
+        $response->assertSee('Ringkasan aktivitas setiap pelatihan');
+        $response->assertSee('Pengantar Kerja PPPK');
+        $response->assertSee('472');
+        $response->assertSee('Pengawas Ketenagakerjaan A.112');
+        $response->assertSee('1,613');
+        $response->assertSee('Instruktur A.7');
+        $response->assertSee('1,041');
         $response->assertSee('Rekapitulasi Jam Pelajaran');
     }
 }
