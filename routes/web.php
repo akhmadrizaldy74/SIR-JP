@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('kelas-mapel', KelasMapelController::class);
     Route::post('kelas-mapel/{kelas_mapel}/pengajar', [KelasMapelController::class, 'storePengajar'])->name('kelas-mapel.pengajar.store');
     Route::delete('kelas-mapel/{kelas_mapel}/pengajar/{pengajar}', [KelasMapelController::class, 'destroyPengajar'])->name('kelas-mapel.pengajar.destroy');
+    Route::post('kelas-mapel/{kelas_mapel}/sinkron-jadwal', [KelasMapelController::class, 'sinkronJadwal'])->name('kelas-mapel.sinkron_jadwal');
     Route::resource('peserta', PesertaController::class);
     Route::resource('sikap-form', AspekPenilaianSikapController::class);
     Route::patch('sikap-form/{sikap_form}/toggle', [AspekPenilaianSikapController::class, 'toggle'])->name('sikap-form.toggle');

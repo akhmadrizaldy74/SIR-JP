@@ -35,4 +35,19 @@ class Pelatihan extends Model
     {
         return $this->hasMany(Angkatan::class);
     }
+
+    public function aspekPenilaianSikaps()
+    {
+        return $this->hasMany(AspekPenilaianSikap::class, 'pelatihan_id');
+    }
+
+    public function formEvaluasis()
+    {
+        return $this->hasMany(FormEvaluasi::class, 'pelatihan_id');
+    }
+
+    public function kelasMapels()
+    {
+        return $this->hasMany(KelasMapel::class, 'pelatihan_id');
+    }
 }

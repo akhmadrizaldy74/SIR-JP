@@ -41,4 +41,9 @@ class MataPelatihan extends Model
     {
         return $this->hasMany(Jadwal::class);
     }
+
+    public function kelasMapels()
+    {
+        return $this->hasMany(KelasMapel::class, 'mata_pelatihan_id');
+    }
 }

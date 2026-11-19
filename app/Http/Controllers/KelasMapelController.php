@@ -12,6 +12,7 @@ use App\Models\Widyaiswara;
 use App\Models\Narasumber;
 use App\Models\Peserta;
 use App\Models\Jadwal;
+use App\Models\PenugasanPengajar;
 use Illuminate\Http\Request;
 
 class KelasMapelController extends Controller
@@ -160,11 +161,65 @@ class KelasMapelController extends Controller
             'jp' => $validated['jp'],
             'jadwal_keterangan' => $validated['jadwal_keterangan'] ?? ($kelasMapel->hari . ' ' . $kelasMapel->jam_mulai . '-' . $kelasMapel->jam_selesai),
             'peran' => $validated['peran'],
-            'kelompok' => $validated['kelompok'],
+            'kelompok' => $validated['kelompok'] ?? null,
         ]);
+
+        // Otomatis sinkronkan ke Penugasan Pengajar SIR-JP jika mata pelatihan ada
+        if ($kelasMapel->mata_pelatihan_id) {
+            $isWi = ($type === 'Widyaiswara');
+            PenugasanPengajar::firstOrCreate([
+                'mata_pelatihan_id' => $kelasMapel->mata_pelatihan_id,
+                'jenis_pengajar' => $type,
+                'widyaiswara_id' => $isWi ? $id : null,
+                'narasumber_id' => $isWi ? null : $id,
+            ], [
+                'peran' => 'Pengampu Utama',
+                'keterangan' => 'Penugasan terintegrasi KCLC Kelas ' . $kelasMapel->nama_kelas . ' (' . ucfirst($validated['peran']) . ')',
+            ]);
+        }
 
         return redirect()->route('kelas-mapel.show', ['kelas_mapel' => $kelasMapel->id, 'tab' => 'pengajar'])
             ->with('success', 'Pengajar berhasil ditambahkan ke kelas ini !');
+    }
+
+    public function sinkronJadwal(KelasMapel $kelasMapel)
+    {
+        if (!$kelasMapel->mata_pelatihan_id) {
+            return redirect()->back()->with('error', 'Kelas Mapel belum memiliki Mata Pelatihan terkait !');
+        }
+
+        $primaryPengajar = $kelasMapel->pengajars()->first();
+        $penugasan = null;
+        if ($primaryPengajar) {
+            $isWi = ($primaryPengajar->pengajar_type === Widyaiswara::class);
+            $penugasan = PenugasanPengajar::where('mata_pelatihan_id', $kelasMapel->mata_pelatihan_id)
+                ->where('jenis_pengajar', $isWi ? 'Widyaiswara' : 'Narasumber')
+                ->where($isWi ? 'widyaiswara_id' : 'narasumber_id', $primaryPengajar->pengajar_id)
+                ->first();
+        }
+
+        $tanggal = $kelasMapel->tanggal_mulai ? $kelasMapel->tanggal_mulai->format('Y-m-d') : date('Y-m-d');
+        $ruanganNama = $kelasMapel->ruangan ? $kelasMapel->ruangan->nama_ruangan : 'Ruang Kelas Online';
+        $metode = $kelasMapel->metode_pembelajaran === 'Klasikal' ? 'Tatap Muka / Klasikal' : 'Daring / Online';
+
+        $existingCount = Jadwal::where('mata_pelatihan_id', $kelasMapel->mata_pelatihan_id)->count();
+
+        $jadwal = Jadwal::create([
+            'mata_pelatihan_id' => $kelasMapel->mata_pelatihan_id,
+            'penugasan_pengajar_id' => $penugasan?->id,
+            'tanggal' => $tanggal,
+            'jam_mulai' => $kelasMapel->jam_mulai ?? '08:00:00',
+            'jam_selesai' => $kelasMapel->jam_selesai ?? '12:00:00',
+            'sesi_ke' => $existingCount + 1,
+            'jp_rencana' => $kelasMapel->jp > 0 ? $kelasMapel->jp : 4,
+            'ruangan' => $ruanganNama,
+            'metode' => $metode,
+            'status' => 'Terjadwal',
+            'keterangan' => 'Sesi KCLC ' . $kelasMapel->nama_kelas . ' (' . ($kelasMapel->hari ?? 'Jadwal Mingguan') . ')',
+        ]);
+
+        return redirect()->route('kelas-mapel.show', ['kelas_mapel' => $kelasMapel->id, 'tab' => 'jadwal'])
+            ->with('success', 'Sesi Jadwal KCLC berhasil dibuat dan terhubung ke SIR-JP !');
     }
 
     public function destroyPengajar(KelasMapel $kelasMapel, KelasMapelPengajar $pengajar)

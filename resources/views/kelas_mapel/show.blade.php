@@ -322,14 +322,22 @@
         <!-- TAB 3: JADWAL PELAKSANAAN                  -->
         <!-- ========================================== -->
         @if($tab == 'jadwal')
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
                 <div>
                     <h5 class="fw-bold text-dark mb-1">Jadwal Pelaksanaan Sesi (Terkoneksi ke SIR-JP)</h5>
-                    <p class="text-muted small">Jadwal pembelajaran yang tercatat pada sistem SIR-JP untuk angkatan ini.</p>
+                    <p class="text-muted small mb-0">Jadwal pembelajaran yang tercatat pada sistem SIR-JP untuk angkatan ini.</p>
                 </div>
-                <a href="{{ route('jadwal.create') }}" class="btn btn-sm btn-primary">
-                    <i class="bi bi-plus-lg me-1"></i> Buat Jadwal Baru
-                </a>
+                <div class="d-flex gap-2">
+                    <form action="{{ route('kelas-mapel.sinkron_jadwal', $kelasMapel->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-success">
+                            <i class="bi bi-arrow-repeat me-1"></i> Buat Sesi Jadwal ke SIR-JP
+                        </button>
+                    </form>
+                    <a href="{{ route('jadwal.create') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-plus-lg me-1"></i> Jadwal Manual
+                    </a>
+                </div>
             </div>
 
             <div class="table-responsive">
