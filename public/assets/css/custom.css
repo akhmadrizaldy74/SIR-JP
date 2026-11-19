@@ -165,43 +165,47 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Collapsed Sidebar */
+/* Sidebar Selalu Lebar Penuh (260px) Sesuai KCLC Kemnaker Corpu */
+.app-sidebar,
 body.sidebar-collapsed .app-sidebar {
-  width: var(--sidebar-collapsed-width);
+  width: var(--sidebar-width) !important;
 }
 
+.sidebar-brand-text,
+.sidebar-section-title,
+.nav-text,
 body.sidebar-collapsed .sidebar-brand-text,
 body.sidebar-collapsed .sidebar-section-title,
 body.sidebar-collapsed .nav-text {
-  display: none !important;
+  display: inline-block !important;
 }
 
+.app-sidebar .sidebar-brand,
 body.sidebar-collapsed .sidebar-brand {
-  justify-content: center;
+  justify-content: flex-start !important;
 }
 
+.app-sidebar .nav-link-custom,
 body.sidebar-collapsed .nav-link-custom {
-  justify-content: center;
-  padding: 0.75rem;
+  justify-content: flex-start !important;
+  padding: 0.65rem 0.85rem !important;
 }
 
+.app-sidebar .nav-link-custom i,
 body.sidebar-collapsed .nav-link-custom i {
-  margin: 0;
-  font-size: 1.35rem;
+  margin-right: 0.5rem !important;
+  font-size: 1.15rem !important;
 }
 
 /* Main Content Area */
-.app-main {
+.app-main,
+body.sidebar-collapsed .app-main {
   flex: 1;
-  margin-left: var(--sidebar-width);
+  margin-left: var(--sidebar-width) !important;
   min-width: 0;
   display: flex;
   flex-direction: column;
   transition: margin-left 0.25s ease-in-out;
-}
-
-body.sidebar-collapsed .app-main {
-  margin-left: var(--sidebar-collapsed-width);
 }
 
 /* Top Navbar */

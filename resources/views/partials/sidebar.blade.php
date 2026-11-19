@@ -13,6 +13,9 @@
     </div>
 
     <div class="sidebar-menu-wrapper">
+        <div class="sidebar-section-title text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px; color: #94A3B8;">
+            MENU
+        </div>
         <ul class="nav flex-column mb-2">
             <li class="nav-item">
                 <a class="nav-link-custom {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
@@ -61,7 +64,7 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link-custom py-1 small {{ request()->routeIs('kelas-mapel.*') ? 'active' : '' }}" href="{{ route('kelas-mapel.index') }}">
-                                <i class="bi bi-dash"></i> <span class="nav-text">Kelas Mapel</span>
+                                <i class="bi bi-dash"></i> <span class="nav-text">Kelas</span>
                             </a>
                         </li>
                         <li class="nav-item">

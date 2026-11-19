@@ -4,17 +4,18 @@ document.addEventListener('DOMContentLoaded', function () {
   const sidebar = document.querySelector('.app-sidebar');
   const backdrop = document.getElementById('sidebarBackdrop');
 
-  // Pastikan default sidebar TERBUKA (Expanded) sesuai tampilan asli KCLC
+  // Pastikan default sidebar TERBUKA PENUH (260px) sesuai tampilan asli KCLC
   document.body.classList.remove('sidebar-collapsed');
-  localStorage.removeItem('sidebarCollapsed');
+  try {
+    localStorage.removeItem('sidebarCollapsed');
+    sessionStorage.removeItem('sidebarCollapsed');
+  } catch (e) {}
 
   if (toggleBtn) {
     toggleBtn.addEventListener('click', function () {
       if (window.innerWidth < 992) {
         sidebar.classList.toggle('show-mobile');
         if (backdrop) backdrop.classList.toggle('show');
-      } else {
-        document.body.classList.toggle('sidebar-collapsed');
       }
     });
   }

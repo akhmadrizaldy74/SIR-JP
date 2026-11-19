@@ -10,12 +10,17 @@
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap-icons.min.css') }}">
-    <!-- Custom Enterprise CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+    <!-- Custom Enterprise CSS (Cache Busted) -->
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}?v={{ time() }}">
 
     @stack('styles')
 </head>
 <body>
+    <script>
+        // Pastikan sidebar selalu terbuka penuh (260px) dan reset status collapsed
+        document.body.classList.remove('sidebar-collapsed');
+        try { localStorage.removeItem('sidebarCollapsed'); } catch(e) {}
+    </script>
     <div class="app-wrapper">
         <!-- Sidebar Navigation -->
         @include('partials.sidebar')
@@ -73,8 +78,8 @@
     <script src="{{ asset('assets/js/chart.umd.min.js') }}"></script>
     <!-- SweetAlert2 Notification Engine -->
     <script src="{{ asset('assets/js/sweetalert2.all.min.js') }}"></script>
-    <!-- Custom Vanilla App JS -->
-    <script src="{{ asset('assets/js/app.js') }}"></script>
+    <!-- Custom Vanilla App JS (Cache Busted) -->
+    <script src="{{ asset('assets/js/app.js') }}?v={{ time() }}"></script>
 
     @stack('scripts')
 </body>
