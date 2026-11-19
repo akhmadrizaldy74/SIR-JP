@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Jadwal;
 use App\Models\MataPelatihan;
-use App\Models\PenugasanPengajar;
 use App\Models\Pelatihan;
+use App\Models\Angkatan;
+use App\Models\PenugasanPengajar;
 use App\Models\PengaturanSesi;
+use App\Models\Widyaiswara;
+use App\Models\Narasumber;
 use App\Models\LogAktivitas;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class JadwalController extends Controller
 {
@@ -77,9 +80,13 @@ class JadwalController extends Controller
 
     public function create(Request $request)
     {
+        $pelatihans = Pelatihan::with(['angkatans.mataPelatihans'])->orderBy('nama_pelatihan', 'asc')->get();
         $mataPelatihans = MataPelatihan::with(['angkatan.pelatihan', 'penugasans.widyaiswara', 'penugasans.narasumber'])
             ->orderBy('nama_mata_pelatihan', 'asc')
             ->get();
+
+        $widyaiswaras = Widyaiswara::where('status', 'Aktif')->orderBy('nama_lengkap', 'asc')->get();
+        $narasumbers = Narasumber::where('status', 'Aktif')->orderBy('nama_lengkap', 'asc')->get();
 
         $templateSesies = PengaturanSesi::where('is_active', true)
             ->where('tipe', 'Pembelajaran')
@@ -88,14 +95,23 @@ class JadwalController extends Controller
 
         $selectedMataPelatihanId = $request->get('mata_pelatihan_id');
 
-        return view('jadwal.create', compact('mataPelatihans', 'templateSesies', 'selectedMataPelatihanId'));
+        return view('jadwal.create', compact(
+            'pelatihans',
+            'mataPelatihans',
+            'widyaiswaras',
+            'narasumbers',
+            'templateSesies',
+            'selectedMataPelatihanId'
+        ));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'mata_pelatihan_id' => ['required', 'exists:mata_pelatihans,id'],
-            'penugasan_pengajar_id' => ['nullable', 'exists:penugasan_pengajars,id'],
+            'penugasan_pengajar_id' => ['nullable'],
+            'direct_jenis_pengajar' => ['nullable', 'in:Widyaiswara,Narasumber'],
+            'direct_pengajar_id' => ['nullable'],
             'tanggal' => ['required', 'date'],
             'metode_input' => ['required', 'in:template,manual'],
             'sesi_id' => ['nullable', 'required_if:metode_input,template'],
@@ -124,7 +140,6 @@ class JadwalController extends Controller
                 $jamMulai = $validated['jam_mulai'] . ':00';
                 $jamSelesai = $validated['jam_selesai'] . ':00';
 
-                // Hitung otomatis JP bila user tidak mengisi manual (1 sesi 45 menit = 1 JP)
                 if (!empty($validated['jp_rencana'])) {
                     $jp = (float) $validated['jp_rencana'];
                 } else {
@@ -136,9 +151,31 @@ class JadwalController extends Controller
                 $nomorSesi = null;
             }
 
+            // Tentukan penugasan pengajar (baik dari penugasan yang ada atau direct assign)
+            $penugasanId = null;
+            if (!empty($validated['penugasan_pengajar_id']) && is_numeric($validated['penugasan_pengajar_id'])) {
+                $penugasanId = (int) $validated['penugasan_pengajar_id'];
+            } elseif (!empty($request->direct_pengajar_id) && !empty($request->direct_jenis_pengajar)) {
+                $jenis = $request->direct_jenis_pengajar;
+                $pId = (int) $request->direct_pengajar_id;
+
+                $penugasan = PenugasanPengajar::firstOrCreate(
+                    [
+                        'mata_pelatihan_id' => $validated['mata_pelatihan_id'],
+                        'jenis_pengajar' => $jenis,
+                        'widyaiswara_id' => $jenis === 'Widyaiswara' ? $pId : null,
+                        'narasumber_id' => $jenis === 'Narasumber' ? $pId : null,
+                    ],
+                    [
+                        'peran' => 'Pengajar Utama',
+                    ]
+                );
+                $penugasanId = $penugasan->id;
+            }
+
             $jadwal = Jadwal::create([
                 'mata_pelatihan_id' => $validated['mata_pelatihan_id'],
-                'penugasan_pengajar_id' => $validated['penugasan_pengajar_id'] ?? null,
+                'penugasan_pengajar_id' => $penugasanId,
                 'tanggal' => $validated['tanggal'],
                 'jam_mulai' => $jamMulai,
                 'jam_selesai' => $jamSelesai,
@@ -160,37 +197,121 @@ class JadwalController extends Controller
         }
     }
 
+    public function show(Jadwal $jadwal)
+    {
+        $jadwal->load([
+            'mataPelatihan.angkatan.pelatihan',
+            'penugasanPengajar.widyaiswara',
+            'penugasanPengajar.narasumber',
+            'realisasi'
+        ]);
+
+        return view('jadwal.show', compact('jadwal'));
+    }
+
     public function edit(Jadwal $jadwal)
     {
-        $jadwal->load(['mataPelatihan.angkatan.pelatihan', 'penugasanPengajar']);
-        $mataPelatihans = MataPelatihan::with(['angkatan.pelatihan'])->orderBy('nama_mata_pelatihan', 'asc')->get();
-        $penugasans = PenugasanPengajar::with(['widyaiswara', 'narasumber'])
-            ->where('mata_pelatihan_id', $jadwal->mata_pelatihan_id)
+        $pelatihans = Pelatihan::with(['angkatans.mataPelatihans'])->orderBy('nama_pelatihan', 'asc')->get();
+        $mataPelatihans = MataPelatihan::with(['angkatan.pelatihan', 'penugasans.widyaiswara', 'penugasans.narasumber'])
+            ->orderBy('nama_mata_pelatihan', 'asc')
             ->get();
 
-        return view('jadwal.edit', compact('jadwal', 'mataPelatihans', 'penugasans'));
+        $widyaiswaras = Widyaiswara::where('status', 'Aktif')->orderBy('nama_lengkap', 'asc')->get();
+        $narasumbers = Narasumber::where('status', 'Aktif')->orderBy('nama_lengkap', 'asc')->get();
+
+        $templateSesies = PengaturanSesi::where('is_active', true)
+            ->where('tipe', 'Pembelajaran')
+            ->orderBy('urutan', 'asc')
+            ->get();
+
+        return view('jadwal.edit', compact('jadwal', 'pelatihans', 'mataPelatihans', 'widyaiswaras', 'narasumbers', 'templateSesies'));
     }
 
     public function update(Request $request, Jadwal $jadwal)
     {
         $validated = $request->validate([
             'mata_pelatihan_id' => ['required', 'exists:mata_pelatihans,id'],
-            'penugasan_pengajar_id' => ['nullable', 'exists:penugasan_pengajars,id'],
+            'penugasan_pengajar_id' => ['nullable'],
+            'direct_jenis_pengajar' => ['nullable', 'in:Widyaiswara,Narasumber'],
+            'direct_pengajar_id' => ['nullable'],
             'tanggal' => ['required', 'date'],
-            'jam_mulai' => ['required'],
-            'jam_selesai' => ['required'],
-            'jp_rencana' => ['required', 'numeric', 'min:0.5'],
+            'metode_input' => ['required', 'in:template,manual'],
+            'sesi_id' => ['nullable', 'required_if:metode_input,template'],
+            'jam_mulai' => ['nullable', 'required_if:metode_input,manual', 'date_format:H:i'],
+            'jam_selesai' => ['nullable', 'required_if:metode_input,manual', 'date_format:H:i', 'after:jam_mulai'],
+            'jp_rencana' => ['nullable', 'numeric', 'min:0.5'],
             'ruangan' => ['nullable', 'string', 'max:100'],
             'metode' => ['required', 'in:Tatap Muka / Klasikal,Daring / Online,Blended'],
             'status' => ['required', 'in:Terjadwal,Terlaksana,Dibatalkan'],
             'keterangan' => ['nullable', 'string'],
         ]);
 
-        $jadwal->update($validated);
+        DB::beginTransaction();
+        try {
+            if ($validated['metode_input'] === 'template') {
+                $sesi = PengaturanSesi::findOrFail($validated['sesi_id']);
+                $jamMulai = $sesi->jam_mulai;
+                $jamSelesai = $sesi->jam_selesai;
+                $jp = $sesi->jumlah_jp > 0 ? $sesi->jumlah_jp : 1.00;
+                $nomorSesi = $sesi->nomor_sesi;
+            } else {
+                $jamMulai = $validated['jam_mulai'] . ':00';
+                $jamSelesai = $validated['jam_selesai'] . ':00';
 
-        LogAktivitas::catat('Jadwal Pelatihan', 'Ubah Jadwal', 'Memperbarui jadwal id #' . $jadwal->id);
+                if (!empty($validated['jp_rencana'])) {
+                    $jp = (float) $validated['jp_rencana'];
+                } else {
+                    $start = Carbon::parse($jamMulai);
+                    $end = Carbon::parse($jamSelesai);
+                    $menit = $start->diffInMinutes($end);
+                    $jp = round($menit / 45, 1);
+                }
+                $nomorSesi = null;
+            }
 
-        return redirect()->route('jadwal.index')->with('success', 'Jadwal pembelajaran berhasil diperbarui.');
+            $penugasanId = null;
+            if (!empty($validated['penugasan_pengajar_id']) && is_numeric($validated['penugasan_pengajar_id'])) {
+                $penugasanId = (int) $validated['penugasan_pengajar_id'];
+            } elseif (!empty($request->direct_pengajar_id) && !empty($request->direct_jenis_pengajar)) {
+                $jenis = $request->direct_jenis_pengajar;
+                $pId = (int) $request->direct_pengajar_id;
+
+                $penugasan = PenugasanPengajar::firstOrCreate(
+                    [
+                        'mata_pelatihan_id' => $validated['mata_pelatihan_id'],
+                        'jenis_pengajar' => $jenis,
+                        'widyaiswara_id' => $jenis === 'Widyaiswara' ? $pId : null,
+                        'narasumber_id' => $jenis === 'Narasumber' ? $pId : null,
+                    ],
+                    [
+                        'peran' => 'Pengajar Utama',
+                    ]
+                );
+                $penugasanId = $penugasan->id;
+            }
+
+            $jadwal->update([
+                'mata_pelatihan_id' => $validated['mata_pelatihan_id'],
+                'penugasan_pengajar_id' => $penugasanId,
+                'tanggal' => $validated['tanggal'],
+                'jam_mulai' => $jamMulai,
+                'jam_selesai' => $jamSelesai,
+                'sesi_ke' => $nomorSesi,
+                'jp_rencana' => $jp,
+                'ruangan' => $validated['ruangan'] ?? 'Ruang Kelas',
+                'metode' => $validated['metode'],
+                'status' => $validated['status'],
+                'keterangan' => $validated['keterangan'] ?? null,
+            ]);
+
+            LogAktivitas::catat('Jadwal Pelatihan', 'Ubah Jadwal', 'Memperbarui jadwal id #' . $jadwal->id);
+
+            DB::commit();
+            return redirect()->route('jadwal.index')->with('success', 'Jadwal pembelajaran berhasil diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'Gagal memperbarui jadwal: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Jadwal $jadwal)
@@ -218,5 +339,87 @@ class JadwalController extends Controller
             });
 
         return response()->json($penugasans);
+    }
+
+    /**
+     * API JSON: Pendaftaran Cepat Pengajar (Solusi: Pengajar yg belum daftar)
+     */
+    public function quickStorePengajar(Request $request)
+    {
+        $validated = $request->validate([
+            'jenis_pengajar' => ['required', 'in:Widyaiswara,Narasumber'],
+            'nama_lengkap' => ['required', 'string', 'max:255'],
+            'nik' => ['required', 'string', 'max:16'],
+            'gelar' => ['nullable', 'string', 'max:100'],
+            'jabatan' => ['nullable', 'string', 'max:100'],
+            'instansi' => ['nullable', 'string', 'max:255'],
+            'nomor_telepon' => ['nullable', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:100'],
+            'mata_pelatihan_id' => ['nullable', 'exists:mata_pelatihans,id'],
+        ], [
+            'nama_lengkap.required' => 'Nama lengkap pengajar wajib diisi.',
+            'nik.required' => 'NIK pengajar wajib diisi.',
+        ]);
+
+        $jenis = $validated['jenis_pengajar'];
+        $nama = trim($validated['nama_lengkap']);
+
+        if ($jenis === 'Widyaiswara') {
+            $pengajar = Widyaiswara::firstOrCreate(
+                ['nik' => $validated['nik']],
+                [
+                    'nama_lengkap' => $nama,
+                    'gelar' => $validated['gelar'] ?? null,
+                    'jabatan' => $validated['jabatan'] ?? 'Widyaiswara Ahli Pertama',
+                    'instansi' => $validated['instansi'] ?? 'Pusat Pengembangan SDM Ketenagakerjaan',
+                    'nomor_telepon' => $validated['nomor_telepon'] ?? null,
+                    'email' => $validated['email'] ?? null,
+                    'status' => 'Aktif',
+                ]
+            );
+            $displayName = $pengajar->nama_gelar . ' (' . $pengajar->jabatan . ')';
+        } else {
+            $pengajar = Narasumber::firstOrCreate(
+                ['nik' => $validated['nik']],
+                [
+                    'nama_lengkap' => $nama,
+                    'gelar' => $validated['gelar'] ?? null,
+                    'instansi' => $validated['instansi'] ?? 'Eksternal / Pakar',
+                    'nomor_telepon' => $validated['nomor_telepon'] ?? null,
+                    'email' => $validated['email'] ?? null,
+                    'status' => 'Aktif',
+                ]
+            );
+            $displayName = $pengajar->nama_gelar . ' [' . $pengajar->instansi . ']';
+        }
+
+        $penugasanId = null;
+        if (!empty($validated['mata_pelatihan_id'])) {
+            $penugasan = PenugasanPengajar::firstOrCreate(
+                [
+                    'mata_pelatihan_id' => $validated['mata_pelatihan_id'],
+                    'jenis_pengajar' => $jenis,
+                    'widyaiswara_id' => $jenis === 'Widyaiswara' ? $pengajar->id : null,
+                    'narasumber_id' => $jenis === 'Narasumber' ? $pengajar->id : null,
+                ],
+                [
+                    'peran' => 'Pengajar Utama',
+                ]
+            );
+            $penugasanId = $penugasan->id;
+        }
+
+        LogAktivitas::catat('Pengajar', 'Pendaftaran Cepat Pengajar', 'Menambahkan ' . $jenis . ': ' . $displayName);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengajar ' . $jenis . ' (' . $displayName . ') berhasil didaftarkan!',
+            'pengajar' => [
+                'id' => $pengajar->id,
+                'nama' => $displayName,
+                'jenis' => $jenis,
+                'penugasan_id' => $penugasanId,
+            ],
+        ]);
     }
 }

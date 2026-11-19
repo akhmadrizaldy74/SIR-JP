@@ -26,6 +26,8 @@ use App\Http\Controllers\ProfileController;
 // Authentication
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Protected Routes (Penyelenggara)
@@ -108,4 +110,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/angkatans-by-pelatihan/{pelatihanId}', [PenugasanPengajarController::class, 'getAngkatansByPelatihan']);
     Route::get('/api/mata-pelatihans-by-angkatan/{angkatanId}', [PenugasanPengajarController::class, 'getMataPelatihansByAngkatan']);
     Route::get('/api/pengajars-by-mata-pelatihan/{mataPelatihanId}', [JadwalController::class, 'getPengajarsByMataPelatihan']);
+    Route::post('/api/pengajar-quick-store', [JadwalController::class, 'quickStorePengajar'])->name('api.pengajar.quick_store');
 });

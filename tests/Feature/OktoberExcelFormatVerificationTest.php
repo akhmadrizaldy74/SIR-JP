@@ -70,4 +70,59 @@ class OktoberExcelFormatVerificationTest extends TestCase
         // Subsequent sheets are individual Widyaiswara sheets
         $this->assertInstanceOf(WidyaiswaraIndividuExport::class, $sheets[1]);
     }
+
+    public function test_penyelenggara_can_login_with_nik(): void
+    {
+        $response = $this->post('/login', [
+            'login' => '3171012345670001',
+            'password' => 'password123',
+        ]);
+
+        $response->assertRedirect('/dashboard');
+        $this->assertAuthenticated();
+    }
+
+    public function test_penyelenggara_can_register_with_nik(): void
+    {
+        $uniqueNik = '327101' . rand(1000000000, 9999999999);
+        $uniqueEmail = 'andi.' . rand(100, 999) . '@kemnaker.go.id';
+
+        $response = $this->post('/register', [
+            'name' => 'Andi Kurniawan, S.Kom.',
+            'nik' => $uniqueNik,
+            'email' => $uniqueEmail,
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertRedirect('/dashboard');
+        $this->assertAuthenticated();
+        $this->assertDatabaseHas('users', [
+            'nik' => $uniqueNik,
+            'email' => $uniqueEmail,
+        ]);
+    }
+
+    public function test_quick_store_pengajar_api(): void
+    {
+        $this->actingAs($this->user);
+
+        $response = $this->postJson('/api/pengajar-quick-store', [
+            'jenis_pengajar' => 'Narasumber',
+            'nama_lengkap' => 'Prof. Dr. Bambang Sudirman',
+            'nik' => '3171019999990001',
+            'gelar' => 'M.Sc.',
+            'instansi' => 'Badan Riset dan Inovasi Nasional (BRIN)',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+        ]);
+
+        $this->assertDatabaseHas('narasumbers', [
+            'nik' => '3171019999990001',
+            'nama_lengkap' => 'Prof. Dr. Bambang Sudirman',
+        ]);
+    }
 }
