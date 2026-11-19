@@ -30,7 +30,7 @@ class Jadwal extends Model
     {
         return [
             'tanggal' => 'date',
-            'jp_rencana' => 'decimal:2',
+            'jp_rencana' => 'float',
             'sesi_ke' => 'integer',
         ];
     }

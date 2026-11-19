@@ -30,8 +30,8 @@ class RealisasiJadwal extends Model
     {
         return [
             'tanggal_realisasi' => 'date',
-            'jp_aktual' => 'decimal:2',
-            'jp_dibayarkan' => 'decimal:2',
+            'jp_aktual' => 'float',
+            'jp_dibayarkan' => 'float',
             'diverifikasi_pada' => 'datetime',
         ];
     }

@@ -29,8 +29,8 @@ class KonversiJp extends Model
     {
         return [
             'tanggal_kegiatan' => 'date',
-            'jumlah_jp' => 'decimal:2',
-            'jp_dibayarkan' => 'decimal:2',
+            'jumlah_jp' => 'float',
+            'jp_dibayarkan' => 'float',
         ];
     }
 

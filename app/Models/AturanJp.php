@@ -22,7 +22,7 @@ class AturanJp extends Model
     protected function casts(): array
     {
         return [
-            'minimum_jp_bulanan' => 'decimal:2',
+            'minimum_jp_bulanan' => 'float',
             'durasi_per_jp_menit' => 'integer',
             'is_active' => 'boolean',
         ];

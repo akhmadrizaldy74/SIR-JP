@@ -17,6 +17,15 @@ use Illuminate\Support\Collection;
 
 class JPRecapitulationService
 {
+    public static function cleanJp($val)
+    {
+        if ($val === null || $val === '') {
+            return 0;
+        }
+        $num = (float) $val;
+        return $num == (int) $num ? (int) $num : round($num, 2);
+    }
+
     /**
      * Dapatkan nilai batas minimum JP per bulan.
      */
@@ -82,9 +91,9 @@ class JPRecapitulationService
                 'jam_selesai' => Carbon::parse($rj->jam_selesai_aktual)->format('H:i'),
                 'nama_pelatihan' => $pelatihan->nama_pelatihan . ' (' . $angkatan->nomor_angkatan . ')',
                 'mata_pelatihan' => $mp->nama_mata_pelatihan,
-                'jp' => $jpAktual,
-                'jp_akumulasi' => $akumulasiA,
-                'jp_dibayarkan' => $jpDibayarkan,
+                'jp' => self::cleanJp($jpAktual),
+                'jp_akumulasi' => self::cleanJp($akumulasiA),
+                'jp_dibayarkan' => self::cleanJp($jpDibayarkan),
                 'keterangan' => $rp->keterangan ?? $rj->catatan ?? '-',
                 'status_kehadiran' => $rp->status_kehadiran,
             ]);
@@ -118,9 +127,9 @@ class JPRecapitulationService
                 'tanggal_raw' => $k->tanggal_kegiatan,
                 'nama_kegiatan' => $k->nama_kegiatan,
                 'kategori' => $k->kategori_konversi,
-                'jp' => $jpKonversi,
-                'jp_akumulasi' => $akumulasiB,
-                'jp_dibayarkan' => $jpDibayar,
+                'jp' => self::cleanJp($jpKonversi),
+                'jp_akumulasi' => self::cleanJp($akumulasiB),
+                'jp_dibayarkan' => self::cleanJp($jpDibayar),
                 'informasi_pembayaran' => $k->informasi_pembayaran ?? '-',
                 'nomor_sk' => $k->nomor_sk ?? '-',
                 'keterangan' => $k->keterangan ?? '-',
@@ -151,15 +160,15 @@ class JPRecapitulationService
             'nama_bulan' => $this->getNamaBulan($bulan),
             'tatap_muka' => $detailA,
             'konversi' => $detailB,
-            'total_a' => round($totalA, 2),
-            'total_b' => round($totalB, 2),
-            'total_ab' => round($totalAB, 2),
-            'total_dibayarkan_a' => round($totalDibayarkanA, 2),
-            'total_dibayarkan_b' => round($totalDibayarkanB, 2),
-            'total_dibayarkan' => round($totalDibayarkan, 2),
-            'minimum_jp' => round($minimumJp, 2),
-            'kekurangan_jp' => round($kekuranganJp, 2),
-            'kelebihan_jp' => round($kelebihanJp, 2),
+            'total_a' => self::cleanJp($totalA),
+            'total_b' => self::cleanJp($totalB),
+            'total_ab' => self::cleanJp($totalAB),
+            'total_dibayarkan_a' => self::cleanJp($totalDibayarkanA),
+            'total_dibayarkan_b' => self::cleanJp($totalDibayarkanB),
+            'total_dibayarkan' => self::cleanJp($totalDibayarkan),
+            'minimum_jp' => self::cleanJp($minimumJp),
+            'kekurangan_jp' => self::cleanJp($kekuranganJp),
+            'kelebihan_jp' => self::cleanJp($kelebihanJp),
             'status_pencapaian' => $statusPencapaian,
             'badge_class' => $badgeClass,
         ];
@@ -257,10 +266,10 @@ class JPRecapitulationService
                 'nip' => $wi->nip,
                 'jabatan' => $wi->jabatan,
                 'bulanan' => $bulanan,
-                'total_a' => round($totalTahunA, 2),
-                'total_b' => round($totalTahunB, 2),
-                'total_ab' => round($totalTahunAB, 2),
-                'total_dibayarkan' => round($totalTahunDibayarkan, 2),
+                'total_a' => self::cleanJp($totalTahunA),
+                'total_b' => self::cleanJp($totalTahunB),
+                'total_ab' => self::cleanJp($totalTahunAB),
+                'total_dibayarkan' => self::cleanJp($totalTahunDibayarkan),
             ]);
         }
 
@@ -315,9 +324,9 @@ class JPRecapitulationService
                 'jam_selesai' => Carbon::parse($rj->jam_selesai_aktual)->format('H:i'),
                 'nama_pelatihan' => $pelatihan->nama_pelatihan . ' (' . $angkatan->nomor_angkatan . ')',
                 'mata_pelatihan' => $mp->nama_mata_pelatihan,
-                'jp' => $jpAktual,
-                'jp_akumulasi' => $akumulasi,
-                'jp_dibayarkan' => $jpDibayarkan,
+                'jp' => self::cleanJp($jpAktual),
+                'jp_akumulasi' => self::cleanJp($akumulasi),
+                'jp_dibayarkan' => self::cleanJp($jpDibayarkan),
                 'keterangan' => $rp->keterangan ?? $rj->catatan ?? '-',
                 'status_kehadiran' => $rp->status_kehadiran,
             ]);
@@ -329,8 +338,8 @@ class JPRecapitulationService
             'tahun' => $tahun,
             'nama_bulan' => $this->getNamaBulan($bulan),
             'tatap_muka' => $detail,
-            'total_jp' => round($totalJp, 2),
-            'total_dibayarkan' => round($totalDibayarkan, 2),
+            'total_jp' => self::cleanJp($totalJp),
+            'total_dibayarkan' => self::cleanJp($totalDibayarkan),
         ];
     }
 
@@ -461,10 +470,10 @@ class JPRecapitulationService
             'total_narasumber' => $totalNs,
             'total_pelatihan' => $totalPelatihan,
             'total_angkatan' => $totalAngkatan,
-            'total_jp_terealisasi' => round($totalJpTerealisasi, 2),
-            'total_jp_dibayarkan' => round($totalJpDibayarkan, 2),
-            'jp_tatap_muka' => round($jpTatapMukaBulanIni, 2),
-            'jp_konversi' => round($jpKonversiBulanIni, 2),
+            'total_jp_terealisasi' => self::cleanJp($totalJpTerealisasi),
+            'total_jp_dibayarkan' => self::cleanJp($totalJpDibayarkan),
+            'jp_tatap_muka' => self::cleanJp($jpTatapMukaBulanIni),
+            'jp_konversi' => self::cleanJp($jpKonversiBulanIni),
             'jadwal_bulan_ini_count' => $jadwalBulanIniCount,
             'jadwal_terlaksana_count' => $jadwalTerlaksanaCount,
             'jadwal_dibatalkan_count' => $jadwalDibatalkanCount,

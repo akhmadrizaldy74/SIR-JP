@@ -23,7 +23,7 @@ class MataPelatihan extends Model
     protected function casts(): array
     {
         return [
-            'rencana_jp' => 'decimal:2',
+            'rencana_jp' => 'float',
         ];
     }
 

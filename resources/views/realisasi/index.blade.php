@@ -105,6 +105,9 @@
                         </td>
                         <td class="text-center">
                             <div class="btn-group btn-group-sm" role="group">
+                                <a href="{{ route('realisasi.show', $r) }}" class="btn btn-outline-info" title="Detail Realisasi">
+                                    <i class="bi bi-eye"></i>
+                                </a>
                                 <a href="{{ route('realisasi.edit', $r) }}" class="btn btn-outline-warning" title="Edit Realisasi">
                                     <i class="bi bi-pencil"></i>
                                 </a>

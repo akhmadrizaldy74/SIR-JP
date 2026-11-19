@@ -3,6 +3,18 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Blade;
+
+if (!function_exists('format_jp')) {
+    function format_jp($val): string
+    {
+        if ($val === null || $val === '') {
+            return '0';
+        }
+        $num = (float) $val;
+        return (string) ($num == (int) $num ? (int) $num : (float) $num);
+    }
+}
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Blade::directive('jp', function ($expression) {
+            return "<?php echo format_jp($expression); ?>";
+        });
     }
 }

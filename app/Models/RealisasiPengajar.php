@@ -27,8 +27,8 @@ class RealisasiPengajar extends Model
     protected function casts(): array
     {
         return [
-            'jp_aktual' => 'decimal:2',
-            'jp_dibayarkan' => 'decimal:2',
+            'jp_aktual' => 'float',
+            'jp_dibayarkan' => 'float',
         ];
     }
 

@@ -150,6 +150,18 @@ class RealisasiController extends Controller
         }
     }
 
+    public function show(RealisasiJadwal $realisasi)
+    {
+        $realisasi->load([
+            'jadwal.mataPelatihan.angkatan.pelatihan',
+            'pengajarRealisasis.widyaiswara',
+            'pengajarRealisasis.narasumber',
+            'verifikator',
+        ]);
+
+        return view('realisasi.show', compact('realisasi'));
+    }
+
     public function edit(RealisasiJadwal $realisasi)
     {
         $realisasi->load(['jadwal.mataPelatihan.angkatan.pelatihan', 'pengajarRealisasis.widyaiswara', 'pengajarRealisasis.narasumber']);
