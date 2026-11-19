@@ -32,6 +32,219 @@
 @endsection
 
 @section('content')
+<!-- Banner KCLC Learning Center Sesuai Gambar 10 -->
+<div class="card border-0 shadow-sm mb-4 overflow-hidden" style="background: linear-gradient(135deg, #183B65 0%, #1e40af 100%); color: white; border-radius: 12px;">
+    <div class="card-body p-4 position-relative">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-warning text-dark fw-bold px-3 py-1">KCLC Kemnaker Corpu</span>
+                    <span class="badge bg-white-50 text-white">Platform Pembelajaran Digital</span>
+                </div>
+                <h3 class="fw-bold mb-1 text-white">Dashboard KCLC Learning Center</h3>
+                <p class="mb-3 text-white-50" style="font-size: 0.95rem;">
+                    Platform Pembelajaran Digital Terintegrasi &bull; Pusat Pengembangan Sumber Daya Manusia Kementerian Ketenagakerjaan
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ route('kelas-mapel.index') }}" class="btn btn-sm btn-light fw-semibold text-primary">
+                        <i class="bi bi-grid-3x3-gap-fill me-1"></i> Kelola Kelas Mapel
+                    </a>
+                    <a href="{{ route('ruangan.index') }}" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-door-open me-1"></i> Ruangan Kelas
+                    </a>
+                    <a href="{{ route('sikap-form.index') }}" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-ui-checks me-1"></i> Form Sikap
+                    </a>
+                    <a href="{{ route('evaluasi-form.index') }}" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-file-earmark-check me-1"></i> Form Evaluasi
+                    </a>
+                    <a href="{{ route('rekapitulasi.index') }}" class="btn btn-sm btn-warning text-dark fw-bold">
+                        <i class="bi bi-calculator-fill me-1"></i> Rekapitulasi JP (32 JP)
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end d-none d-lg-block">
+                <i class="bi bi-laptop fs-1 text-white-50" style="font-size: 5.5rem !important;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistik KCLC Learning Center (9 Cards Sesuai Gambar 10) -->
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-speedometer2 text-primary me-2"></i>Statistik KCLC Learning Center</h5>
+        <span class="text-muted small">Ringkasan data dan aktivitas sistem pembelajaran</span>
+    </div>
+    <span class="badge bg-primary px-3 py-2">Terintegrasi KCLC &amp; SIR-JP</span>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted small">Pelatihan Diklat</span>
+                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['total_pelatihan'] }}</h3>
+                </div>
+                <span class="badge bg-light text-primary border">Pelatihan</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted small">Kelas</span>
+                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['total_kelas'] }}</h3>
+                </div>
+                <span class="badge bg-light text-info border">Kelas</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted small">Ruangan</span>
+                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['total_ruangan'] }}</h3>
+                </div>
+                <span class="badge bg-light text-success border">Ruangan</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted small">Form Aspek Penilaian Sikap</span>
+                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['total_sikap'] }}</h3>
+                </div>
+                <span class="badge bg-light text-warning border">Penilaian</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted small">Form Evaluasi</span>
+                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['total_evaluasi'] }}</h3>
+                </div>
+                <span class="badge bg-light text-danger border">Evaluasi</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted small">Angkatan</span>
+                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['total_angkatan'] }}</h3>
+                </div>
+                <span class="badge bg-light text-primary border">Angkatan</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted small">Peserta</span>
+                    <h3 class="fw-bold text-dark mb-0">{{ number_format($kclcStats['total_peserta']) }}</h3>
+                </div>
+                <i class="bi bi-people text-primary fs-3"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted small">Presensi Hadir</span>
+                    <h3 class="fw-bold text-success mb-0">{{ number_format($kclcStats['total_presensi']) }}</h3>
+                </div>
+                <i class="bi bi-check-circle-fill text-success fs-3"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted small">Evaluasi Selesai</span>
+                    <h3 class="fw-bold text-dark mb-0">{{ $kclcStats['evaluasi_selesai'] }}</h3>
+                </div>
+                <i class="bi bi-journal-check text-warning fs-3"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabel Statistik Pelatihan Sesuai Gambar 11 -->
+<div class="card card-custom mb-5">
+    <div class="card-custom-header">
+        <div>
+            <h5 class="card-custom-title">
+                <i class="bi bi-table text-primary"></i> Statistik Pelatihan
+            </h5>
+            <span class="text-muted small">Ringkasan aktivitas setiap pelatihan pada platform pembelajaran</span>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-custom">
+            <thead>
+                <tr>
+                    <th>Pelatihan</th>
+                    <th class="text-center">Peserta</th>
+                    <th class="text-center">Presensi</th>
+                    <th class="text-center">Pretest</th>
+                    <th class="text-center">Posttest</th>
+                    <th class="text-center">Kuis</th>
+                    <th class="text-center">Tugas</th>
+                    <th class="text-center">Evaluasi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($pelatihanStats as $ps)
+                    <tr>
+                        <td class="fw-semibold text-dark">{{ $ps['nama'] }}</td>
+                        <td class="text-center">{{ $ps['peserta'] }}</td>
+                        <td class="text-center">
+                            @if($ps['presensi'] > 0)
+                                <span class="badge bg-success-subtle text-success px-2 py-1">{{ number_format($ps['presensi']) }}</span>
+                            @else
+                                <span class="text-muted">0</span>
+                            @endif
+                        </td>
+                        <td class="text-center text-muted">{{ $ps['pretest'] }}</td>
+                        <td class="text-center text-muted">{{ $ps['posttest'] }}</td>
+                        <td class="text-center text-muted">{{ $ps['kuis'] }}</td>
+                        <td class="text-center">
+                            @if($ps['tugas'] > 0)
+                                <span class="badge bg-primary-subtle text-primary px-2 py-1">{{ $ps['tugas'] }}</span>
+                            @else
+                                <span class="text-muted">0</span>
+                            @endif
+                        </td>
+                        <td class="text-center text-muted">{{ $ps['evaluasi'] }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- SISTEM INFORMASI REKAPITULASI JP (SIR-JP)                     -->
+<!-- ============================================================== -->
+<div class="d-flex align-items-center justify-content-between mb-3 pt-3 border-top">
+    <div>
+        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-calculator text-primary me-2"></i>Rekapitulasi Jam Pelajaran Widyaiswara &amp; Narasumber</h5>
+        <span class="text-muted small">Perhitungan beban kerja mengajar dan pencapaian target minimum 32 JP bulanan</span>
+    </div>
+</div>
+
 <!-- Filter Info Banner -->
 <div class="alert alert-light border d-flex align-items-center justify-content-between p-3 mb-4 rounded-3 shadow-sm">
     <div class="d-flex align-items-center gap-2">

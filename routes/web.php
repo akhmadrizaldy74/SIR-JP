@@ -16,6 +16,11 @@ use App\Http\Controllers\RekapitulasiController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RuanganController;
+use App\Http\Controllers\KelasMapelController;
+use App\Http\Controllers\PesertaController;
+use App\Http\Controllers\AspekPenilaianSikapController;
+use App\Http\Controllers\FormEvaluasiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +55,16 @@ Route::middleware('auth')->group(function () {
 
     // 5. Data Angkatan
     Route::resource('angkatan', AngkatanController::class);
+
+    // KCLC LMS Diklat Modules (Terintegrasi)
+    Route::resource('ruangan', RuanganController::class);
+    Route::resource('kelas-mapel', KelasMapelController::class);
+    Route::post('kelas-mapel/{kelas_mapel}/pengajar', [KelasMapelController::class, 'storePengajar'])->name('kelas-mapel.pengajar.store');
+    Route::delete('kelas-mapel/{kelas_mapel}/pengajar/{pengajar}', [KelasMapelController::class, 'destroyPengajar'])->name('kelas-mapel.pengajar.destroy');
+    Route::resource('peserta', PesertaController::class);
+    Route::resource('sikap-form', AspekPenilaianSikapController::class);
+    Route::patch('sikap-form/{sikap_form}/toggle', [AspekPenilaianSikapController::class, 'toggle'])->name('sikap-form.toggle');
+    Route::resource('evaluasi-form', FormEvaluasiController::class);
 
     // 6. Mata Pelatihan
     Route::resource('mata-pelatihan', MataPelatihanController::class);

@@ -41,4 +41,14 @@ class Angkatan extends Model
     {
         return $this->hasMany(MataPelatihan::class);
     }
+
+    public function pesertas()
+    {
+        return $this->hasMany(Peserta::class, 'angkatan_id');
+    }
+
+    public function kelasMapels()
+    {
+        return $this->hasMany(KelasMapel::class, 'angkatan_id');
+    }
 }
