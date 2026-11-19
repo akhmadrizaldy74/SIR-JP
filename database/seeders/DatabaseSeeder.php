@@ -567,5 +567,10 @@ class DatabaseSeeder extends Seeder
             'detail' => 'Database migrations dan seed data awal berhasil diproses.',
             'ip_address' => '127.0.0.1',
         ]);
+
+        // 14. Integrasi KCLC Learning Center (Screenshot Seeder)
+        $this->call([
+            KCLCScreenshotSeeder::class,
+        ]);
     }
 }

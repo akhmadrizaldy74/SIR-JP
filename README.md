@@ -1,59 +1,92 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SIR-JP & KCLC Learning Center (Terintegrasi)
+### Sistem Informasi Rekapitulasi Jam Pelajaran & Learning Management System Diklat
+**Pusat Pengembangan Sumber Daya Manusia (PPSDM) Kementerian Ketenagakerjaan RI**
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+## 📌 Ringkasan Sistem
+Aplikasi web terintegrasi yang menggabungkan:
+1. **KCLC (*Kemnaker Corpu Learning Center*)**: Modul pengelolaan pelatihan, angkatan, kelas mata pelatihan (4 tab: Detail, Pengajar, Jadwal, Peserta), ruangan, aspek penilaian sikap, dan form evaluasi.
+2. **SIR-JP (*Sistem Informasi Rekapitulasi Jam Pelajaran*)**: Perhitungan otomatis beban kerja mengajar widyaiswara & narasumber dengan batasan minimum **32 JP/bulan**, konversi kegiatan ilmiah/mentoring, serta ekspor Berita Acara & Lampiran Honor (Excel multi-sheet dan PDF).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🚀 Panduan Menjalankan Aplikasi (Untuk Rekan/Penguji)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 1. Persyaratan Sistem
+* PHP >= 8.2 (ekstensi: `pdo_mysql`, `mbstring`, `openssl`, `gd`, `zip`)
+* Composer >= 2.0
+* MySQL / MariaDB (disarankan XAMPP atau MySQL Server lokal)
 
-## Learning Laravel
+### 2. Langkah Instalasi Cepat
+1. **Ekstrak file project** ke folder kerja Anda.
+2. **Install Dependensi Composer**:
+   ```bash
+   composer install
+   ```
+3. **Konfigurasi Environment (`.env`)**:
+   Salin file `.env.example` menjadi `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Pastikan pengaturan database di `.env` sesuai dengan MySQL Anda (buat database baru bernama `sir_jp`):
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=sir_jp
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+4. **Generate Application Key**:
+   ```bash
+   php artisan key:generate
+   ```
+5. **Jalankan Migrasi & Seeder Lengkap**:
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+   *(Perintah ini otomatis mengisi seluruh data pelatihan, widyaiswara, narasumber, riwayat mengajar real Oktober, ruangan, kelas mapel, dan 10 data peserta)*
+6. **Jalankan Web Server**:
+   ```bash
+   php artisan serve
+   ```
+7. Buka browser di: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🔐 Akun Login Default
+* **Akses**: Halaman Login (`/login`)
+* **NIK**: `3171012345670001` *(atau Email: `penyelenggara@sir-jp.go.id`)*
+* **Password**: `password123`
+* **Role**: Penyelenggara Diklat (Admin Tunggal)
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 📂 Berkas yang Perlu Dikirim ke Pihak Lain
 
-### Premium Partners
+### Skenario A: Jika Dikirim ke Pimpinan / Penguji / Klien (Review Hasil)
+1. **Akses Demo**: Kirimkan URL aplikasi serta NIK & Password login di atas.
+2. **File Laporan Rekapitulasi Excel & PDF**:
+   - Dapat diunduh langsung dari menu **Rekapitulasi JP &rarr; Export Excel / PDF** (Format Berita Acara resmi & Lampiran Honor Widyaiswara).
+3. **Dokumen Panduan Singkat (README ini)**.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Skenario B: Jika Dikirim ke Tim IT / Programmer (Source Code)
+1. **Source Code (.ZIP)**:
+   > ⚠️ **Catatan Penting**: Sebelum di-ZIP, **HAPUS / JANGAN SERTAKAN** folder:
+   > - `vendor/` *(ukurannya besar, penerima cukup ketik `composer install`)*
+   > - `node_modules/` *(jika ada)*
+   > - `.git/` *(opsional)*
+   > - File `.env` *(biarkan penerima menggunakan `.env.example`)*
+2. **README.md** (instruksi instalasi di atas).
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🧪 Verifikasi & Pengujian Otomatis
+Sistem ini dilengkapi 33 automated test suite dengan 192 assertion tanpa error:
+```bash
+php artisan test
+```
+* **EndToEndInterconnectedFlowTest**: Menguji alur lengkap dari KCLC Ruangan &rarr; Kelas Mapel &rarr; Sesi Jadwal &rarr; Peserta & Presensi &rarr; Realisasi Mengajar &rarr; Rekapitulasi JP &rarr; Export Excel/PDF.
+* **KCLCIntegrationTest**: Menguji 4 tab kelas mapel, form sikap & evaluasi dinamis, dan dashboard.
+* **OktoberExcelFormatVerificationTest**: Memverifikasi formula perhitungan dan format multi-sheet.
