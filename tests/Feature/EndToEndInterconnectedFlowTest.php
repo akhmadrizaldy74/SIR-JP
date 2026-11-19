@@ -82,7 +82,7 @@ class EndToEndInterconnectedFlowTest extends TestCase
         // -------------------------------------------------------------
         $wi = Widyaiswara::create([
             'nik' => '317101' . rand(1000000000, 9999999999),
-            'nip' => '197505122000031' . rand(100, 999),
+            'nip' => '1975' . time() . rand(1000, 9999),
             'nama_lengkap' => 'Dr. H. Bambang E2E ' . $unique,
             'gelar_depan' => 'Dr.',
             'gelar_belakang' => 'M.Si.',

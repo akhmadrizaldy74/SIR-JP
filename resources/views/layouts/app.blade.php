@@ -29,11 +29,11 @@
 
             <!-- Content Area -->
             <main class="page-container">
-                <div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-                    <div>
-                        <h1 class="page-title">@yield('page_title', 'Dashboard')</h1>
+                <div class="page-header d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="page-title mb-0" style="font-size: 1.25rem; font-weight: 700; color: #1E293B;">@yield('page_title', 'Dashboard')</h1>
+                    <div class="d-flex align-items-center gap-3">
                         <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb mb-0">
+                            <ol class="breadcrumb mb-0" style="font-size: 0.85rem;">
                                 @if(trim($__env->yieldContent('breadcrumb_custom')))
                                     @yield('breadcrumb_custom')
                                 @else
@@ -42,8 +42,6 @@
                                 @endif
                             </ol>
                         </nav>
-                    </div>
-                    <div>
                         @yield('page_actions')
                     </div>
                 </div>

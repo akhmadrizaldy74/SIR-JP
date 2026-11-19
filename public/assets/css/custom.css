@@ -260,6 +260,12 @@ body.sidebar-collapsed .app-main {
   text-decoration: none;
 }
 
+.breadcrumb-item + .breadcrumb-item::before {
+  content: ">" !important;
+  color: #94A3B8;
+  padding: 0 0.35rem;
+}
+
 /* Stat Cards */
 .stat-card {
   background: var(--white);

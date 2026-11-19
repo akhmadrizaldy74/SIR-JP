@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', function () {
   const sidebar = document.querySelector('.app-sidebar');
   const backdrop = document.getElementById('sidebarBackdrop');
 
+  // Pastikan default sidebar TERBUKA (Expanded) sesuai tampilan asli KCLC
+  document.body.classList.remove('sidebar-collapsed');
+  localStorage.removeItem('sidebarCollapsed');
+
   if (toggleBtn) {
     toggleBtn.addEventListener('click', function () {
       if (window.innerWidth < 992) {
@@ -11,10 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (backdrop) backdrop.classList.toggle('show');
       } else {
         document.body.classList.toggle('sidebar-collapsed');
-        localStorage.setItem(
-          'sidebarCollapsed',
-          document.body.classList.contains('sidebar-collapsed') ? 'true' : 'false'
-        );
       }
     });
   }
@@ -24,11 +24,6 @@ document.addEventListener('DOMContentLoaded', function () {
       sidebar.classList.remove('show-mobile');
       backdrop.classList.remove('show');
     });
-  }
-
-  // Restore sidebar preference
-  if (window.innerWidth >= 992 && localStorage.getItem('sidebarCollapsed') === 'true') {
-    document.body.classList.add('sidebar-collapsed');
   }
 
   // Intercept any form with data-confirm

@@ -25,18 +25,22 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Akun Penyelenggara
+        // 1. Akun Penyelenggara (Sesuai KCLC)
         $penyelenggara = User::firstOrCreate(
             ['email' => 'penyelenggara@sir-jp.go.id'],
             [
-                'name' => 'Administrator Penyelenggara',
-                'username' => 'penyelenggara',
+                'name' => 'AKHMAD RIZALDY',
+                'username' => 'admin_penyelenggara',
                 'phone' => '081234567890',
                 'role' => 'penyelenggara',
                 'status' => 'Aktif',
                 'password' => Hash::make('password123'),
             ]
         );
+        $penyelenggara->update([
+            'name' => 'AKHMAD RIZALDY',
+            'username' => 'admin_penyelenggara',
+        ]);
 
         // 2. Aturan JP (Default 32 JP per bulan)
         AturanJp::firstOrCreate(

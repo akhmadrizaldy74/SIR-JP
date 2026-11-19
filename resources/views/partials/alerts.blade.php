@@ -38,7 +38,7 @@
     </script>
 @endif
 
-@if($errors->any())
+@if(isset($errors) && $errors->any())
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             if (window.SirAlert) {

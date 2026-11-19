@@ -1,29 +1,35 @@
-<header class="app-navbar">
+<header class="app-navbar d-flex align-items-center justify-content-between px-3 bg-white border-bottom" style="height: 64px;">
     <div class="d-flex align-items-center gap-3">
-        <button type="button" class="navbar-toggle-btn" id="sidebarToggleBtn" title="Buka/Tutup Sidebar">
+        <button type="button" class="navbar-toggle-btn btn btn-light border-0 p-1" id="sidebarToggleBtn" title="Buka/Tutup Sidebar" style="font-size: 1.4rem;">
             <i class="bi bi-list"></i>
         </button>
-        <div class="d-none d-md-block">
-            <span class="badge bg-light text-secondary border px-3 py-2 fw-normal">
-                <i class="bi bi-building me-1 text-primary"></i>
-                {{ \App\Models\Pengaturan::get('instansi_nama', 'Pusat Pengembangan Sumber Daya Manusia') }}
-            </span>
-        </div>
     </div>
 
     <div class="d-flex align-items-center gap-3">
-        <div class="text-end d-none d-sm-block">
-            <div class="fw-semibold text-dark small">{{ auth()->user()->name ?? 'Penyelenggara' }}</div>
-            <div class="text-muted" style="font-size: 0.75rem;">Role: Penyelenggara (Administrator)</div>
-        </div>
+        <!-- Fullscreen Button Sesuai Gambar KCLC -->
+        <button type="button" class="btn btn-link text-secondary p-1" onclick="document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()" title="Fullscreen">
+            <i class="bi bi-fullscreen fs-5"></i>
+        </button>
 
-        <div class="dropdown">
-            <button class="btn btn-light rounded-circle p-1 border dropdown-toggle d-flex align-items-center justify-content-center" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 40px; height: 40px;">
-                <i class="bi bi-person-fill fs-5 text-primary"></i>
+        <!-- Notification Bell Sesuai Gambar KCLC -->
+        <button type="button" class="btn btn-link text-secondary p-1" title="Notifikasi">
+            <i class="bi bi-bell fs-5"></i>
+        </button>
+
+        <!-- User Profile Dropdown Sesuai Gambar KCLC: AKHMAD RIZALDY / admin_penyelenggara -->
+        <div class="dropdown d-flex align-items-center">
+            <button class="btn btn-link text-decoration-none d-flex align-items-center gap-2 p-0 text-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="avatar-circle rounded-circle bg-light border d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                    <i class="bi bi-person-fill text-secondary fs-5"></i>
+                </div>
+                <div class="text-start d-none d-sm-block">
+                    <div class="fw-bold text-dark lh-1" style="font-size: 0.85rem; letter-spacing: 0.3px;">{{ strtoupper(auth()->user()->name ?? 'AKHMAD RIZALDY') }}</div>
+                    <span class="text-muted" style="font-size: 0.72rem;">{{ auth()->user()->username ?? 'admin_penyelenggara' }}</span>
+                </div>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="min-width: 200px;">
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border py-2" style="min-width: 200px;">
                 <li class="px-3 py-2 border-bottom">
-                    <div class="fw-bold text-dark">{{ auth()->user()->name ?? 'Penyelenggara' }}</div>
+                    <div class="fw-bold text-dark">{{ auth()->user()->name ?? 'AKHMAD RIZALDY' }}</div>
                     <div class="text-muted small">{{ auth()->user()->email ?? 'penyelenggara@sir-jp.go.id' }}</div>
                 </li>
                 <li>
