@@ -6,6 +6,7 @@ use App\Models\Pengaturan;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
@@ -46,17 +47,17 @@ class WidyaiswaraIndividuExport implements WithEvents, WithTitle
                 // Gridlines visible
                 $sheet->setShowGridLines(true);
 
-                // Column Widths matching original JP WI Excel
+                // Column Widths matching original JP WI Excel, with room for wrapped text
                 $sheet->getColumnDimension('A')->setWidth(17.7);
                 $sheet->getColumnDimension('B')->setWidth(26.0);
                 $sheet->getColumnDimension('C')->setWidth(36.0);
                 $sheet->getColumnDimension('D')->setWidth(8.0);
-                $sheet->getColumnDimension('E')->setWidth(8.0);
-                $sheet->getColumnDimension('F')->setWidth(15.0);
+                $sheet->getColumnDimension('E')->setWidth(14.0); // Ample width: prevents "AKUMU\nLASI" clipping
+                $sheet->getColumnDimension('F')->setWidth(16.0);
                 // Column G is collapsed / hidden in the original template
                 $sheet->getColumnDimension('G')->setWidth(0.5);
                 $sheet->getColumnDimension('G')->setVisible(false);
-                $sheet->getColumnDimension('H')->setWidth(26.0);
+                $sheet->getColumnDimension('H')->setWidth(34.0); // Ample width for full notes
 
                 // Set default font to Calibri 11
                 $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(11);
@@ -93,13 +94,13 @@ class WidyaiswaraIndividuExport implements WithEvents, WithTitle
                 $sheet->getStyle('B5')->getFont()->setSize(12)->setBold(true);
 
                 // Row 7: Table Headers
-                $sheet->getRowDimension(7)->setRowHeight(30);
+                $sheet->getRowDimension(7)->setRowHeight(36); // Comfortable height for 2-line wrapped header
                 $headers = [
                     'A' => 'TANGGAL',
                     'B' => 'NAMA PELATIHAN',
                     'C' => 'MATA PELATIHAN',
                     'D' => 'JP',
-                    'E' => 'JP AKUMULASI',
+                    'E' => "JP\nAKUMULASI", // Explicit 2-line break
                     'F' => 'JP DIBAYARKAN',
                     'G' => 'KETERANGAN',
                     'H' => 'KETERANGAN',
@@ -127,7 +128,8 @@ class WidyaiswaraIndividuExport implements WithEvents, WithTitle
                 ];
                 $sheet->getStyle('A7:H7')->applyFromArray($headerStyle);
 
-                // Row 8: Section A. TATAP MUKA
+                // Row 8: Section A. TATAP MUKA (Merge B8:C8)
+                $sheet->mergeCells('B8:C8');
                 $sheet->setCellValue('B8', 'A. TATAP MUKA');
                 $sheet->getStyle('B8')->getFont()->setBold(true);
                 $sheet->getStyle('A8:H8')->applyFromArray($thinBorders);
@@ -142,7 +144,21 @@ class WidyaiswaraIndividuExport implements WithEvents, WithTitle
                     $pelatihanStartRow = null;
 
                     foreach ($tatapMukaItems as $tm) {
-                        $sheet->getRowDimension($currentRow)->setRowHeight(22);
+                        $ket = ($tm['keterangan'] && $tm['keterangan'] !== '-') ? $tm['keterangan'] : '';
+
+                        // Dynamically compute row height so wrapped notes are never cut off!
+                        $maxLen = max(
+                            mb_strlen($tm['nama_pelatihan'] ?? ''),
+                            mb_strlen($tm['mata_pelatihan'] ?? ''),
+                            mb_strlen($ket)
+                        );
+                        $rowH = 22;
+                        if ($maxLen > 45) {
+                            $rowH = 38;
+                        } elseif ($maxLen > 25) {
+                            $rowH = 30;
+                        }
+                        $sheet->getRowDimension($currentRow)->setRowHeight($rowH);
 
                         // Col A: Tanggal
                         $sheet->setCellValue("A$currentRow", $tm['tanggal']);
@@ -156,20 +172,25 @@ class WidyaiswaraIndividuExport implements WithEvents, WithTitle
                         $sheet->setCellValue("C$currentRow", $tm['mata_pelatihan']);
                         $sheet->getStyle("C$currentRow")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
 
-                        // Col D: JP
-                        $sheet->setCellValue("D$currentRow", $tm['jp'] > 0 ? $tm['jp'] : '');
+                        // Col D: JP (Explicit numeric)
+                        if (($tm['jp'] ?? 0) > 0) {
+                            $sheet->setCellValueExplicit("D$currentRow", (float) $tm['jp'], DataType::TYPE_NUMERIC);
+                        }
                         $sheet->getStyle("D$currentRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
 
-                        // Col E: JP Akumulasi
-                        $sheet->setCellValue("E$currentRow", $tm['jp_akumulasi'] > 0 ? $tm['jp_akumulasi'] : '');
+                        // Col E: JP Akumulasi (Explicit numeric)
+                        if (($tm['jp_akumulasi'] ?? 0) > 0) {
+                            $sheet->setCellValueExplicit("E$currentRow", (float) $tm['jp_akumulasi'], DataType::TYPE_NUMERIC);
+                        }
                         $sheet->getStyle("E$currentRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
 
-                        // Col F: JP Dibayarkan
-                        $sheet->setCellValue("F$currentRow", $tm['jp_dibayarkan'] > 0 ? $tm['jp_dibayarkan'] : '');
+                        // Col F: JP Dibayarkan (Explicit numeric)
+                        if (($tm['jp_dibayarkan'] ?? 0) > 0) {
+                            $sheet->setCellValueExplicit("F$currentRow", (float) $tm['jp_dibayarkan'], DataType::TYPE_NUMERIC);
+                        }
                         $sheet->getStyle("F$currentRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
 
                         // Col H: Keterangan (Col G is hidden)
-                        $ket = ($tm['keterangan'] && $tm['keterangan'] !== '-') ? $tm['keterangan'] : '';
                         $sheet->setCellValue("H$currentRow", $ket);
                         $sheet->getStyle("H$currentRow")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
 
@@ -206,9 +227,10 @@ class WidyaiswaraIndividuExport implements WithEvents, WithTitle
                     $currentRow++;
                 }
 
-                // Row TOTAL A
+                // Row TOTAL A (Merge B:C)
                 $rowTotalA = $currentRow;
                 $sheet->getRowDimension($rowTotalA)->setRowHeight(22);
+                $sheet->mergeCells("B$rowTotalA:C$rowTotalA");
                 $sheet->setCellValue("B$rowTotalA", 'TOTAL A');
                 if (!empty($tatapMukaItems)) {
                     $lastTMRow = $currentRow - 1;
@@ -230,9 +252,10 @@ class WidyaiswaraIndividuExport implements WithEvents, WithTitle
                 $sheet->getStyle("H$rowTotalA")->getFont()->setBold(true);
                 $currentRow++;
 
-                // Row B. KONVERSI
+                // Row B. KONVERSI (Merge B:C)
                 $rowKonversiHeader = $currentRow;
                 $sheet->getRowDimension($rowKonversiHeader)->setRowHeight(20);
+                $sheet->mergeCells("B$rowKonversiHeader:C$rowKonversiHeader");
                 $sheet->setCellValue("B$rowKonversiHeader", 'B. KONVERSI');
                 $sheet->setCellValue("D$rowKonversiHeader", 0);
                 $sheet->getStyle("B$rowKonversiHeader")->getFont()->setBold(true);
@@ -245,7 +268,15 @@ class WidyaiswaraIndividuExport implements WithEvents, WithTitle
 
                 if (!empty($konversiItems)) {
                     foreach ($konversiItems as $kv) {
-                        $sheet->getRowDimension($currentRow)->setRowHeight(24);
+                        $ketKv = $kv['keterangan'] ?? '';
+                        $maxLenKv = max(mb_strlen($kv['nama_kegiatan'] ?? ''), mb_strlen($ketKv));
+                        $rowHKv = 24;
+                        if ($maxLenKv > 45) {
+                            $rowHKv = 40;
+                        } elseif ($maxLenKv > 25) {
+                            $rowHKv = 32;
+                        }
+                        $sheet->getRowDimension($currentRow)->setRowHeight($rowHKv);
 
                         // Col A: Tanggal
                         $sheet->setCellValue("A$currentRow", $kv['tanggal']);
@@ -256,19 +287,19 @@ class WidyaiswaraIndividuExport implements WithEvents, WithTitle
                         $sheet->setCellValue("B$currentRow", $kv['nama_kegiatan']);
                         $sheet->getStyle("B$currentRow")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
 
-                        // Col D: JP
-                        $sheet->setCellValue("D$currentRow", $kv['jp']);
+                        // Col D: JP (Explicit numeric, prevents green error triangle!)
+                        $sheet->setCellValueExplicit("D$currentRow", (float) $kv['jp'], DataType::TYPE_NUMERIC);
                         $sheet->getStyle("D$currentRow")->getFont()->setBold(true);
                         $sheet->getStyle("D$currentRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
 
-                        // Col F: JP Dibayarkan
+                        // Col F: JP Dibayarkan (Explicit numeric)
                         if (($kv['jp_dibayarkan'] ?? 0) > 0) {
-                            $sheet->setCellValue("F$currentRow", $kv['jp_dibayarkan']);
+                            $sheet->setCellValueExplicit("F$currentRow", (float) $kv['jp_dibayarkan'], DataType::TYPE_NUMERIC);
                             $sheet->getStyle("F$currentRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
                         }
 
                         // Col H: Keterangan
-                        $sheet->setCellValue("H$currentRow", $kv['keterangan'] ?? '');
+                        $sheet->setCellValue("H$currentRow", $ketKv);
                         $sheet->getStyle("H$currentRow")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
 
                         $sheet->getStyle("A$currentRow:H$currentRow")->applyFromArray($thinBorders);
@@ -276,38 +307,35 @@ class WidyaiswaraIndividuExport implements WithEvents, WithTitle
                     }
                 }
 
-                // Row TOTAL B
+                // Row TOTAL B (Merge B:C)
                 $rowTotalB = $currentRow;
                 $sheet->getRowDimension($rowTotalB)->setRowHeight(22);
+                $sheet->mergeCells("B$rowTotalB:C$rowTotalB");
                 $sheet->setCellValue("B$rowTotalB", 'TOTAL  B');
                 if (!empty($konversiItems)) {
                     $lastKVRow = $currentRow - 1;
                     $sheet->setCellValue("D$rowTotalB", "=SUM(D$konversiStartRow:D$lastKVRow)");
-                    $sheet->setCellValue("F$rowTotalB", "=SUM(F$konversiStartRow:F$lastKVRow)");
                 } else {
                     $sheet->setCellValue("D$rowTotalB", 0);
-                    $sheet->setCellValue("F$rowTotalB", 0);
                 }
+                // Col F remains empty on TOTAL B per official template
                 $sheet->getStyle("A$rowTotalB:H$rowTotalB")->applyFromArray($thinBorders);
                 $sheet->getStyle("B$rowTotalB")->getFont()->setBold(true);
                 $sheet->getStyle("D$rowTotalB")->getFont()->setBold(true);
                 $sheet->getStyle("D$rowTotalB")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("F$rowTotalB")->getFont()->setBold(true);
-                $sheet->getStyle("F$rowTotalB")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $currentRow++;
 
-                // Row TOTAL A DAN B
+                // Row TOTAL A DAN B (Merge B:C)
                 $rowTotalAB = $currentRow;
                 $sheet->getRowDimension($rowTotalAB)->setRowHeight(22);
+                $sheet->mergeCells("B$rowTotalAB:C$rowTotalAB");
                 $sheet->setCellValue("B$rowTotalAB", 'TOTAL A DAN B');
                 $sheet->setCellValue("D$rowTotalAB", "=SUM(D$rowTotalA+D$rowTotalB)");
-                $sheet->setCellValue("F$rowTotalAB", "=SUM(F$rowTotalA+F$rowTotalB)");
+                // Col F remains empty on TOTAL A DAN B per official template
                 $sheet->getStyle("A$rowTotalAB:H$rowTotalAB")->applyFromArray($thinBorders);
                 $sheet->getStyle("B$rowTotalAB")->getFont()->setBold(true);
                 $sheet->getStyle("D$rowTotalAB")->getFont()->setBold(true);
                 $sheet->getStyle("D$rowTotalAB")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("F$rowTotalAB")->getFont()->setBold(true);
-                $sheet->getStyle("F$rowTotalAB")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $currentRow++;
 
                 // Signature Block (D to H merged, exactly as in original Excel)
@@ -332,8 +360,8 @@ class WidyaiswaraIndividuExport implements WithEvents, WithTitle
                 $sheet->setCellValue("D$rowSig3", $instansiSub);
                 $sheet->getStyle("D$rowSig3")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                // Nama Pimpinan (after blank rows for signature)
-                $rowSigName = $sigStart + 7;
+                // Nama Pimpinan (clean 4 blank rows for signature)
+                $rowSigName = $sigStart + 6;
                 $sheet->mergeCells("D$rowSigName:H$rowSigName");
                 $pimpinanNama = Pengaturan::get('pimpinan_nama', 'Dr. Narsih, S.Pd., M.M.');
                 $sheet->setCellValue("D$rowSigName", $pimpinanNama);
@@ -341,7 +369,7 @@ class WidyaiswaraIndividuExport implements WithEvents, WithTitle
                 $sheet->getStyle("D$rowSigName")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // NIP Pimpinan
-                $rowSigNip = $sigStart + 8;
+                $rowSigNip = $sigStart + 7;
                 $sheet->mergeCells("D$rowSigNip:H$rowSigNip");
                 $pimpinanNip = Pengaturan::get('pimpinan_nip', '197202111998032002');
                 $sheet->setCellValue("D$rowSigNip", "NIP. " . $pimpinanNip);

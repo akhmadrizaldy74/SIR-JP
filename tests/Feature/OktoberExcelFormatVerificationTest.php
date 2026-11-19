@@ -160,5 +160,11 @@ class OktoberExcelFormatVerificationTest extends TestCase
             }
         }
         $this->assertTrue($hasSignatureMerge, 'Signature must be merged across columns D to H');
+
+        // 5. Verify B8:C8 is merged
+        $this->assertArrayHasKey('B8:C8', $merges);
+
+        // 6. Col E has ample width (>= 12)
+        $this->assertGreaterThanOrEqual(12, $sheet->getColumnDimension('E')->getWidth());
     }
 }
