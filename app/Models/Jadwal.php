@@ -49,4 +49,9 @@ class Jadwal extends Model
     {
         return $this->hasOne(RealisasiJadwal::class);
     }
+
+    public function attendanceSessions()
+    {
+        return $this->hasMany(AttendanceSession::class, 'jadwal_id');
+    }
 }

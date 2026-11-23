@@ -69,4 +69,14 @@ class KelasMapel extends Model
     {
         return $this->hasMany(Jadwal::class, 'angkatan_id', 'angkatan_id');
     }
+
+    public function attendanceSessions()
+    {
+        return $this->hasMany(AttendanceSession::class, 'kelas_mapel_id');
+    }
+
+    public function documentations()
+    {
+        return $this->hasMany(ClassDocumentation::class, 'kelas_mapel_id');
+    }
 }

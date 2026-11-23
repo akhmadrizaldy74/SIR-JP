@@ -77,6 +77,55 @@
                                 <i class="bi bi-dash"></i> <span class="nav-text">Peserta Diklat</span>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link-custom py-1 small {{ request()->routeIs('participant-access.*') ? 'active' : '' }}" href="{{ route('participant-access.index') }}">
+                                <i class="bi bi-dash"></i> <span class="nav-text">Kode & PIN Peserta</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <!-- Modul Presensi Peserta Diklat -->
+            @php
+                $isPresensiActive = request()->routeIs('presensi.*') || request()->routeIs('attendance-sessions.*') || request()->routeIs('attendance-manual.*') || request()->routeIs('attendance-requests.*') || request()->routeIs('class-documentations.*');
+            @endphp
+            <li class="nav-item">
+                <a class="nav-link-custom d-flex justify-content-between align-items-center {{ $isPresensiActive ? 'active' : '' }}" 
+                   data-bs-toggle="collapse" href="#menuPresensi" role="button" aria-expanded="{{ $isPresensiActive ? 'true' : 'false' }}">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-qr-code-scan"></i>
+                        <span class="nav-text">Presensi Diklat</span>
+                    </div>
+                    <i class="bi bi-chevron-down small transition-icon"></i>
+                </a>
+                <div class="collapse {{ $isPresensiActive ? 'show' : '' }} ps-3" id="menuPresensi">
+                    <ul class="nav flex-column py-1 border-start border-secondary ms-2 ps-2">
+                        <li class="nav-item">
+                            <a class="nav-link-custom py-1 small {{ request()->routeIs('presensi.dashboard') ? 'active' : '' }}" href="{{ route('presensi.dashboard') }}">
+                                <i class="bi bi-dash"></i> <span class="nav-text">Dashboard Presensi</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link-custom py-1 small {{ request()->routeIs('attendance-sessions.*') || request()->routeIs('attendance-manual.*') ? 'active' : '' }}" href="{{ route('attendance-sessions.index') }}">
+                                <i class="bi bi-dash"></i> <span class="nav-text">Sesi Presensi</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link-custom py-1 small {{ request()->routeIs('presensi.rekap') ? 'active' : '' }}" href="{{ route('presensi.rekap') }}">
+                                <i class="bi bi-dash"></i> <span class="nav-text">Rekap Kehadiran</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link-custom py-1 small {{ request()->routeIs('attendance-requests.*') ? 'active' : '' }}" href="{{ route('attendance-requests.index') }}">
+                                <i class="bi bi-dash"></i> <span class="nav-text">Pengajuan Izin</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link-custom py-1 small {{ request()->routeIs('class-documentations.*') ? 'active' : '' }}" href="{{ route('class-documentations.index') }}">
+                                <i class="bi bi-dash"></i> <span class="nav-text">Dokumentasi</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </li>

@@ -21,6 +21,14 @@ use App\Http\Controllers\KelasMapelController;
 use App\Http\Controllers\PesertaController;
 use App\Http\Controllers\AspekPenilaianSikapController;
 use App\Http\Controllers\FormEvaluasiController;
+use App\Http\Controllers\ParticipantAuthController;
+use App\Http\Controllers\ParticipantPortalController;
+use App\Http\Controllers\AttendanceSessionController;
+use App\Http\Controllers\AttendanceManualController;
+use App\Http\Controllers\AttendanceRequestController;
+use App\Http\Controllers\ClassDocumentationController;
+use App\Http\Controllers\AttendanceReportController;
+use App\Http\Controllers\ParticipantAccessController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,12 +36,28 @@ use App\Http\Controllers\FormEvaluasiController;
 |--------------------------------------------------------------------------
 */
 
-// Authentication
+// Authentication (Admin Penyelenggara)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ==============================================================
+// PORTAL PRESENSI PESERTA DIKLAT (SEPARATE & MOBILE-OPTIMIZED)
+// ==============================================================
+Route::get('/presensi/login', [ParticipantAuthController::class, 'showLoginForm'])->name('portal.login');
+Route::post('/presensi/login', [ParticipantAuthController::class, 'login'])->name('portal.login.post');
+Route::post('/presensi/logout', [ParticipantAuthController::class, 'logout'])->name('portal.logout');
+
+Route::middleware(\App\Http\Middleware\EnsureParticipantAuth::class)->prefix('presensi')->name('portal.')->group(function () {
+    Route::get('/', [ParticipantPortalController::class, 'dashboard'])->name('dashboard');
+    Route::get('/scan', [ParticipantPortalController::class, 'scan'])->name('scan');
+    Route::post('/scan', [ParticipantPortalController::class, 'submitScan'])->name('scan.post');
+    Route::get('/riwayat', [ParticipantPortalController::class, 'riwayat'])->name('riwayat');
+    Route::get('/pengajuan', [ParticipantPortalController::class, 'pengajuan'])->name('pengajuan');
+    Route::post('/pengajuan', [ParticipantPortalController::class, 'submitPengajuan'])->name('pengajuan.post');
+});
 
 // Protected Routes (Penyelenggara)
 Route::middleware('auth')->group(function () {
@@ -66,6 +90,45 @@ Route::middleware('auth')->group(function () {
     Route::resource('sikap-form', AspekPenilaianSikapController::class);
     Route::patch('sikap-form/{sikap_form}/toggle', [AspekPenilaianSikapController::class, 'toggle'])->name('sikap-form.toggle');
     Route::resource('evaluasi-form', FormEvaluasiController::class);
+
+    // ==============================================================
+    // MODUL PRESENSI HYBRID KCLC (SESI, QR, MANUAL, IZIN, DOKUMENTASI)
+    // ==============================================================
+    Route::prefix('presensi-admin')->name('presensi.')->group(function () {
+        Route::get('/dashboard', [AttendanceReportController::class, 'index'])->name('dashboard');
+        Route::get('/rekap', [AttendanceReportController::class, 'rekap'])->name('rekap');
+        Route::get('/export/excel', [AttendanceReportController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/export/pdf', [AttendanceReportController::class, 'exportPdf'])->name('export.pdf');
+    });
+
+    // Sesi Presensi & QR Code
+    Route::resource('attendance-sessions', AttendanceSessionController::class);
+    Route::post('attendance-sessions/{attendance_session}/activate', [AttendanceSessionController::class, 'activate'])->name('attendance-sessions.activate');
+    Route::post('attendance-sessions/{attendance_session}/close', [AttendanceSessionController::class, 'close'])->name('attendance-sessions.close');
+    Route::get('attendance-sessions/{attendance_session}/qr-display', [AttendanceSessionController::class, 'qrDisplay'])->name('attendance-sessions.qr_display');
+    Route::get('attendance-sessions/{attendance_session}/qr-token', [AttendanceSessionController::class, 'getLatestQrToken'])->name('attendance-sessions.qr_token');
+
+    // Presensi Manual Admin
+    Route::get('attendance-sessions/{attendance_session}/manual', [AttendanceManualController::class, 'index'])->name('attendance-manual.index');
+    Route::post('attendance-sessions/{attendance_session}/manual', [AttendanceManualController::class, 'updateSingle'])->name('attendance-manual.update');
+    Route::post('attendance-sessions/{attendance_session}/manual-bulk', [AttendanceManualController::class, 'bulkUpdate'])->name('attendance-manual.bulk');
+    Route::get('attendance-sessions/{attendance_session}/logs/{peserta}', [AttendanceManualController::class, 'getLogs'])->name('attendance-manual.logs');
+
+    // Pengajuan Izin / Sakit / Dispensasi & Bukti
+    Route::get('attendance-requests', [AttendanceRequestController::class, 'index'])->name('attendance-requests.index');
+    Route::post('attendance-requests/{attendance_request}/verify', [AttendanceRequestController::class, 'verify'])->name('attendance-requests.verify');
+    Route::get('attendance-evidences/{evidence}', [AttendanceRequestController::class, 'downloadEvidence'])->name('attendance-evidences.download');
+
+    // Dokumentasi Foto Kegiatan
+    Route::get('class-documentations', [ClassDocumentationController::class, 'index'])->name('class-documentations.index');
+    Route::post('class-documentations', [ClassDocumentationController::class, 'store'])->name('class-documentations.store');
+    Route::get('class-documentations/{class_documentation}/view', [ClassDocumentationController::class, 'viewFile'])->name('class-documentations.view');
+    Route::delete('class-documentations/{class_documentation}', [ClassDocumentationController::class, 'destroy'])->name('class-documentations.destroy');
+
+    // Manajemen Kode Akses & PIN Peserta
+    Route::get('participant-access-codes', [ParticipantAccessController::class, 'index'])->name('participant-access.index');
+    Route::post('participant-access-codes/massal', [ParticipantAccessController::class, 'generateMassal'])->name('participant-access.massal');
+    Route::post('participant-access-codes/{peserta}/reset', [ParticipantAccessController::class, 'resetPin'])->name('participant-access.reset');
 
     // 6. Mata Pelatihan
     Route::resource('mata-pelatihan', MataPelatihanController::class);

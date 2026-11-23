@@ -37,4 +37,19 @@ class Peserta extends Model
     {
         return $this->hasMany(Presensi::class, 'peserta_id');
     }
+
+    public function accessCode()
+    {
+        return $this->hasOne(ParticipantAccessCode::class, 'peserta_id');
+    }
+
+    public function requests()
+    {
+        return $this->hasMany(AttendanceRequest::class, 'peserta_id');
+    }
+
+    public function logs()
+    {
+        return $this->hasMany(AttendanceLog::class, 'peserta_id');
+    }
 }

@@ -318,6 +318,16 @@ class KCLCScreenshotSeeder extends Seeder
                     'waktu_presensi' => '07:55:00',
                 ]
             );
+
+            // Kode Akses & PIN Peserta Portal
+            \App\Models\ParticipantAccessCode::firstOrCreate(
+                ['peserta_id' => $peserta->id],
+                [
+                    'kode_peserta' => 'PST-2026-' . str_pad($peserta->id, 4, '0', STR_PAD_LEFT),
+                    'pin_hash' => \Illuminate\Support\Facades\Hash::make('123456'),
+                    'is_active' => true,
+                ]
+            );
         }
 
         // 6. Aspek Penilaian Sikap (Sesuai Gambar 6 & 7)
