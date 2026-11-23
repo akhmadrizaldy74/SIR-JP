@@ -753,7 +753,7 @@
         <div class="text-muted small">Ringkasan aktivitas setiap pelatihan</div>
     </div>
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" style="border-collapse: separate; border-spacing: 0;">
+        <table class="table table-hover align-middle mb-0" id="tableStatistikPelatihan" style="border-collapse: separate; border-spacing: 0;">
             <thead style="background-color: #F8FAFC;">
                 <tr class="text-dark fw-bold" style="font-size: 0.9rem;">
                     <th class="ps-3 py-3" style="border-top-left-radius: 8px; border-bottom: 1px solid #E2E8F0;">Pelatihan</th>
@@ -766,9 +766,9 @@
                     <th class="text-center pe-3 py-3" style="border-top-right-radius: 8px; border-bottom: 1px solid #E2E8F0;">Evaluasi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="tbodyStatistikPelatihan">
                 @foreach($pelatihanStats as $ps)
-                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                    <tr class="pelatihan-stat-row" style="border-bottom: 1px solid #F1F5F9;">
                         <td class="ps-3 py-3 text-dark fw-semibold" style="font-size: 0.925rem;">
                             {{ $ps['nama'] }}
                         </td>
@@ -799,6 +799,28 @@
                 @endforeach
             </tbody>
         </table>
+    </div>
+
+    <!-- Footer Controls: Dropdown Opsi 5 / 10 & Pagination Sesuai Permintaan User -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pt-3 mt-2 border-top">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="text-muted small fw-medium">Tampilkan:</span>
+            <select id="selectPelatihanPerPage" class="form-select form-select-sm" style="width: 80px; border-color: #CBD5E1; font-weight: 600;">
+                <option value="5" selected>5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="all">Semua</option>
+            </select>
+            <span class="text-muted small">data per halaman</span>
+            <span class="text-muted small ms-2 border-start ps-2" id="pelatihanTableInfo">
+                Menampilkan 1 s/d 5 dari {{ count($pelatihanStats) }} data
+            </span>
+        </div>
+        <div id="pelatihanPaginationWrapper">
+            <ul class="pagination pagination-sm mb-0 gap-1" id="pelatihanPaginationList">
+                <!-- Diisi via JavaScript -->
+            </ul>
+        </div>
     </div>
 </div>
 
@@ -1439,6 +1461,121 @@ document.addEventListener('DOMContentLoaded', function () {
                 cutout: '70%'
             }
         });
+    }
+
+    // ==============================================================
+    // PAGINATION INTERAKTIF: STATISTIK PELATIHAN (DROPDOWN 5 / 10 / DLL)
+    // ==============================================================
+    const rows = Array.from(document.querySelectorAll('.pelatihan-stat-row'));
+    const selectPerPage = document.getElementById('selectPelatihanPerPage');
+    const tableInfo = document.getElementById('pelatihanTableInfo');
+    const paginationList = document.getElementById('pelatihanPaginationList');
+
+    if (rows.length > 0 && selectPerPage && paginationList) {
+        let currentPage = 1;
+        // Default 5 baris sesuai permintaan user
+        let perPageSetting = localStorage.getItem('kclc_pelatihan_per_page');
+        let perPage = perPageSetting ? (perPageSetting === 'all' ? 'all' : parseInt(perPageSetting)) : 5;
+        
+        if (['5', '10', '25', 'all'].includes(String(perPageSetting))) {
+            selectPerPage.value = perPageSetting;
+        } else {
+            perPage = 5;
+            selectPerPage.value = '5';
+        }
+
+        function renderPelatihanTable() {
+            const totalRows = rows.length;
+            const effectivePerPage = (perPage === 'all' || perPage >= totalRows) ? totalRows : perPage;
+            const totalPages = effectivePerPage > 0 ? Math.ceil(totalRows / effectivePerPage) : 1;
+
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            if (currentPage < 1) {
+                currentPage = 1;
+            }
+
+            const startIdx = (currentPage - 1) * effectivePerPage;
+            const endIdx = effectivePerPage === totalRows ? totalRows : Math.min(startIdx + effectivePerPage, totalRows);
+
+            // Tampilkan / Sembunyikan baris
+            rows.forEach((row, index) => {
+                if (index >= startIdx && index < endIdx) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Update keterangan info
+            if (tableInfo) {
+                if (totalRows === 0) {
+                    tableInfo.textContent = 'Tidak ada data';
+                } else {
+                    tableInfo.textContent = `Menampilkan ${startIdx + 1} s/d ${endIdx} dari ${totalRows} data`;
+                }
+            }
+
+            // Render tombol navigasi pagination
+            paginationList.innerHTML = '';
+            if (totalPages <= 1) {
+                return;
+            }
+
+            // Tombol Prev
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<button type="button" class="page-link py-1 px-2.5 text-dark small" style="border-radius: 4px;" ${currentPage === 1 ? 'disabled' : ''}>Prev</button>`;
+            prevLi.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderPelatihanTable();
+                }
+            });
+            paginationList.appendChild(prevLi);
+
+            // Angka Halaman
+            for (let i = 1; i <= totalPages; i++) {
+                const pageLi = document.createElement('li');
+                const isActive = (i === currentPage);
+                pageLi.className = `page-item ${isActive ? 'active' : ''}`;
+                pageLi.innerHTML = `<button type="button" class="page-link py-1 px-2.5 small fw-semibold" style="border-radius: 4px; ${isActive ? 'background-color: #2563EB; border-color: #2563EB; color: #FFFFFF;' : 'color: #1E293B;'}">${i}</button>`;
+                pageLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (currentPage !== i) {
+                        currentPage = i;
+                        renderPelatihanTable();
+                    }
+                });
+                paginationList.appendChild(pageLi);
+            }
+
+            // Tombol Next
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<button type="button" class="page-link py-1 px-2.5 text-dark small" style="border-radius: 4px;" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+            nextLi.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderPelatihanTable();
+                }
+            });
+            paginationList.appendChild(nextLi);
+        }
+
+        selectPerPage.addEventListener('change', function() {
+            const val = this.value;
+            perPage = val === 'all' ? 'all' : parseInt(val);
+            localStorage.setItem('kclc_pelatihan_per_page', val);
+            currentPage = 1;
+            renderPelatihanTable();
+        });
+
+        // Inisialisasi awal
+        renderPelatihanTable();
     }
 });
 </script>
