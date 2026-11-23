@@ -24,32 +24,64 @@ class ParticipantPortalController extends Controller
         return Peserta::with(['angkatan.pelatihan', 'kelasMapel.ruangan'])->findOrFail($id);
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $peserta = $this->getAuthenticatedPeserta();
+        $pelatihan = $peserta->angkatan->pelatihan ?? null;
+        $angkatan = $peserta->angkatan ?? null;
 
-        // Cari sesi pembelajaran hari ini yang relevan untuk peserta
-        $today = now()->toDateString();
-        $sessionsToday = AttendanceSession::with(['jadwal.mataPelatihan', 'kelasMapel.ruangan'])
-            ->where('tanggal', $today)
-            ->where(function ($q) use ($peserta) {
-                if ($peserta->kelas_mapel_id) {
-                    $q->where('kelas_mapel_id', $peserta->kelas_mapel_id);
-                }
-                if ($peserta->angkatan_id) {
-                    $q->orWhereHas('kelasMapel', fn($k) => $k->where('angkatan_id', $peserta->angkatan_id))
-                      ->orWhereHas('jadwal.mataPelatihan', fn($m) => $m->where('angkatan_id', $peserta->angkatan_id));
-                }
-            })
+        // Ambil sesi pembelajaran yang relevan untuk peserta
+        $query = AttendanceSession::with([
+            'jadwal.mataPelatihan', 
+            'jadwal.penugasanPengajar.widyaiswara', 
+            'jadwal.penugasanPengajar.narasumber',
+            'kelasMapel.ruangan'
+        ])
+        ->where(function ($q) use ($peserta) {
+            if ($peserta->kelas_mapel_id) {
+                $q->where('kelas_mapel_id', $peserta->kelas_mapel_id);
+            }
+            if ($peserta->angkatan_id) {
+                $q->orWhereHas('kelasMapel', fn($k) => $k->where('angkatan_id', $peserta->angkatan_id))
+                  ->orWhereHas('jadwal.mataPelatihan', fn($m) => $m->where('angkatan_id', $peserta->angkatan_id));
+            }
+        });
+
+        // Filter jadwal jika ada
+        if ($request->filled('filter_tanggal')) {
+            $query->whereDate('tanggal', $request->filter_tanggal);
+        }
+        if ($request->filled('filter_mapel')) {
+            $query->whereHas('jadwal', fn($j) => $j->where('mata_pelatihan_id', $request->filter_mapel));
+        }
+
+        $sessionsList = $query->orderBy('tanggal', 'asc')->orderBy('jam_mulai', 'asc')->get();
+
+        // Fallback jika belum ada sesi terdaftar untuk kelas peserta
+        if ($sessionsList->isEmpty()) {
+            $sessionsList = AttendanceSession::with([
+                'jadwal.mataPelatihan', 
+                'jadwal.penugasanPengajar.widyaiswara', 
+                'jadwal.penugasanPengajar.narasumber',
+                'kelasMapel.ruangan'
+            ])
+            ->where('status', 'Aktif')
+            ->orderBy('tanggal', 'asc')
             ->orderBy('jam_mulai', 'asc')
+            ->take(5)
             ->get();
+        }
 
-        // Ambil presensi peserta untuk sesi-sesi hari ini
-        $sessionIds = $sessionsToday->pluck('id');
+        // Ambil presensi peserta untuk sesi-sesi ini
+        $sessionIds = $sessionsList->pluck('id');
         $presensisToday = Presensi::whereIn('attendance_session_id', $sessionIds)
             ->where('peserta_id', $peserta->id)
             ->get()
             ->keyBy('attendance_session_id');
+
+        // Sesi hari ini untuk backward compatibility
+        $today = now()->toDateString();
+        $sessionsToday = $sessionsList->where('tanggal', $today);
 
         // Ringkasan riwayat keseluruhan peserta
         $totalHadir = Presensi::where('peserta_id', $peserta->id)->where('status_kehadiran', 'Hadir')->count();
@@ -74,8 +106,14 @@ class ParticipantPortalController extends Controller
             ->take(5)
             ->get();
 
+        // Daftar mata pelatihan untuk dropdown filter
+        $mataPelatihans = $angkatan ? $angkatan->mataPelatihans : collect();
+
         return view('portal.dashboard', compact(
             'peserta',
+            'pelatihan',
+            'angkatan',
+            'sessionsList',
             'sessionsToday',
             'presensisToday',
             'totalHadir',
@@ -85,7 +123,8 @@ class ParticipantPortalController extends Controller
             'totalAlpa',
             'totalDispensasi',
             'pendingRequests',
-            'recentPresensis'
+            'recentPresensis',
+            'mataPelatihans'
         ));
     }
 
