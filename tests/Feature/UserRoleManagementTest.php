@@ -359,4 +359,54 @@ class UserRoleManagementTest extends TestCase
         $moocResponse->assertOk();
         $moocResponse->assertSeeText('Pelatihan LMS MOOC', false);
     }
+
+    public function test_administrator_dashboard_displays_kms_lms_and_analytic_charts(): void
+    {
+        $unique = rand(100000, 999999);
+        $user = User::create([
+            'name' => 'Admin Role ' . $unique,
+            'nik' => '320110' . $unique . '0010',
+            'email' => "admin_kms_{$unique}@example.com",
+            'username' => 'admin_kms_' . $unique,
+            'role' => 'admin',
+            'roles' => ['Administrator', 'Penyelenggara'],
+            'status' => 'Aktif',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $this->actingAs($user)->get(route('switch-role', ['role' => 'Administrator']));
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+        $response->assertOk();
+
+        // 1. Verifikasi Section KMS
+        $response->assertSeeText('Knowledge Management System', false);
+        $response->assertSeeText('Total KMS', false);
+        $response->assertSeeText('141', false);
+        $response->assertSeeText('Status Proses', false);
+        $response->assertSeeText('10', false);
+        $response->assertSeeText('Status Disetujui', false);
+        $response->assertSeeText('90', false);
+        $response->assertSeeText('Status Ditolak', false);
+        $response->assertSeeText('25', false);
+        $response->assertSeeText('Status Revisi', false);
+        $response->assertSeeText('15', false);
+        $response->assertSeeText('Status Perbaikan', false);
+
+        // 2. Verifikasi Section LMS
+        $response->assertSeeText('TOTAL INSTRUKTUR', false);
+        $response->assertSeeText('TOTAL MODUL', false);
+        $response->assertSeeText('TOTAL MATERI', false);
+        $response->assertSeeText('TOTAL MEDIA PEMBELAJARAN', false);
+
+        // 3. Verifikasi 4 Charts Analitik
+        $response->assertSeeText('Grafik Jumlah View KMS Berdasarkan Pelatihan', false);
+        $response->assertSeeText('Grafik Prosentase View KMS Berdasarkan Pelatihan', false);
+        $response->assertSeeText('Grafik Prosentase Peserta LMS Berdasarkan Pelatihan', false);
+        $response->assertSeeText('Grafik Jumlah Peserta LMS Berdasarkan Pelatihan', false);
+
+        // 4. Verifikasi Statistik KCLC & SIR-JP
+        $response->assertSeeText('Statistik KCLC Learning Center', false);
+        $response->assertSeeText('Rekapitulasi Jam Pelajaran', false);
+    }
 }
