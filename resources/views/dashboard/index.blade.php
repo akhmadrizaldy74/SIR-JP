@@ -802,23 +802,23 @@
     </div>
 
     <!-- Footer Controls: Dropdown Opsi 5 / 10 & Pagination Sesuai Permintaan User -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pt-3 mt-2 border-top">
-        <div class="d-flex align-items-center gap-2 flex-wrap">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pt-3 mt-2 border-top">
+        <div class="d-flex align-items-center gap-2 text-nowrap flex-wrap">
             <span class="text-muted small fw-medium">Tampilkan:</span>
-            <select id="selectPelatihanPerPage" class="form-select form-select-sm" style="width: 80px; border-color: #CBD5E1; font-weight: 600;">
+            <select id="selectPelatihanPerPage" class="form-select form-select-sm" style="width: 75px; border-color: #CBD5E1; font-weight: 600;">
                 <option value="5" selected>5</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
-                <option value="all">Semua</option>
+                <option value="50">50</option>
             </select>
             <span class="text-muted small">data per halaman</span>
             <span class="text-muted small ms-2 border-start ps-2" id="pelatihanTableInfo">
                 Menampilkan 1 s/d 5 dari {{ count($pelatihanStats) }} data
             </span>
         </div>
-        <div id="pelatihanPaginationWrapper">
-            <ul class="pagination pagination-sm mb-0 gap-1" id="pelatihanPaginationList">
-                <!-- Diisi via JavaScript -->
+        <div id="pelatihanPaginationWrapper" class="flex-shrink-0 ms-auto">
+            <ul class="pagination pagination-sm mb-0 gap-1 flex-nowrap align-items-center" id="pelatihanPaginationList">
+                <!-- Diisi via JavaScript dengan windowing agar rapi dan tidak meluber -->
             </ul>
         </div>
     </div>
@@ -1475,10 +1475,10 @@ document.addEventListener('DOMContentLoaded', function () {
         let currentPage = 1;
         // Default 5 baris sesuai permintaan user
         let perPageSetting = localStorage.getItem('kclc_pelatihan_per_page');
-        let perPage = perPageSetting ? (perPageSetting === 'all' ? 'all' : parseInt(perPageSetting)) : 5;
-        
-        if (['5', '10', '25', 'all'].includes(String(perPageSetting))) {
-            selectPerPage.value = perPageSetting;
+        let perPage = 5;
+        if (['5', '10', '25', '50'].includes(String(perPageSetting))) {
+            perPage = parseInt(perPageSetting);
+            selectPerPage.value = String(perPage);
         } else {
             perPage = 5;
             selectPerPage.value = '5';
@@ -1486,7 +1486,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function renderPelatihanTable() {
             const totalRows = rows.length;
-            const effectivePerPage = (perPage === 'all' || perPage >= totalRows) ? totalRows : perPage;
+            const effectivePerPage = perPage;
             const totalPages = effectivePerPage > 0 ? Math.ceil(totalRows / effectivePerPage) : 1;
 
             if (currentPage > totalPages) {
@@ -1517,7 +1517,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            // Render tombol navigasi pagination
+            // Render tombol navigasi pagination (dengan windowing ellipsis agar rapi & tidak meluber)
             paginationList.innerHTML = '';
             if (totalPages <= 1) {
                 return;
@@ -1526,7 +1526,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Tombol Prev
             const prevLi = document.createElement('li');
             prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-            prevLi.innerHTML = `<button type="button" class="page-link py-1 px-2.5 text-dark small" style="border-radius: 4px;" ${currentPage === 1 ? 'disabled' : ''}>Prev</button>`;
+            prevLi.innerHTML = `<button type="button" class="page-link py-1 px-2.5 text-dark small" style="border-radius: 4px; border: 1px solid #E2E8F0; min-height: 28px;" ${currentPage === 1 ? 'disabled' : ''}>Prev</button>`;
             prevLi.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (currentPage > 1) {
@@ -1536,26 +1536,46 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             paginationList.appendChild(prevLi);
 
-            // Angka Halaman
-            for (let i = 1; i <= totalPages; i++) {
-                const pageLi = document.createElement('li');
-                const isActive = (i === currentPage);
-                pageLi.className = `page-item ${isActive ? 'active' : ''}`;
-                pageLi.innerHTML = `<button type="button" class="page-link py-1 px-2.5 small fw-semibold" style="border-radius: 4px; ${isActive ? 'background-color: #2563EB; border-color: #2563EB; color: #FFFFFF;' : 'color: #1E293B;'}">${i}</button>`;
-                pageLi.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (currentPage !== i) {
-                        currentPage = i;
-                        renderPelatihanTable();
-                    }
-                });
-                paginationList.appendChild(pageLi);
+            // Algoritma Range Windowing (Maksimal 7-8 tombol agar tidak meluber)
+            function getPaginationRange(current, total) {
+                if (total <= 7) {
+                    return Array.from({ length: total }, (_, i) => i + 1);
+                }
+                if (current <= 4) {
+                    return [1, 2, 3, 4, 5, '...', total];
+                }
+                if (current >= total - 3) {
+                    return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+                }
+                return [1, '...', current - 1, current, current + 1, '...', total];
             }
+
+            const range = getPaginationRange(currentPage, totalPages);
+
+            range.forEach(item => {
+                const pageLi = document.createElement('li');
+                if (item === '...') {
+                    pageLi.className = 'page-item disabled';
+                    pageLi.innerHTML = `<span class="page-link py-1 px-2 text-muted border-0 bg-transparent small fw-bold">...</span>`;
+                } else {
+                    const isActive = (item === currentPage);
+                    pageLi.className = `page-item ${isActive ? 'active' : ''}`;
+                    pageLi.innerHTML = `<button type="button" class="page-link py-1 px-2.5 small fw-semibold" style="border-radius: 4px; min-width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; ${isActive ? 'background-color: #0B1727; border-color: #0B1727; color: #FFFFFF;' : 'border: 1px solid #E2E8F0; color: #1E293B;'}">${item}</button>`;
+                    pageLi.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (currentPage !== item) {
+                            currentPage = item;
+                            renderPelatihanTable();
+                        }
+                    });
+                }
+                paginationList.appendChild(pageLi);
+            });
 
             // Tombol Next
             const nextLi = document.createElement('li');
             nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-            nextLi.innerHTML = `<button type="button" class="page-link py-1 px-2.5 text-dark small" style="border-radius: 4px;" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+            nextLi.innerHTML = `<button type="button" class="page-link py-1 px-2.5 text-dark small" style="border-radius: 4px; border: 1px solid #E2E8F0; min-height: 28px;" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
             nextLi.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (currentPage < totalPages) {
@@ -1567,9 +1587,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         selectPerPage.addEventListener('change', function() {
-            const val = this.value;
-            perPage = val === 'all' ? 'all' : parseInt(val);
-            localStorage.setItem('kclc_pelatihan_per_page', val);
+            perPage = parseInt(this.value) || 5;
+            localStorage.setItem('kclc_pelatihan_per_page', String(perPage));
             currentPage = 1;
             renderPelatihanTable();
         });
