@@ -58,6 +58,7 @@ Route::middleware(\App\Http\Middleware\EnsureParticipantAuth::class)->prefix('pr
     Route::get('/riwayat', [ParticipantPortalController::class, 'riwayat'])->name('riwayat');
     Route::get('/pengajuan', [ParticipantPortalController::class, 'pengajuan'])->name('pengajuan');
     Route::post('/pengajuan', [ParticipantPortalController::class, 'submitPengajuan'])->name('pengajuan.post');
+    Route::post('/presensi-mandiri/{sessionId}', [ParticipantPortalController::class, 'submitDirectPresensi'])->name('presensi.direct.post');
 
     // Modul Tugas Peserta
     Route::get('/tugas', [ParticipantTugasController::class, 'index'])->name('tugas.index');
@@ -135,6 +136,7 @@ Route::middleware('auth')->group(function () {
     Route::get('participant-access-codes', [ParticipantAccessController::class, 'index'])->name('participant-access.index');
     Route::post('participant-access-codes/massal', [ParticipantAccessController::class, 'generateMassal'])->name('participant-access.massal');
     Route::post('participant-access-codes/{peserta}/reset', [ParticipantAccessController::class, 'resetPin'])->name('participant-access.reset');
+    Route::post('participant-access-codes/modules', [ParticipantAccessController::class, 'updateModules'])->name('participant-access.modules');
 
     // 6. Mata Pelatihan
     Route::resource('mata-pelatihan', MataPelatihanController::class);

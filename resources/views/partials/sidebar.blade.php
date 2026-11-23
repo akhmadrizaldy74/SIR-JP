@@ -79,7 +79,7 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link-custom py-1 small {{ request()->routeIs('participant-access.*') ? 'active' : '' }}" href="{{ route('participant-access.index') }}">
-                                <i class="bi bi-dash"></i> <span class="nav-text">Kode & PIN Peserta</span>
+                                <i class="bi bi-dash"></i> <span class="nav-text">Hak Akses & PIN Peserta</span>
                             </a>
                         </li>
                     </ul>

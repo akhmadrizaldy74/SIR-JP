@@ -244,4 +244,38 @@ class ParticipantPortalController extends Controller
 
         return redirect()->route('portal.pengajuan')->with('success', 'Pengajuan ' . $request->jenis_pengajuan . ' berhasil dikirim! Menunggu verifikasi admin.');
     }
+
+    /**
+     * Submit Presensi Langsung (Tanpa QR Code) sesuai form template pilihan Hadir, Sakit, Izin, Dispensasi,
+     * Keterangan, dan Bukti Foto / PDF (maks. 2MB).
+     */
+    public function submitDirectPresensi(Request $request, int $sessionId)
+    {
+        $peserta = $this->getAuthenticatedPeserta();
+        $session = AttendanceSession::findOrFail($sessionId);
+
+        $request->validate([
+            'status_kehadiran' => 'required|in:Hadir,Sakit,Izin,Dispensasi',
+            'keterangan'       => 'nullable|string|max:500',
+            'bukti_file'       => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // maks 2MB
+        ], [
+            'status_kehadiran.required' => 'Pilih salah satu status kehadiran.',
+            'bukti_file.max'            => 'Ukuran file bukti maksimal 2 MB.',
+            'bukti_file.mimes'          => 'Format bukti harus berupa Foto (JPG, PNG) atau dokumen PDF.',
+        ]);
+
+        $result = $this->attendanceService->submitDirectAttendance(
+            $peserta,
+            $session,
+            $request->input('status_kehadiran'),
+            $request->input('keterangan'),
+            $request->file('bukti_file')
+        );
+
+        if (!$result['success']) {
+            return redirect()->back()->with('error', $result['message']);
+        }
+
+        return redirect()->back()->with('success', $result['message']);
+    }
 }

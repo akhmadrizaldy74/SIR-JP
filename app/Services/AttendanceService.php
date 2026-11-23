@@ -279,6 +279,107 @@ class AttendanceService
     }
 
     /**
+     * Presensi mandiri peserta via form langsung (tanpa perlu scan QR).
+     * Mendukung pilihan status (Hadir, Sakit, Izin, Dispensasi), keterangan, dan unggah bukti (foto/pdf maks 2MB).
+     */
+    public function submitDirectAttendance(
+        Peserta $peserta,
+        AttendanceSession $session,
+        string $statusKehadiran,
+        ?string $keterangan = null,
+        $uploadedFile = null
+    ): array {
+        if ($session->status !== 'Aktif') {
+            return [
+                'success' => false,
+                'message' => 'Sesi presensi ini belum dibuka atau sudah ditutup oleh panitia.',
+            ];
+        }
+
+        // Cek keterkaitan peserta dengan sesi ini jika dibatasi kelas
+        if ($session->kelas_mapel_id && $peserta->kelas_mapel_id && $session->kelas_mapel_id != $peserta->kelas_mapel_id) {
+            if ($session->kelasMapel && $session->kelasMapel->angkatan_id != $peserta->angkatan_id) {
+                return [
+                    'success' => false,
+                    'message' => 'Anda tidak terdaftar dalam kelas atau angkatan pada sesi pembelajaran ini.',
+                ];
+            }
+        }
+
+        // Cek apakah peserta sudah pernah presensi pada sesi ini
+        $existing = Presensi::where('attendance_session_id', $session->id)
+            ->where('peserta_id', $peserta->id)
+            ->first();
+
+        if ($existing) {
+            return [
+                'success' => false,
+                'message' => 'Anda sudah tercatat melakukan presensi untuk sesi ini (' . $existing->status_kehadiran . ').',
+            ];
+        }
+
+        // Status yang valid
+        $allowed = ['Hadir', 'Sakit', 'Izin', 'Dispensasi'];
+        $status = in_array($statusKehadiran, $allowed) ? $statusKehadiran : 'Hadir';
+
+        // Cek keterlambatan bila status Hadir
+        $now = now();
+        $batasWaktu = null;
+        if ($session->waktu_buka_presensi) {
+            $batasWaktu = $session->waktu_buka_presensi->copy()->addMinutes($session->toleransi_terlambat_menit);
+        } else {
+            $batasWaktu = Carbon::parse($session->tanggal->format('Y-m-d') . ' ' . $session->jam_mulai)->addMinutes($session->toleransi_terlambat_menit);
+        }
+
+        if ($status === 'Hadir' && $batasWaktu && $now->gt($batasWaktu)) {
+            $status = 'Terlambat';
+        }
+
+        // Simpan file bukti jika dilampirkan
+        $buktiPath = null;
+        if ($uploadedFile && $uploadedFile->isValid()) {
+            $fileName = 'bukti_sess_' . $session->id . '_pst_' . $peserta->id . '_' . time() . '.' . $uploadedFile->getClientOriginalExtension();
+            $buktiPath = $uploadedFile->storeAs('presensi_evidence/' . $session->id, $fileName, 'public');
+        }
+
+        return DB::transaction(function () use ($session, $peserta, $status, $keterangan, $buktiPath, $now) {
+            $presensi = Presensi::create([
+                'attendance_session_id' => $session->id,
+                'peserta_id' => $peserta->id,
+                'jadwal_id' => $session->jadwal_id,
+                'kelas_mapel_id' => $session->kelas_mapel_id,
+                'tanggal' => $session->tanggal,
+                'status_kehadiran' => $status,
+                'metode_presensi' => 'Mandiri',
+                'waktu_presensi' => $now->format('H:i:s'),
+                'waktu_check_in' => $now,
+                'keterangan' => $keterangan ?: 'Presensi mandiri peserta via form KCLC',
+                'bukti_file' => $buktiPath,
+            ]);
+
+            // Audit Log
+            AttendanceLog::create([
+                'presensi_id' => $presensi->id,
+                'attendance_session_id' => $session->id,
+                'peserta_id' => $peserta->id,
+                'user_id' => null,
+                'status_sebelum' => null,
+                'status_sesudah' => $status,
+                'alasan_perubahan' => 'Presensi mandiri peserta via form portal',
+                'metode_input' => 'Mandiri',
+                'ip_address' => request()->ip(),
+            ]);
+
+            return [
+                'success' => true,
+                'presensi' => $presensi,
+                'status' => $status,
+                'message' => 'Presensi berhasil dicatat! Status: ' . $status . ' (Waktu: ' . $now->format('H:i:s') . ' WIB)',
+            ];
+        });
+    }
+
+    /**
      * Input atau perbarui kehadiran peserta secara manual oleh Admin/Operator.
      */
     public function recordManualAttendance(

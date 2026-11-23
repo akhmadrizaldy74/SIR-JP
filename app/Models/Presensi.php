@@ -22,6 +22,7 @@ class Presensi extends Model
         'waktu_presensi',
         'waktu_check_in',
         'keterangan',
+        'bukti_file',
         'diinput_oleh',
     ];
 

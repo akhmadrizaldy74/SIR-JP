@@ -19,6 +19,51 @@
     </form>
 </div>
 
+<!-- Card Pengaturan Hak Akses Modul Peserta -->
+<div class="card border-0 shadow-sm rounded-3 p-4 mb-4 bg-white">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h6 class="fw-bold text-dark mb-1"><i class="bi bi-toggles2 text-primary me-2"></i>Kelola Hak Akses Modul Peserta Diklat</h6>
+            <div class="text-muted small">Pilih modul apa saja yang diizinkan tampil dan diakses pada portal peserta. Admin tinggal centang modul yang ingin diberikan ke peserta.</div>
+        </div>
+    </div>
+    <form action="{{ route('participant-access.modules') }}" method="POST">
+        @csrf
+        <div class="row g-3">
+            @php
+                $availableList = [
+                    'presensi' => ['title' => 'Presensi Sesi', 'icon' => 'bi-qr-code', 'desc' => 'Absen mandiri tiap sesi'],
+                    'tugas'    => ['title' => 'Tugas Diklat', 'icon' => 'bi-check-square-fill', 'desc' => 'Tugas individu & kelompok'],
+                    'materi'   => ['title' => 'Materi Pembelajaran', 'icon' => 'bi-journal-text', 'desc' => 'Download materi & slide'],
+                    'pretest'  => ['title' => 'Pre Test', 'icon' => 'bi-question-circle', 'desc' => 'Ujian awal sebelum materi'],
+                    'kuis'     => ['title' => 'Kuis', 'icon' => 'bi-chat-left-dots-fill', 'desc' => 'Kuis latihan pemahaman'],
+                    'postest'  => ['title' => 'Pos Test', 'icon' => 'bi-file-earmark-check-fill', 'desc' => 'Evaluasi akhir materi'],
+                    'ujian'    => ['title' => 'Ujian', 'icon' => 'bi-pencil-square', 'desc' => 'Ujian komprehensif diklat'],
+                    'seminar'  => ['title' => 'Seminar', 'icon' => 'bi-easel-fill', 'desc' => 'Jadwal seminar / rancangan'],
+                ];
+            @endphp
+            @foreach($availableList as $key => $mod)
+            <div class="col-6 col-md-3">
+                <div class="border rounded-3 p-3 h-100 {{ in_array($key, $activeModules) ? 'bg-primary-subtle border-primary' : 'bg-light' }}">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" name="modules[]" value="{{ $key }}" id="mod_{{ $key }}" {{ in_array($key, $activeModules) ? 'checked' : '' }}>
+                        <label class="form-check-label fw-bold text-dark small" for="mod_{{ $key }}">
+                            <i class="bi {{ $mod['icon'] }} me-1"></i> {{ $mod['title'] }}
+                        </label>
+                    </div>
+                    <div class="text-muted small" style="font-size: 0.72rem;">{{ $mod['desc'] }}</div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        <div class="mt-3 text-end">
+            <button type="submit" class="btn btn-primary btn-sm px-4 fw-semibold rounded-2">
+                <i class="bi bi-save me-1"></i> Simpan Hak Akses Peserta
+            </button>
+        </div>
+    </form>
+</div>
+
 <!-- Filter Bar -->
 <div class="card border-0 shadow-sm rounded-3 p-3 mb-4 bg-white">
     <form method="GET" action="{{ route('participant-access.index') }}" class="row g-2 align-items-end">

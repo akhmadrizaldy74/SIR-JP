@@ -212,14 +212,90 @@
 
         <!-- Section MENU -->
         <div class="sidebar-section-label">MENU</div>
+        @php
+            $allowedModules = json_decode(\App\Models\Pengaturan::get('participant_modules', '["presensi","tugas","materi"]'), true) ?? ['presensi', 'tugas'];
+        @endphp
         <ul class="portal-sidebar-nav flex-column mb-auto">
             <li class="nav-item">
-                <a class="nav-link-custom {{ request()->routeIs('portal.dashboard') ? 'active' : '' }}" href="{{ route('portal.dashboard') }}">
+                <a class="nav-link-custom {{ request()->routeIs('portal.dashboard') && !request()->routeIs('portal.tugas.*') ? 'active' : '' }}" href="{{ route('portal.dashboard') }}">
                     <i class="bi bi-grid-fill"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
-            <li class="nav-item mt-2">
+
+            @if(in_array('presensi', $allowedModules))
+            <li class="nav-item">
+                <a class="nav-link-custom" href="{{ route('portal.dashboard') }}#areaJadwalSesi">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Presensi</span>
+                </a>
+            </li>
+            @endif
+
+            @if(in_array('tugas', $allowedModules))
+            <li class="nav-item">
+                <a class="nav-link-custom {{ request()->routeIs('portal.tugas.*') ? 'active' : '' }}" href="{{ route('portal.tugas.index') }}">
+                    <i class="bi bi-check-square"></i>
+                    <span>Tugas</span>
+                </a>
+            </li>
+            @endif
+
+            @if(in_array('materi', $allowedModules))
+            <li class="nav-item">
+                <a class="nav-link-custom" href="javascript:void(0)" onclick="Swal.fire('Materi Pembelajaran', 'Materi dan modul pembelajaran siap diakses pada menu aktifitas.', 'info');">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Materi</span>
+                </a>
+            </li>
+            @endif
+
+            @if(in_array('pretest', $allowedModules))
+            <li class="nav-item">
+                <a class="nav-link-custom" href="javascript:void(0)" onclick="Swal.fire('Pre Test', 'Pre Test telah diaktifkan oleh panitia penyelenggara.', 'info');">
+                    <i class="bi bi-question-circle"></i>
+                    <span>Pre Test</span>
+                </a>
+            </li>
+            @endif
+
+            @if(in_array('kuis', $allowedModules))
+            <li class="nav-item">
+                <a class="nav-link-custom" href="javascript:void(0)" onclick="Swal.fire('Kuis', 'Kuis dibuka sesuai jadwal mata pelatihan.', 'info');">
+                    <i class="bi bi-chat-left-dots"></i>
+                    <span>Kuis</span>
+                </a>
+            </li>
+            @endif
+
+            @if(in_array('postest', $allowedModules))
+            <li class="nav-item">
+                <a class="nav-link-custom" href="javascript:void(0)" onclick="Swal.fire('Pos Test', 'Pos Test telah dibuka oleh panitia penyelenggara.', 'info');">
+                    <i class="bi bi-file-earmark-check"></i>
+                    <span>Pos Test</span>
+                </a>
+            </li>
+            @endif
+
+            @if(in_array('ujian', $allowedModules))
+            <li class="nav-item">
+                <a class="nav-link-custom" href="javascript:void(0)" onclick="Swal.fire('Ujian', 'Ujian evaluasi diklat telah diaktifkan.', 'info');">
+                    <i class="bi bi-pencil-square"></i>
+                    <span>Ujian</span>
+                </a>
+            </li>
+            @endif
+
+            @if(in_array('seminar', $allowedModules))
+            <li class="nav-item">
+                <a class="nav-link-custom" href="javascript:void(0)" onclick="Swal.fire('Seminar', 'Jadwal seminar telah diaktifkan.', 'info');">
+                    <i class="bi bi-easel"></i>
+                    <span>Seminar</span>
+                </a>
+            </li>
+            @endif
+
+            <li class="nav-item mt-3 pt-2 border-top border-secondary border-opacity-25">
                 <form action="{{ route('portal.logout') }}" method="POST" id="formLogoutSidebar" onsubmit="return confirm('Apakah Anda yakin ingin keluar dari portal?');">
                     @csrf
                     <button type="submit" class="nav-link-custom bg-transparent border-0 w-100 text-start text-danger">

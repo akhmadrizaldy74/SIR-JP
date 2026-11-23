@@ -8,6 +8,7 @@ use App\Models\Angkatan;
 use App\Models\KelasMapel;
 use App\Models\ParticipantAccessCode;
 use App\Models\LogAktivitas;
+use App\Models\Pengaturan;
 use Illuminate\Http\Request;
 
 class ParticipantAccessController extends Controller
@@ -47,7 +48,19 @@ class ParticipantAccessController extends Controller
         $angkatans = Angkatan::with('pelatihan')->orderBy('nomor_angkatan')->get();
         $kelasMapels = KelasMapel::orderBy('nama_kelas')->get();
 
-        return view('presensi.access_codes.index', compact('pesertas', 'angkatans', 'kelasMapels', 'angkatanId', 'kelasMapelId', 'search'));
+        $activeModules = json_decode(Pengaturan::get('participant_modules', '["presensi","tugas","materi"]'), true) ?? ['presensi', 'tugas'];
+
+        return view('presensi.access_codes.index', compact('pesertas', 'angkatans', 'kelasMapels', 'angkatanId', 'kelasMapelId', 'search', 'activeModules'));
+    }
+
+    public function updateModules(Request $request)
+    {
+        $modules = $request->input('modules', []);
+        Pengaturan::set('participant_modules', json_encode(array_values($modules)), 'Modul yang diizinkan untuk peserta');
+
+        LogAktivitas::catat('Pengaturan', 'Update Akses Modul Peserta', 'Mengubah akses modul peserta: ' . implode(', ', $modules));
+
+        return back()->with('success', 'Hak akses modul portal peserta berhasil diperbarui!');
     }
 
     public function generateMassal(Request $request)

@@ -168,10 +168,17 @@
                         <!-- Right Action: Tombol Presensi Sesuai Gambar -->
                         <div>
                             @if($presensiUser)
-                                <button type="button" class="btn btn-success btn-sm px-3 py-2 rounded-2 fw-semibold shadow-sm d-flex align-items-center gap-1" disabled>
-                                    <i class="bi bi-check2-circle fs-6"></i>
-                                    <span>{{ $presensiUser->status_kehadiran }} ({{ $presensiUser->waktu_check_in ? $presensiUser->waktu_check_in->format('H:i') : 'OK' }})</span>
-                                </button>
+                                <div class="d-flex align-items-center gap-1">
+                                    <button type="button" class="btn btn-success btn-sm px-3 py-2 rounded-2 fw-semibold shadow-sm d-flex align-items-center gap-1" disabled>
+                                        <i class="bi bi-check2-circle fs-6"></i>
+                                        <span>{{ $presensiUser->status_kehadiran }} ({{ $presensiUser->waktu_check_in ? $presensiUser->waktu_check_in->format('H:i') : 'OK' }})</span>
+                                    </button>
+                                    @if($presensiUser->bukti_file)
+                                        <a href="{{ asset('storage/' . $presensiUser->bukti_file) }}" target="_blank" class="btn btn-outline-secondary btn-sm px-2 py-2 rounded-2" title="Lihat Bukti Foto/PDF">
+                                            <i class="bi bi-paperclip"></i>
+                                        </a>
+                                    @endif
+                                </div>
                             @elseif($sess->status === 'Aktif')
                                 <button type="button" class="btn btn-primary btn-sm px-3 py-2 rounded-2 fw-semibold shadow-sm d-flex align-items-center gap-2" 
                                         data-bs-toggle="modal" data-bs-target="#modalPresensi{{ $sess->id }}">
@@ -187,50 +194,120 @@
                     </div>
                 </div>
 
-                <!-- Modal Presensi untuk Pertemuan Ini -->
+                <!-- Modal Presensi Langsung Sesuai Template User (Pilihan Hadir, Keterangan, Bukti Foto/PDF) -->
                 @if(!$presensiUser && $sess->status === 'Aktif')
                 <div class="modal fade" id="modalPresensi{{ $sess->id }}" tabindex="-1" aria-labelledby="modalPresensiLabel{{ $sess->id }}" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
-                            <div class="modal-header bg-primary text-white py-3 px-4">
-                                <h6 class="modal-title fw-bold" id="modalPresensiLabel{{ $sess->id }}">
-                                    <i class="bi bi-person-check me-2"></i> Presensi: Pertemuan {{ $idx + 1 }}
-                                </h6>
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                            <!-- Modal Header Navy -->
+                            <div class="modal-header text-white py-3 px-4" style="background-color: #0B1727;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: rgba(56, 189, 248, 0.2); color: #38BDF8;">
+                                        <i class="bi bi-person-check fs-6"></i>
+                                    </div>
+                                    <h6 class="modal-title fw-bold mb-0 text-white" id="modalPresensiLabel{{ $sess->id }}">
+                                        Form Presensi Peserta: Pertemuan {{ $idx + 1 }}
+                                    </h6>
+                                </div>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body p-4">
-                                <div class="text-center mb-3">
-                                    <h6 class="fw-bold text-dark mb-1">{{ $sess->judul_sesi }}</h6>
-                                    <p class="text-muted small mb-0">{{ substr($sess->jam_mulai, 0, 5) }} - {{ substr($sess->jam_selesai, 0, 5) }} WIB &bull; {{ $ruanganNama }}</p>
-                                </div>
 
-                                <!-- Opsi 1: Scan Kamera HP Langsung -->
-                                <div class="card p-3 border rounded-3 mb-3 text-center bg-light">
-                                    <div class="fw-bold text-dark small mb-1"><i class="bi bi-qr-code-scan text-primary me-1"></i> Scan QR Code Proyektor</div>
-                                    <p class="text-muted small mb-2">Arahkan kamera HP Anda ke QR Code yang sedang berputar di layar kelas</p>
-                                    <a href="{{ route('portal.scan', ['session_id' => $sess->id]) }}" class="btn btn-primary btn-sm px-3 fw-bold rounded-pill">
-                                        <i class="bi bi-camera me-1"></i> Buka Kamera Scanner QR
-                                    </a>
-                                </div>
-
-                                <!-- Opsi 2: Konfirmasi / Input Kode Token Manual -->
-                                <div class="card p-3 border rounded-3 text-center">
-                                    <div class="fw-bold text-dark small mb-1"><i class="bi bi-shield-lock text-warning me-1"></i> Atau Masukkan Token QR</div>
-                                    <form action="{{ route('portal.scan.post') }}" method="POST" class="mt-2 formSubmitToken">
-                                        @csrf
-                                        <div class="input-group input-group-sm mb-2">
-                                            <input type="text" name="qr_payload" class="form-control text-center font-monospace" placeholder="Tempel URL / Token QR di sini" required>
-                                            <button type="submit" class="btn btn-dark fw-semibold">Check-In</button>
+                            <form action="{{ route('portal.presensi.direct.post', $sess->id) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="modal-body p-4">
+                                    <!-- Info Sesi Pembelajaran -->
+                                    <div class="p-3 rounded-3 mb-4 border d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2" style="background-color: #F8FAFC;">
+                                        <div>
+                                            <div class="fw-bold text-dark fs-6">{{ $sess->judul_sesi }}</div>
+                                            <div class="text-secondary small mt-1">
+                                                <i class="bi bi-calendar-event me-1"></i> {{ \Carbon\Carbon::parse($sess->tanggal)->translatedFormat('l, d F Y') }} &bull;
+                                                <i class="bi bi-clock me-1"></i> {{ substr($sess->jam_mulai, 0, 5) }} - {{ substr($sess->jam_selesai, 0, 5) }} WIB
+                                            </div>
                                         </div>
-                                    </form>
+                                        <div class="badge px-3 py-2 rounded-pill bg-primary-subtle text-primary border border-primary-subtle align-self-start align-self-sm-center">
+                                            <i class="bi bi-geo-alt me-1"></i> {{ $ruanganNama }}
+                                        </div>
+                                    </div>
+
+                                    <!-- 4 KOTAK STATUS SESUAI GAMBAR TEMPLATE USER (HADIR, SAKIT, IZIN, DISPENSASI) -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold text-dark small text-uppercase" style="letter-spacing: 0.5px;">
+                                            1. Pilih Status Kehadiran <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="row g-2">
+                                            <!-- Box 1: Hadir -->
+                                            <div class="col-6 col-md-3">
+                                                <input type="radio" class="btn-check" name="status_kehadiran" id="statusHadir{{ $sess->id }}" value="Hadir" checked autocomplete="off">
+                                                <label class="btn btn-outline-primary w-100 p-3 rounded-3 text-center d-flex flex-column align-items-center justify-content-center h-100 border-2" for="statusHadir{{ $sess->id }}">
+                                                    <i class="bi bi-check-circle-fill fs-3 mb-1 text-success"></i>
+                                                    <span class="fw-bold">Hadir</span>
+                                                    <span class="small text-muted" style="font-size: 0.72rem;">Mengikuti Sesi</span>
+                                                </label>
+                                            </div>
+
+                                            <!-- Box 2: Sakit -->
+                                            <div class="col-6 col-md-3">
+                                                <input type="radio" class="btn-check" name="status_kehadiran" id="statusSakit{{ $sess->id }}" value="Sakit" autocomplete="off">
+                                                <label class="btn btn-outline-warning w-100 p-3 rounded-3 text-center d-flex flex-column align-items-center justify-content-center h-100 border-2" for="statusSakit{{ $sess->id }}">
+                                                    <i class="bi bi-heart-pulse-fill fs-3 mb-1 text-warning"></i>
+                                                    <span class="fw-bold text-dark">Sakit</span>
+                                                    <span class="small text-muted" style="font-size: 0.72rem;">Kondisi Sakit</span>
+                                                </label>
+                                            </div>
+
+                                            <!-- Box 3: Izin -->
+                                            <div class="col-6 col-md-3">
+                                                <input type="radio" class="btn-check" name="status_kehadiran" id="statusIzin{{ $sess->id }}" value="Izin" autocomplete="off">
+                                                <label class="btn btn-outline-info w-100 p-3 rounded-3 text-center d-flex flex-column align-items-center justify-content-center h-100 border-2" for="statusIzin{{ $sess->id }}">
+                                                    <i class="bi bi-envelope-paper-fill fs-3 mb-1 text-info"></i>
+                                                    <span class="fw-bold text-dark">Izin</span>
+                                                    <span class="small text-muted" style="font-size: 0.72rem;">Ada Keperluan</span>
+                                                </label>
+                                            </div>
+
+                                            <!-- Box 4: Dispensasi -->
+                                            <div class="col-6 col-md-3">
+                                                <input type="radio" class="btn-check" name="status_kehadiran" id="statusDispensasi{{ $sess->id }}" value="Dispensasi" autocomplete="off">
+                                                <label class="btn btn-outline-secondary w-100 p-3 rounded-3 text-center d-flex flex-column align-items-center justify-content-center h-100 border-2" for="statusDispensasi{{ $sess->id }}">
+                                                    <i class="bi bi-briefcase-fill fs-3 mb-1 text-secondary"></i>
+                                                    <span class="fw-bold text-dark">Dispensasi</span>
+                                                    <span class="small text-muted" style="font-size: 0.72rem;">Tugas Kedinasan</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- KOTAK 5: KETERANGAN SESUAI GAMBAR TEMPLATE USER -->
+                                    <div class="mb-4">
+                                        <label for="keterangan{{ $sess->id }}" class="form-label fw-bold text-dark small text-uppercase" style="letter-spacing: 0.5px;">
+                                            2. Keterangan / Catatan
+                                        </label>
+                                        <textarea name="keterangan" id="keterangan{{ $sess->id }}" rows="2" class="form-control" placeholder="Tuliskan keterangan singkat (wajib diisi apabila izin/sakit/dispensasi)..."></textarea>
+                                    </div>
+
+                                    <!-- KOTAK 6: BUKTI FOTO / PDF SESUAI GAMBAR TEMPLATE USER -->
+                                    <div class="mb-3">
+                                        <label for="buktiFile{{ $sess->id }}" class="form-label fw-bold text-dark small text-uppercase" style="letter-spacing: 0.5px;">
+                                            3. Bukti Kehadiran / Surat Izin (Foto atau PDF)
+                                        </label>
+                                        <input type="file" name="bukti_file" id="buktiFile{{ $sess->id }}" class="form-control" accept="image/*,application/pdf" capture="user">
+                                        <div class="form-text text-muted small mt-1">
+                                            <i class="bi bi-info-circle me-1"></i> Lampirkan foto selfie kehadiran di ruang kelas / tangkapan layar Zoom, atau dokumen surat izin (JPG, PNG, PDF &bull; Maks. 2 MB).
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="text-center mt-3">
-                                    <a href="{{ route('portal.pengajuan') }}" class="text-decoration-none small text-muted">
-                                        <i class="bi bi-file-earmark-medical me-1 text-danger"></i> Berhalangan hadir? Ajukan Izin / Sakit di sini
-                                    </a>
+                                <!-- Modal Footer -->
+                                <div class="modal-footer border-0 px-4 pb-4 pt-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small"><span class="text-danger">*</span> Presensi mandiri tanpa perlu scan QR</span>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-light px-3 fw-medium" data-bs-dismiss="modal">Batal</button>
+                                        <button type="submit" class="btn text-white fw-bold px-4 rounded-2 shadow-sm" style="background-color: #2563EB;">
+                                            <i class="bi bi-send-check me-1"></i> Simpan Presensi
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
