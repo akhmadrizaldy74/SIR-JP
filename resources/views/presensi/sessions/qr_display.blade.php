@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Layar Presensi QR — {{ $attendanceSession->judul_sesi }}</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/logo-kclc.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/images/apple-touch-icon.png') }}">
+
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap-icons.min.css') }}">
 
@@ -48,7 +53,7 @@
     <!-- Top Header Bar -->
     <header class="py-3 px-4 d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-25">
         <div class="d-flex align-items-center gap-3">
-            <span class="badge fw-bold px-3 py-2 text-white fs-5" style="background: linear-gradient(135deg, #F59E0B 0%, #10B981 100%); border-radius: 8px;">KC</span>
+            <img src="{{ asset('assets/images/logo-kclc.png') }}" alt="Logo KC" style="height: 48px; width: 48px; object-fit: contain;">
             <div>
                 <h5 class="mb-0 fw-bold text-white letter-spacing-1">KEMNAKER CORPU LEARNING CENTER</h5>
                 <small class="text-white-50">Sistem Presensi Digital Peserta Diklat PPSDMK</small>

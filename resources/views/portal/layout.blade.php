@@ -6,6 +6,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Portal Presensi Peserta') — KCLC PPSDMK</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/logo-kclc.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/images/apple-touch-icon.png') }}">
+
     <!-- Bootstrap 5 CSS & Bootstrap Icons -->
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap-icons.min.css') }}">
@@ -109,7 +114,7 @@
     <header class="portal-header">
         <div class="container-fluid max-w-md d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
-                <span class="badge fw-bold px-2 py-1 text-white" style="background: linear-gradient(135deg, #F59E0B 0%, #10B981 100%); font-size: 1rem; border-radius: 6px;">KC</span>
+                <img src="{{ asset('assets/images/logo-kclc.png') }}" alt="Logo KC" style="height: 34px; width: 34px; object-fit: contain;" class="flex-shrink-0">
                 <div>
                     <h6 class="mb-0 fw-bold text-white" style="letter-spacing: 0.5px;">KCLC PRESENSI</h6>
                     <small class="text-white-50" style="font-size: 0.7rem;">PPSDM Ketenagakerjaan</small>

@@ -6,6 +6,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Sistem Informasi Rekapitulasi Jam Pelajaran') - SIR-JP</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/logo-kclc.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/images/apple-touch-icon.png') }}">
+
     <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
     <!-- Bootstrap Icons -->

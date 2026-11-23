@@ -6,8 +6,8 @@
 <div class="d-flex flex-column align-items-center justify-content-center pt-4">
     <!-- Logo & Header -->
     <div class="text-center mb-4">
-        <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle shadow-sm mb-3" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); width: 72px; height: 72px;">
-            <span class="badge fw-bold text-white fs-4" style="background: linear-gradient(135deg, #F59E0B 0%, #10B981 100%); border-radius: 8px;">KC</span>
+        <div class="d-inline-flex align-items-center justify-content-center p-2 rounded-4 shadow-sm mb-3 bg-white" style="width: 76px; height: 76px; border: 1px solid #E2E8F0;">
+            <img src="{{ asset('assets/images/logo-kclc.png') }}" alt="Logo KC" style="height: 60px; width: 60px; object-fit: contain;">
         </div>
         <h4 class="fw-bold text-dark mb-1">Portal Presensi Diklat</h4>
         <p class="text-muted small">Kemnaker Corpu Learning Center (KCLC) PPSDMK</p>

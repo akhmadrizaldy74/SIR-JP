@@ -3,7 +3,7 @@
         <a href="{{ route('dashboard') }}" class="sidebar-brand d-flex align-items-center gap-2 text-decoration-none">
             <!-- Logo KC KEMNAKER CORPU Presisi Gambar -->
             <div class="brand-logo-kc d-flex align-items-center">
-                <span class="badge fw-bold px-2 py-1 me-1 text-white" style="background: linear-gradient(135deg, #F59E0B 0%, #10B981 100%); font-size: 1.15rem; letter-spacing: -0.5px; border-radius: 6px;">KC</span>
+                <img src="{{ asset('assets/images/logo-kclc.png') }}" alt="Logo Kemnaker Corpu" style="height: 38px; width: 38px; object-fit: contain;" class="me-2 flex-shrink-0">
                 <div class="d-flex flex-column text-start sidebar-brand-text">
                     <span class="fw-bold text-white lh-1" style="font-size: 0.95rem; letter-spacing: 0.5px;">KEMNAKER CORPU</span>
                     <span class="text-white-50" style="font-size: 0.65rem;">Lebih Cerdas Lebih Unggul</span>

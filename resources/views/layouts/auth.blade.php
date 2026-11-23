@@ -6,6 +6,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Login') - SIR-JP</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/logo-kclc.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/images/apple-touch-icon.png') }}">
+
     <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
     <!-- Bootstrap Icons -->
@@ -58,11 +63,11 @@
 <body>
     <div class="auth-card">
         <div class="auth-header">
-            <div class="auth-logo">
-                <i class="bi bi-clock-history"></i>
+            <div class="auth-logo bg-transparent mb-2" style="width: auto; height: auto;">
+                <img src="{{ asset('assets/images/logo-kclc.png') }}" alt="Logo SIR-JP & KCLC" style="height: 64px; width: 64px; object-fit: contain;">
             </div>
-            <h3 class="fw-bold mb-1">SIR-JP</h3>
-            <p class="text-blue-200 small mb-0" style="color: #93C5FD;">Sistem Informasi Rekapitulasi Jam Pelajaran</p>
+            <h3 class="fw-bold mb-1">SIR-JP & KCLC</h3>
+            <p class="text-blue-200 small mb-0" style="color: #93C5FD;">Sistem Informasi Rekapitulasi Jam Pelajaran & Learning Center</p>
         </div>
         <div class="auth-body">
             @include('partials.alerts')
