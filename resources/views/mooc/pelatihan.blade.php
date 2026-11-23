@@ -17,9 +17,9 @@
             <p class="text-muted small mb-0">Kelola materi mandiri, kursus online, dan modul digital bagi peserta pelatihan.</p>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-primary btn-sm px-3 rounded-3" onclick="Swal.fire('Tambah Pelatihan MOOC', 'Fitur pembuatan modul kursus MOOC baru.', 'info')">
-                <i class="bi bi-plus-lg me-1"></i> Tambah Kursus MOOC
-            </button>
+            <a href="{{ route('pelatihan.create') }}" class="btn btn-primary btn-sm px-3 rounded-3 d-inline-flex align-items-center gap-1">
+                <i class="bi bi-plus-lg"></i> Tambah Kursus MOOC
+            </a>
         </div>
     </div>
 
@@ -32,7 +32,7 @@
                     <th>Kategori</th>
                     <th>Jumlah Angkatan</th>
                     <th>Status</th>
-                    <th class="text-center" style="width: 120px;">Aksi</th>
+                    <th class="text-center" style="width: 140px;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,9 +47,37 @@
                     <td>{{ $item->angkatans_count ?? 0 }} Angkatan</td>
                     <td><span class="badge bg-success-subtle text-success">Aktif</span></td>
                     <td class="text-center">
-                        <button class="btn btn-sm btn-outline-secondary" title="Detail Modul" onclick="Swal.fire('{{ $item->nama_pelatihan }}', 'Modul MOOC dalam proses pembelajaran digital.', 'info')">
-                            <i class="bi bi-eye"></i>
-                        </button>
+                        <div class="d-flex align-items-center justify-content-center gap-2">
+                            <!-- Tombol Edit -->
+                            <a href="{{ route('pelatihan.edit', $item->id) }}" 
+                               class="btn btn-sm d-inline-flex align-items-center justify-content-center" 
+                               style="width: 32px; height: 32px; background-color: #E0F2FE; border: none; border-radius: 6px; color: #0284C7;"
+                               title="Edit Modul Kursus">
+                                <i class="bi bi-pencil-square fs-6"></i>
+                            </a>
+
+                            <!-- Tombol Delete / Tong Sampah (Permintaan User) -->
+                            <button type="button" 
+                                    class="btn btn-sm d-inline-flex align-items-center justify-content-center" 
+                                    style="width: 32px; height: 32px; background-color: #FEE2E2; border: none; border-radius: 6px; color: #DC2626;"
+                                    onclick="confirmDelete('delete-mooc-form-{{ $item->id }}', 'Hapus modul pelatihan {{ addslashes($item->nama_pelatihan) }}?')"
+                                    title="Hapus Modul (Tong Sampah)">
+                                <i class="bi bi-trash3 fs-6"></i>
+                            </button>
+                            <form id="delete-mooc-form-{{ $item->id }}" action="{{ route('pelatihan.destroy', $item->id) }}" method="POST" class="d-none">
+                                @csrf
+                                @method('DELETE')
+                                <input type="hidden" name="redirect_to" value="{{ url()->current() }}">
+                            </form>
+
+                            <!-- Tombol Detail / View -->
+                            <a href="{{ route('pelatihan.show', $item->id) }}" 
+                               class="btn btn-sm d-inline-flex align-items-center justify-content-center" 
+                               style="width: 32px; height: 32px; background-color: #E0F2FE; border: none; border-radius: 6px; color: #0284C7;"
+                               title="Detail Kursus">
+                                <i class="bi bi-eye fs-6"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 @empty

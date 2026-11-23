@@ -35,9 +35,17 @@
                 <p class="text-muted small mb-3">Tersedia bank soal Pre-Test, Kuis 1-4, dan Post-Test.</p>
                 <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                     <span class="text-muted small"><i class="bi bi-question-circle me-1"></i> 25 Butir Soal</span>
-                    <button class="btn btn-sm btn-outline-primary" onclick="Swal.fire('Bank Soal: {{ $p->nama_pelatihan }}', 'Daftar 25 butir soal siap dievaluasi oleh Pengajar.', 'info')">
-                        Kelola Soal
-                    </button>
+                    <div class="d-flex gap-1 align-items-center">
+                        <button class="btn btn-sm" style="width: 32px; height: 32px; background-color: #E0F2FE; color: #0284C7; border: none; border-radius: 6px;" title="Edit Paket Soal" onclick="Swal.fire('Edit Paket Soal', 'Formulir ubah paket soal {{ addslashes($p->nama_pelatihan) }}.', 'info')">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-sm" style="width: 32px; height: 32px; background-color: #FEE2E2; color: #DC2626; border: none; border-radius: 6px;" title="Hapus Paket Soal (Tong Sampah)" onclick="Swal.fire({title: 'Hapus Paket Soal?', text: 'Hapus paket soal {{ addslashes($p->nama_pelatihan) }}?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#DC2626', confirmButtonText: 'Ya, Hapus'})">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary px-2" onclick="Swal.fire('Bank Soal: {{ $p->nama_pelatihan }}', 'Daftar 25 butir soal siap dievaluasi oleh Pengajar.', 'info')">
+                            Kelola
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

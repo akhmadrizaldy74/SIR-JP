@@ -116,14 +116,18 @@ class PelatihanController extends Controller
         return redirect()->route('pelatihan.index')->with('success', 'Data Pelatihan berhasil diperbarui.');
     }
 
-    public function destroy(Pelatihan $pelatihan)
+    public function destroy(Request $request, Pelatihan $pelatihan)
     {
         $nama = $pelatihan->nama_pelatihan;
         $pelatihan->delete();
 
         LogAktivitas::catat('Pelatihan', 'Hapus Data', 'Menghapus data Pelatihan: ' . $nama);
 
-        return redirect()->route('pelatihan.index')->with('success', 'Data Pelatihan berhasil dihapus.');
+        if ($request->filled('redirect_to')) {
+            return redirect($request->input('redirect_to'))->with('success', 'Data Pelatihan ' . $nama . ' berhasil dihapus.');
+        }
+
+        return redirect()->route('pelatihan.index')->with('success', 'Data Pelatihan ' . $nama . ' berhasil dihapus.');
     }
 
     public function toggle(Pelatihan $pelatihan)

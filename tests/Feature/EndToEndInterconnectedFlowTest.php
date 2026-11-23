@@ -156,7 +156,7 @@ class EndToEndInterconnectedFlowTest extends TestCase
         // STEP 8: Daftarkan Peserta Diklat & Presensi Hadir di KCLC
         // -------------------------------------------------------------
         $peserta = Peserta::create([
-            'nip' => '199510102022031' . rand(100, 999),
+            'nip' => substr('199' . time() . rand(10000000, 99999999), 0, 18),
             'nama' => 'Peserta Test E2E ' . $unique,
             'email' => 'peserta' . $unique . '@kemnaker.go.id',
             'jenis_kelamin' => 'Laki-laki',
