@@ -341,8 +341,8 @@
                         <i class="bi bi-person-fill text-secondary fs-5"></i>
                     </div>
                     <div class="text-start d-none d-sm-block">
-                        <div class="fw-bold text-dark lh-1" style="font-size: 0.85rem;">{{ $peserta->nama ?? 'Faizal Haqqi, S.I.P., M.M.' }}</div>
-                        <span class="text-muted" style="font-size: 0.72rem;">peserta_diklat</span>
+                        <div class="fw-bold text-dark lh-1" style="font-size: 0.85rem;">{{ $peserta->nama ?? (auth()->check() ? auth()->user()->name : 'Peserta Diklat') }}</div>
+                        <span class="text-muted" style="font-size: 0.72rem;">{{ auth()->check() && auth()->user()->role ? auth()->user()->role . '_diklat' : 'peserta_diklat' }}</span>
                     </div>
                 </div>
             </div>

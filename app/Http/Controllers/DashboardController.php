@@ -26,6 +26,23 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
+        // Jika pengguna ber-role 'peserta', arahkan ke dashboard portal peserta
+        if (auth()->check() && auth()->user()->role === 'peserta') {
+            $user = auth()->user();
+            $peserta = Peserta::where('nip', $user->nik)->orWhere('email', $user->email)->first();
+            if (!$peserta) {
+                $peserta = Peserta::create([
+                    'nip' => $user->nik,
+                    'nama' => $user->name,
+                    'email' => $user->email,
+                    'jenis_kelamin' => 'Laki-laki',
+                    'instansi' => 'PPSDM Kemnaker',
+                ]);
+            }
+            session(['participant_id' => $peserta->id]);
+            return redirect()->route('portal.dashboard');
+        }
+
         $bulan = (int) $request->get('bulan', Carbon::now()->month);
         $tahun = (int) $request->get('tahun', Carbon::now()->year);
 

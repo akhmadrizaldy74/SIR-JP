@@ -30,6 +30,7 @@ use App\Http\Controllers\AttendanceRequestController;
 use App\Http\Controllers\ClassDocumentationController;
 use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\ParticipantAccessController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -192,6 +193,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/password', [ProfileController::class, 'password'])->name('password');
         Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
     });
+
+    // 14. Manajemen Pengguna Sistem & Peran (Role)
+    Route::resource('users', UserController::class);
 
     // JSON API Endpoints untuk Interaktivitas Dinamis Form
     Route::get('/api/angkatans-by-pelatihan/{pelatihanId}', [PenugasanPengajarController::class, 'getAngkatansByPelatihan']);

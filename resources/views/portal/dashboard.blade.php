@@ -111,8 +111,8 @@
             </h6>
             <div class="text-muted small">
                 Diselenggarakan Tanggal 
-                <strong>{{ $angkatan->tanggal_mulai ? $angkatan->tanggal_mulai->translatedFormat('d F Y') : '23 November 2026' }}</strong> s/d 
-                <strong>{{ $angkatan->tanggal_selesai ? $angkatan->tanggal_selesai->translatedFormat('d F Y') : '4 Desember 2026' }}</strong>
+                <strong>{{ $angkatan?->tanggal_mulai ? $angkatan->tanggal_mulai->translatedFormat('d F Y') : '23 November 2026' }}</strong> s/d 
+                <strong>{{ $angkatan?->tanggal_selesai ? $angkatan->tanggal_selesai->translatedFormat('d F Y') : '4 Desember 2026' }}</strong>
             </div>
         </div>
 

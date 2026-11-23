@@ -205,10 +205,34 @@
                     <span class="nav-text">Laporan (Excel & PDF)</span>
                 </a>
             </li>
+        </ul>
+
+        <!-- ============================================== -->
+        <!-- MANAJEMEN SISTEM & PENGGUNA                    -->
+        <!-- ============================================== -->
+        <div class="sidebar-section-title text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px; color: #94A3B8;">
+            Administrasi & Pengguna
+        </div>
+        <div class="sidebar-section-title pt-0 text-white-50" style="font-size: 0.75rem; font-weight: 700;">
+            MANAJEMEN SISTEM
+        </div>
+        <ul class="nav flex-column mb-3">
+            <li class="nav-item">
+                <a class="nav-link-custom {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                    <i class="bi bi-people-fill"></i>
+                    <span class="nav-text">Kelola Pengguna & Role</span>
+                </a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link-custom {{ request()->routeIs('pengaturan.*') ? 'active' : '' }}" href="{{ route('pengaturan.index') }}">
                     <i class="bi bi-gear-fill"></i>
                     <span class="nav-text">Pengaturan Sistem</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link-custom {{ request()->routeIs('profile.*') ? 'active' : '' }}" href="{{ route('profile.index') }}">
+                    <i class="bi bi-person-circle"></i>
+                    <span class="nav-text">Profil Akun</span>
                 </a>
             </li>
         </ul>

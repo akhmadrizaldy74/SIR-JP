@@ -73,9 +73,12 @@ class ParticipantAuthController extends Controller
     public function logout(Request $request)
     {
         $request->session()->forget('participant_id');
+        if (\Illuminate\Support\Facades\Auth::check()) {
+            \Illuminate\Support\Facades\Auth::logout();
+        }
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('portal.login')->with('info', 'Anda telah berhasil keluar dari Portal Presensi Peserta.');
+        return redirect()->route('login')->with('info', 'Anda telah berhasil keluar dari sistem.');
     }
 }

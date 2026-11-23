@@ -13,6 +13,9 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         if (Auth::check()) {
+            if (Auth::user()->role === 'peserta') {
+                return redirect()->route('portal.dashboard');
+            }
             return redirect()->route('dashboard');
         }
         return view('auth.login');
@@ -57,8 +60,31 @@ class AuthController extends Controller
 
         if ($attempt) {
             $request->session()->regenerate();
+            $user = Auth::user();
 
             LogAktivitas::catat('Autentikasi', 'User Login Berhasil', 'Login menggunakan ' . $loginField . ': ' . $input);
+
+            // Jika peran adalah Peserta, sambungkan ke sesi Peserta dan arahkan ke Dashboard Peserta
+            if ($user->role === 'peserta') {
+                $peserta = \App\Models\Peserta::where('nip', $user->nik)
+                    ->orWhere('email', $user->email)
+                    ->first();
+
+                if (!$peserta) {
+                    $peserta = \App\Models\Peserta::create([
+                        'nip' => $user->nik,
+                        'nama' => $user->name,
+                        'email' => $user->email,
+                        'jenis_kelamin' => 'Laki-laki',
+                        'instansi' => 'PPSDM Kemnaker',
+                    ]);
+                }
+
+                session(['participant_id' => $peserta->id]);
+
+                return redirect()->route('portal.dashboard')
+                    ->with('success', 'Selamat datang di Portal Diklat, ' . $user->name . '!');
+            }
 
             return redirect()->intended(route('dashboard'))
                 ->with('success', 'Selamat datang kembali, ' . Auth::user()->name . '!');
@@ -74,6 +100,9 @@ class AuthController extends Controller
     public function showRegisterForm()
     {
         if (Auth::check()) {
+            if (Auth::user()->role === 'peserta') {
+                return redirect()->route('portal.dashboard');
+            }
             return redirect()->route('dashboard');
         }
         return view('auth.register');

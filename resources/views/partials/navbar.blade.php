@@ -24,7 +24,7 @@
                 </div>
                 <div class="text-start d-none d-sm-block">
                     <div class="fw-bold text-dark lh-1" style="font-size: 0.85rem; letter-spacing: 0.3px;">{{ strtoupper(auth()->user()->name ?? 'AKHMAD RIZALDY') }}</div>
-                    <span class="text-muted" style="font-size: 0.72rem;">{{ auth()->user()->username ?? 'admin_penyelenggara' }}</span>
+                    <span class="text-muted text-capitalize" style="font-size: 0.72rem;">{{ auth()->user()->role ?? 'penyelenggara' }}</span>
                 </div>
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm border py-2" style="min-width: 200px;">
