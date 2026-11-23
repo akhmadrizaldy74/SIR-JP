@@ -46,8 +46,58 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       }
     });
-  });
+  // Animasi Angka Berjalan (Count-Up Animation untuk Statistik Dashboard)
+  initAnimatedCounters();
 });
+
+/**
+ * Animated Number Counter (Count-Up Odometer Engine)
+ * Smooth easing cubic count-up effect for KPI numbers and stat cards
+ */
+function initAnimatedCounters() {
+  const elements = document.querySelectorAll('.counter-animate');
+  if (!elements.length) return;
+
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        animateCounterElement(entry.target);
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  elements.forEach(el => observer.observe(el));
+
+  function animateCounterElement(el) {
+    const raw = (el.getAttribute('data-target') || el.innerText || '').trim();
+    const cleanNumber = raw.replace(/,/g, '');
+    const target = parseFloat(cleanNumber);
+    if (isNaN(target)) return;
+
+    const isThousand = raw.includes(',') || target >= 1000;
+    const duration = 1250; // Durasi animasi 1.25 detik (sangat halus)
+    const startTime = performance.now();
+
+    function step(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Easing cubic out: cepat di awal lalu melambat halus saat mendekati target
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(target * ease);
+
+      el.innerText = isThousand ? current.toLocaleString('en-US') : current;
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.innerText = isThousand ? Math.round(target).toLocaleString('en-US') : Math.round(target);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+}
 
 /**
  * SirAlert - Enterprise Popup Notification & Confirmation System

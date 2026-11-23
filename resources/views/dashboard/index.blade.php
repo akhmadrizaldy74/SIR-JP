@@ -61,7 +61,7 @@
                     </div>
                     <div>
                         <div class="text-muted small fw-medium">Pelatihan Diklat</div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_pelatihan'] }}</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_pelatihan'] }}">{{ $kclcStats['total_pelatihan'] }}</h3>
                     </div>
                 </div>
                 <span class="badge rounded-pill fw-medium" style="background-color: #EEF2FF; color: #4F46E5; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Pelatihan</span>
@@ -78,7 +78,7 @@
                     </div>
                     <div>
                         <div class="text-muted small fw-medium">Kelas</div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_kelas'] }}</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_kelas'] }}">{{ $kclcStats['total_kelas'] }}</h3>
                     </div>
                 </div>
                 <span class="badge rounded-pill fw-medium" style="background-color: #E0F2FE; color: #0284C7; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Kelas</span>
@@ -95,7 +95,7 @@
                     </div>
                     <div>
                         <div class="text-muted small fw-medium">Ruangan</div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_ruangan'] }}</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_ruangan'] }}">{{ $kclcStats['total_ruangan'] }}</h3>
                     </div>
                 </div>
                 <span class="badge rounded-pill fw-medium" style="background-color: #D1FAE5; color: #059669; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Ruangan</span>
@@ -115,7 +115,7 @@
                     </div>
                     <div>
                         <div class="text-muted small fw-medium">Form Aspek Penilaian Sikap</div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_sikap'] }}</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_sikap'] }}">{{ $kclcStats['total_sikap'] }}</h3>
                     </div>
                 </div>
                 <span class="badge rounded-pill fw-medium" style="background-color: #FEF3C7; color: #D97706; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Penilaian</span>
@@ -132,7 +132,7 @@
                     </div>
                     <div>
                         <div class="text-muted small fw-medium">Form Evaluasi</div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_evaluasi'] }}</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_evaluasi'] }}">{{ $kclcStats['total_evaluasi'] }}</h3>
                     </div>
                 </div>
                 <span class="badge rounded-pill fw-medium" style="background-color: #FEE2E2; color: #DC2626; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Evaluasi</span>
@@ -149,7 +149,7 @@
                     </div>
                     <div>
                         <div class="text-muted small fw-medium">Angkatan</div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_angkatan'] }}</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_angkatan'] }}">{{ $kclcStats['total_angkatan'] }}</h3>
                     </div>
                 </div>
                 <span class="badge rounded-pill fw-medium" style="background-color: #EEF2FF; color: #4F46E5; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Angkatan</span>
@@ -168,7 +168,7 @@
                 </div>
                 <div>
                     <div class="text-muted small fw-medium">Pelatihan Diklat</div>
-                    <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_pelatihan'] }}</h3>
+                    <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_pelatihan'] }}">{{ $kclcStats['total_pelatihan'] }}</h3>
                 </div>
             </div>
         </div>
@@ -182,7 +182,7 @@
                 </div>
                 <div>
                     <div class="text-muted small fw-medium">Peserta</div>
-                    <h3 class="fw-bold text-dark mb-0 lh-1">{{ number_format($kclcStats['total_peserta']) }}</h3>
+                    <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_peserta'] }}">{{ number_format($kclcStats['total_peserta']) }}</h3>
                 </div>
             </div>
         </div>
@@ -196,7 +196,7 @@
                 </div>
                 <div>
                     <div class="text-muted small fw-medium">Presensi Hadir</div>
-                    <h3 class="fw-bold text-dark mb-0 lh-1">{{ number_format($kclcStats['total_presensi']) }}</h3>
+                    <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_presensi'] }}">{{ number_format($kclcStats['total_presensi']) }}</h3>
                 </div>
             </div>
         </div>
@@ -210,7 +210,7 @@
                 </div>
                 <div>
                     <div class="text-muted small fw-medium">Evaluasi Selesai</div>
-                    <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['evaluasi_selesai'] }}</h3>
+                    <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['evaluasi_selesai'] }}">{{ $kclcStats['evaluasi_selesai'] }}</h3>
                 </div>
             </div>
         </div>
@@ -334,7 +334,7 @@
                     <i class="bi bi-person-badge"></i>
                 </div>
             </div>
-            <div class="stat-value">{{ $stats['total_widyaiswara'] }}</div>
+            <div class="stat-value counter-animate" data-target="{{ $stats['total_widyaiswara'] }}">{{ $stats['total_widyaiswara'] }}</div>
             <div class="small text-muted mt-1">Pengajar internal aktif</div>
         </div>
     </div>
@@ -348,7 +348,7 @@
                     <i class="bi bi-person-lines-fill"></i>
                 </div>
             </div>
-            <div class="stat-value">{{ $stats['total_narasumber'] }}</div>
+            <div class="stat-value counter-animate" data-target="{{ $stats['total_narasumber'] }}">{{ $stats['total_narasumber'] }}</div>
             <div class="small text-muted mt-1">Pakar eksternal aktif</div>
         </div>
     </div>
@@ -362,7 +362,7 @@
                     <i class="bi bi-mortarboard"></i>
                 </div>
             </div>
-            <div class="stat-value">{{ $stats['total_pelatihan'] }}</div>
+            <div class="stat-value counter-animate" data-target="{{ $stats['total_pelatihan'] }}">{{ $stats['total_pelatihan'] }}</div>
             <div class="small text-muted mt-1">Program terdaftar</div>
         </div>
     </div>
@@ -376,7 +376,7 @@
                     <i class="bi bi-people"></i>
                 </div>
             </div>
-            <div class="stat-value">{{ $stats['total_angkatan'] }}</div>
+            <div class="stat-value counter-animate" data-target="{{ $stats['total_angkatan'] }}">{{ $stats['total_angkatan'] }}</div>
             <div class="small text-muted mt-1">Rombongan belajar</div>
         </div>
     </div>
@@ -390,7 +390,7 @@
                     <i class="bi bi-calendar-check"></i>
                 </div>
             </div>
-            <div class="stat-value">{{ $stats['jadwal_terlaksana_count'] }} <span class="fs-6 fw-normal text-muted">/ {{ $stats['jadwal_bulan_ini_count'] }}</span></div>
+            <div class="stat-value"><span class="counter-animate" data-target="{{ $stats['jadwal_terlaksana_count'] }}">{{ $stats['jadwal_terlaksana_count'] }}</span> <span class="fs-6 fw-normal text-muted">/ {{ $stats['jadwal_bulan_ini_count'] }}</span></div>
             <div class="small text-success mt-1 fw-semibold">{{ $stats['jadwal_terlaksana_count'] }} sesi terlaksana</div>
         </div>
     </div>
@@ -404,7 +404,7 @@
                     <i class="bi bi-stopwatch-fill"></i>
                 </div>
             </div>
-            <div class="stat-value text-primary">{{ $stats['total_jp_terealisasi'] }} <span class="fs-6 fw-normal">JP</span></div>
+            <div class="stat-value text-primary"><span class="counter-animate" data-target="{{ $stats['total_jp_terealisasi'] }}">{{ $stats['total_jp_terealisasi'] }}</span> <span class="fs-6 fw-normal">JP</span></div>
             <div class="small text-muted mt-1">TM: {{ $stats['jp_tatap_muka'] }} | KV: {{ $stats['jp_konversi'] }}</div>
         </div>
     </div>
