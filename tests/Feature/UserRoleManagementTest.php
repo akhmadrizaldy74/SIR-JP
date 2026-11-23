@@ -307,4 +307,56 @@ class UserRoleManagementTest extends TestCase
         $finalResponse->assertOk();
         $finalResponse->assertSeeText('REKAPITULASI JP (SIR-JP)', false);
     }
+
+    public function test_user_can_switch_mode_to_pengajar_and_sidebar_and_dashboard_adjust_to_kclc_pengajar(): void
+    {
+        $unique = rand(100000, 999999);
+        $user = User::create([
+            'name' => 'Akhmad Rizaldy ' . $unique,
+            'nik' => '320109' . $unique . '0009',
+            'email' => "pengajar_{$unique}@example.com",
+            'username' => 'pengajar_' . $unique,
+            'role' => 'penyelenggara',
+            'roles' => ['Administrator', 'Penyelenggara', 'Pengajar'],
+            'status' => 'Aktif',
+            'password' => Hash::make('password123'),
+        ]);
+
+        // Swipe / Ganti mode ke Pengajar
+        $response = $this->actingAs($user)->get(route('switch-role', ['role' => 'Pengajar']));
+        $response->assertRedirect(route('dashboard'));
+
+        $dashboardResponse = $this->actingAs($user)->get(route('dashboard'));
+        $dashboardResponse->assertOk();
+
+        // Verifikasi Navbar Role Subtitle
+        $dashboardResponse->assertSee('pengajar');
+
+        // Verifikasi Sidebar Pengajar (LMS DIKLAT & LMS MOOC)
+        $dashboardResponse->assertSeeText('LMS DIKLAT', false);
+        $dashboardResponse->assertSeeText('LMS MOOC', false);
+        $dashboardResponse->assertSeeText('Pelatihan Diklat', false);
+        $dashboardResponse->assertSeeText('Bank Soal', false);
+        $dashboardResponse->assertSeeText('Riwayat Pelatihan Peserta', false);
+        $dashboardResponse->assertSeeText('Nilai Peserta Ujian Permodul', false);
+
+        // Sidebar Pengajar tidak boleh ada SIR-JP, Manajemen Sistem, Data Widyaiswara
+        $dashboardResponse->assertDontSeeText('REKAPITULASI JP (SIR-JP)', false);
+        $dashboardResponse->assertDontSeeText('MANAJEMEN SISTEM', false);
+        $dashboardResponse->assertDontSeeText('Data Widyaiswara', false);
+
+        // Verifikasi Konten Dashboard Pengajar Sesuai Gambar
+        $dashboardResponse->assertSeeText('Helpdesk', false);
+        $dashboardResponse->assertSeeText('Learning Management System Permohonan', false);
+        $dashboardResponse->assertSeeText('Total LMS', false);
+        $dashboardResponse->assertSeeText('Status Proses', false);
+        $dashboardResponse->assertSeeText('Status Disetujui', false);
+        $dashboardResponse->assertSeeText('Grafik Jumlah Peserta LMS Berdasarkan Pelatihan', false);
+        $dashboardResponse->assertSeeText('Grafik Prosentase Peserta LMS Berdasarkan Pelatihan', false);
+
+        // Verifikasi Akses Menu MOOC
+        $moocResponse = $this->actingAs($user)->get(route('mooc.pelatihan'));
+        $moocResponse->assertOk();
+        $moocResponse->assertSeeText('Pelatihan LMS MOOC', false);
+    }
 }

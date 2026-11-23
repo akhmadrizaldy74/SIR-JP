@@ -9,6 +9,280 @@
 @endsection
 
 @section('content')
+@php
+    $currentActiveRole = auth()->check() ? auth()->user()->getActiveRole() : 'Penyelenggara';
+    $isPengajar = strcasecmp($currentActiveRole, 'Pengajar') === 0;
+@endphp
+
+@if($isPengajar)
+    <!-- ============================================================== -->
+    <!-- TAMPILAN DASHBOARD KHUSUS ROLE PENGAJAR (SESUAI GAMBAR KCLC)    -->
+    <!-- ============================================================== -->
+    <!-- Row: 2 Banners (Dashboard KCLC & Helpdesk) -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-7">
+            <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100 position-relative overflow-hidden">
+                <div class="row align-items-center h-100">
+                    <div class="col-sm-7">
+                        <h4 class="fw-bold text-dark mb-1" style="font-size: 1.35rem; letter-spacing: -0.3px;">Dashboard KCLC Learning Center</h4>
+                        <p class="text-muted mb-0" style="font-size: 0.88rem;">
+                            Platform Pembelajaran Digital Kementerian Ketenagakerjaan
+                        </p>
+                    </div>
+                    <div class="col-sm-5 text-end d-none d-sm-block">
+                        <svg width="200" height="95" viewBox="0 0 240 110" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-height: 95px;">
+                            <circle cx="190" cy="55" r="50" stroke="#E2E8F0" stroke-width="1.2" stroke-dasharray="4 3"/>
+                            <circle cx="190" cy="55" r="75" stroke="#F1F5F9" stroke-width="1.5"/>
+                            <circle cx="190" cy="55" r="100" stroke="#F8FAFC" stroke-width="1.5"/>
+                            <rect x="80" y="74" width="135" height="5" rx="2.5" fill="#475569"/>
+                            <rect x="95" y="79" width="4" height="26" rx="2" fill="#94A3B8"/>
+                            <rect x="195" y="79" width="4" height="26" rx="2" fill="#94A3B8"/>
+                            <rect x="135" y="36" width="46" height="30" rx="4" fill="#0284C7"/>
+                            <rect x="138" y="39" width="40" height="24" rx="2" fill="#E0F2FE"/>
+                            <rect x="156" y="66" width="4" height="8" fill="#64748B"/>
+                            <rect x="148" y="73" width="20" height="2" rx="1" fill="#475569"/>
+                            <circle cx="112" cy="42" r="9" fill="#F59E0B"/>
+                            <path d="M107 40 H117" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M100 66 C100 54, 124 54, 124 66 Z" fill="#059669"/>
+                            <rect x="96" y="64" width="28" height="5" rx="2.5" fill="#10B981"/>
+                            <rect x="108" y="69" width="4" height="18" fill="#64748B"/>
+                            <path d="M100 87 L120 87" stroke="#64748B" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M200 68 C200 62, 206 62, 206 68 Z" fill="#10B981"/>
+                            <rect x="201" y="68" width="4" height="6" rx="1" fill="#F59E0B"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100 position-relative overflow-hidden">
+                <div class="row align-items-center h-100">
+                    <div class="col-sm-8">
+                        <h5 class="fw-bold text-dark mb-1" style="font-size: 1.15rem;">Helpdesk</h5>
+                        <p class="text-muted mb-0" style="font-size: 0.8rem; line-height: 1.45;">
+                            Apabila permohonan Anda belum diproses atau menemukan kendala pada aplikasi, mohon segera menghubungi tim Helpdesk melalui email: <a href="mailto:helpdesk.ppsdm@kemnaker.go.id" class="text-primary text-decoration-none fw-semibold">Kirim Email ke Helpdesk</a>
+                        </p>
+                    </div>
+                    <div class="col-sm-4 text-end d-none d-sm-block">
+                        <svg width="120" height="90" viewBox="0 0 120 90" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-height: 90px;">
+                            <path d="M48 48 C 65 20, 80 35, 95 18" stroke="#1E293B" stroke-width="1.6" stroke-dasharray="3 3" fill="none"/>
+                            <g transform="translate(82, 4) rotate(15)">
+                                <polygon points="0,16 26,0 14,24" fill="#FFFFFF" stroke="#1E293B" stroke-width="2" stroke-linejoin="round"/>
+                                <line x1="14" y1="24" x2="26" y2="0" stroke="#1E293B" stroke-width="2"/>
+                                <polygon points="14,24 8,28 10,21" fill="#E2E8F0" stroke="#1E293B" stroke-width="1.5"/>
+                            </g>
+                            <rect x="10" y="32" width="68" height="46" rx="4" stroke="#1E293B" stroke-width="2.5" fill="#FFFFFF"/>
+                            <path d="M11 34 L43 56 C43.8 56.5 44.8 56.5 45.6 56 L77 34" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="12" y1="76" x2="35" y2="52" stroke="#E2E8F0" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="76" y1="76" x2="53" y2="52" stroke="#E2E8F0" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="22" y1="46" x2="38" y2="46" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="22" y1="54" x2="34" y2="54" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="22" y1="62" x2="48" y2="62" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Learning Management System Permohonan (6 Cards) -->
+    <div class="mb-3">
+        <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #0284C7;">Learning Management System Permohonan</h5>
+    </div>
+    <div class="row row-cols-2 row-cols-md-3 row-cols-xl-6 g-3 mb-4">
+        <!-- Total LMS -->
+        <div class="col">
+            <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+                <div class="text-muted small fw-medium mb-2">Total LMS</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <div class="text-danger small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-down-short"></i></div>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
+                        <i class="bi bi-database"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Status Proses -->
+        <div class="col">
+            <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+                <div class="text-muted small fw-medium mb-2">Status Proses</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <div class="text-danger small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-down-short"></i></div>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Status Disetujui -->
+        <div class="col">
+            <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+                <div class="text-muted small fw-medium mb-2">Status Disetujui</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
+                        <i class="bi bi-check2-square"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Status Ditolak -->
+        <div class="col">
+            <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+                <div class="text-muted small fw-medium mb-2">Status Ditolak</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
+                        <i class="bi bi-x-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Status Revisi -->
+        <div class="col">
+            <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+                <div class="text-muted small fw-medium mb-2">Status Revisi</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Status Perbaikan -->
+        <div class="col">
+            <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+                <div class="text-muted small fw-medium mb-2">Status Perbaikan</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
+                        <i class="bi bi-wrench"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Learning Management System (4 Cards) -->
+    <div class="mb-3">
+        <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem;">Learning Management System</h5>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
+        <!-- Pelatihan -->
+        <div class="col">
+            <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+                <div class="text-muted small fw-medium mb-2">Pelatihan</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_pelatihan'] ?? 0 }}</h3>
+                        <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
+                        <i class="bi bi-database"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Materi -->
+        <div class="col">
+            <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+                <div class="text-muted small fw-medium mb-2">Materi</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Media Pembelajaran -->
+        <div class="col">
+            <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+                <div class="text-muted small fw-medium mb-2">Media Pembelajaran</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Bank Soal -->
+        <div class="col">
+            <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
+                <div class="text-muted small fw-medium mb-2">Bank Soal</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
+                    </div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: 2 Charts Sesuai Gambar KCLC Pengajar -->
+    <div class="row g-4 mb-4">
+        <!-- Chart 1: Grafik Jumlah Peserta LMS Berdasarkan Pelatihan -->
+        <div class="col-lg-6">
+            <div class="card border shadow-sm rounded-4 bg-white h-100">
+                <div class="card-header bg-white border-0 pt-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 0.95rem;">Grafik Jumlah Peserta LMS Berdasarkan Pelatihan</h6>
+                    <button type="button" class="btn btn-sm btn-link text-secondary p-0" title="Menu Grafik">
+                        <i class="bi bi-list fs-5"></i>
+                    </button>
+                </div>
+                <div class="card-body p-4 pt-2">
+                    <canvas id="chartJumlahPesertaLms" height="230"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 2: Grafik Prosentase Peserta LMS Berdasarkan Pelatihan -->
+        <div class="col-lg-6">
+            <div class="card border shadow-sm rounded-4 bg-white h-100">
+                <div class="card-header bg-white border-0 pt-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 0.95rem;">Grafik Prosentase Peserta LMS Berdasarkan Pelatihan</h6>
+                    <button type="button" class="btn btn-sm btn-link text-secondary p-0" title="Menu Grafik">
+                        <i class="bi bi-list fs-5"></i>
+                    </button>
+                </div>
+                <div class="card-body p-4 pt-2">
+                    <canvas id="chartProsentasePesertaLms" height="230"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@else
 <!-- Banner KCLC Learning Center Sesuai Gambar 10 -->
 <div class="card bg-white border-0 shadow-sm rounded-4 mb-4 p-4 position-relative overflow-hidden">
     <div class="row align-items-center">
@@ -601,11 +875,67 @@
         </div>
     </div>
 </div>
+@endif
 @endsection
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // 0. Chart Pengajar (LMS MOOC)
+    const ctxPesertaLms = document.getElementById('chartJumlahPesertaLms');
+    if (ctxPesertaLms) {
+        new Chart(ctxPesertaLms, {
+            type: 'bar',
+            data: {
+                labels: ['Pengantar Kerja PPPK', 'Pengawas Naker', 'Mediator HI', 'Instruktur', 'K3 Listrik'],
+                datasets: [{
+                    label: 'Jumlah Peserta',
+                    data: [143, 112, 104, 98, 76],
+                    backgroundColor: '#0284C7',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 50 }
+                    }
+                }
+            }
+        });
+    }
+
+    const ctxProsentaseLms = document.getElementById('chartProsentasePesertaLms');
+    if (ctxProsentaseLms) {
+        new Chart(ctxProsentaseLms, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pengantar Kerja', 'Pengawas Naker', 'Mediator HI', 'Instruktur', 'Lainnya'],
+                datasets: [{
+                    data: [35, 25, 20, 12, 8],
+                    backgroundColor: ['#0284C7', '#10B981', '#F59E0B', '#6366F1', '#94A3B8'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+    }
     // 1. Chart Bar/Line Bulanan
     const ctxMonthly = document.getElementById('jpMonthlyChart');
     if (ctxMonthly) {

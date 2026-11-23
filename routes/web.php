@@ -31,6 +31,7 @@ use App\Http\Controllers\ClassDocumentationController;
 use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\ParticipantAccessController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\MoocController;
 
 /*
 |--------------------------------------------------------------------------
@@ -197,7 +198,16 @@ Route::middleware('auth')->group(function () {
     // 14. Manajemen Pengguna Sistem & Peran (Role)
     Route::resource('users', UserController::class);
 
-    // 15. Ganti Mode Peran / Swipe Role Dinamis Sesuai KCLC
+    // 15. LMS MOOC (Modul Pengajar & Administrator)
+    Route::prefix('mooc')->name('mooc.')->group(function () {
+        Route::get('/pelatihan', [MoocController::class, 'pelatihan'])->name('pelatihan');
+        Route::get('/bank-soal', [MoocController::class, 'bankSoal'])->name('bank-soal');
+        Route::get('/riwayat', [MoocController::class, 'riwayat'])->name('riwayat');
+        Route::get('/komentar', [MoocController::class, 'komentar'])->name('komentar');
+        Route::get('/nilai-ujian', [MoocController::class, 'nilaiUjian'])->name('nilai-ujian');
+    });
+
+    // 16. Ganti Mode Peran / Swipe Role Dinamis Sesuai KCLC
     Route::get('/switch-role/{role}', [AuthController::class, 'switchRole'])->name('switch-role');
 
     // JSON API Endpoints untuk Interaktivitas Dinamis Form

@@ -4,6 +4,7 @@
         $isAdministrator = strcasecmp($currentActiveRole, 'Administrator') === 0;
         $isPeserta = strcasecmp($currentActiveRole, 'Peserta') === 0 || strcasecmp($currentActiveRole, 'Peserta Diklat') === 0 || (session()->has('participant_id') && !auth()->check());
         $isPenyelenggara = strcasecmp($currentActiveRole, 'Penyelenggara') === 0;
+        $isPengajar = strcasecmp($currentActiveRole, 'Pengajar') === 0;
     @endphp
     <div class="sidebar-header">
         <a href="{{ $isPeserta ? route('portal.dashboard') : route('dashboard') }}" class="sidebar-brand">
@@ -111,6 +112,85 @@
             <ul class="nav flex-column mb-4">
                 <li class="nav-item">
                     <form action="{{ route('portal.logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="nav-link-custom w-100 text-start border-0 bg-transparent text-danger">
+                            <i class="bi bi-power"></i>
+                            <span class="nav-text">Logout</span>
+                        </button>
+                    </form>
+                </li>
+            </ul>
+
+        @elseif($isPengajar)
+            <!-- ============================================================== -->
+            <!-- SIDEBAR KHUSUS PENGAJAR (SESUAI GAMBAR KCLC ROLE PENGAJAR)     -->
+            <!-- ============================================================== -->
+            <div class="sidebar-section-title">
+                MENU
+            </div>
+            <ul class="nav flex-column mb-3">
+                <li class="nav-item">
+                    <a class="nav-link-custom {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                        <i class="bi bi-grid-fill"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- LMS DIKLAT -->
+            <div class="sidebar-section-title pt-0 text-white-50" style="font-size: 0.75rem; font-weight: 700;">
+                LMS DIKLAT
+            </div>
+            <ul class="nav flex-column mb-3">
+                <li class="nav-item">
+                    <a class="nav-link-custom {{ request()->routeIs('pelatihan.*') ? 'active' : '' }}" href="{{ route('pelatihan.index') }}">
+                        <i class="bi bi-grid-fill"></i>
+                        <span class="nav-text">Pelatihan Diklat</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- LMS MOOC -->
+            <div class="sidebar-section-title pt-0 text-white-50" style="font-size: 0.75rem; font-weight: 700;">
+                LMS MOOC
+            </div>
+            <ul class="nav flex-column mb-3">
+                <li class="nav-item">
+                    <a class="nav-link-custom {{ request()->routeIs('mooc.pelatihan') ? 'active' : '' }}" href="{{ route('mooc.pelatihan') }}">
+                        <i class="bi bi-folder2-open"></i>
+                        <span class="nav-text">Pelatihan</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link-custom {{ request()->routeIs('mooc.bank-soal') ? 'active' : '' }}" href="{{ route('mooc.bank-soal') }}">
+                        <i class="bi bi-card-checklist"></i>
+                        <span class="nav-text">Bank Soal</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link-custom {{ request()->routeIs('mooc.riwayat') ? 'active' : '' }}" href="{{ route('mooc.riwayat') }}">
+                        <i class="bi bi-clock-history"></i>
+                        <span class="nav-text">Riwayat Pelatihan Peserta</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link-custom {{ request()->routeIs('mooc.komentar') ? 'active' : '' }}" href="{{ route('mooc.komentar') }}">
+                        <i class="bi bi-chat-dots-fill"></i>
+                        <span class="nav-text">Komentar Pelatihan</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link-custom {{ request()->routeIs('mooc.nilai-ujian') ? 'active' : '' }}" href="{{ route('mooc.nilai-ujian') }}">
+                        <i class="bi bi-briefcase-fill"></i>
+                        <span class="nav-text">Nilai Peserta Ujian Permodul</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-section-title" style="font-size: 0.7rem;">Sesi Pengguna</div>
+            <ul class="nav flex-column mb-4">
+                <li class="nav-item">
+                    <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="nav-link-custom w-100 text-start border-0 bg-transparent text-danger">
                             <i class="bi bi-power"></i>

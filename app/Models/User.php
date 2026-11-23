@@ -50,6 +50,11 @@ class User extends Authenticatable
         return strcasecmp($this->getActiveRole(), 'Administrator') === 0;
     }
 
+    public function isPengajar(): bool
+    {
+        return strcasecmp($this->getActiveRole(), 'Pengajar') === 0;
+    }
+
     public function isPeserta(): bool
     {
         if ($this->role === 'peserta') {
@@ -79,16 +84,16 @@ class User extends Authenticatable
             return ['Peserta'];
         }
 
-        if ($this->role === 'widyaiswara') {
+        if ($this->role === 'widyaiswara' || $this->role === 'pengajar') {
             return ['Pengajar'];
         }
 
         if ($this->role === 'admin') {
-            return ['Administrator', 'Penyelenggara'];
+            return ['Administrator', 'Penyelenggara', 'Pengajar'];
         }
 
         // Default staf administrasi
-        return ['Administrator', 'Penyelenggara'];
+        return ['Administrator', 'Penyelenggara', 'Pengajar'];
     }
 
     /**
@@ -116,6 +121,10 @@ class User extends Authenticatable
 
         if (in_array('Penyelenggara', $available)) {
             return 'Penyelenggara';
+        }
+
+        if (in_array('Pengajar', $available)) {
+            return 'Pengajar';
         }
 
         return $available[0] ?? 'Penyelenggara';
