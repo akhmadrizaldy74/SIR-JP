@@ -23,6 +23,16 @@ class Peserta extends Model
         'golongan',
     ];
 
+    public function getMaskedNipAttribute(): string
+    {
+        return \App\Services\SecurityMaskingService::maskNip($this->nip);
+    }
+
+    public function getMaskedEmailAttribute(): string
+    {
+        return \App\Services\SecurityMaskingService::maskEmail($this->email);
+    }
+
     public function angkatan()
     {
         return $this->belongsTo(Angkatan::class, 'angkatan_id');

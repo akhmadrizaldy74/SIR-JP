@@ -33,6 +33,26 @@ class Widyaiswara extends Model
         return $depan . $this->nama_lengkap . $belakang;
     }
 
+    public function getMaskedNikAttribute(): string
+    {
+        return \App\Services\SecurityMaskingService::maskNik($this->nik);
+    }
+
+    public function getMaskedNipAttribute(): string
+    {
+        return \App\Services\SecurityMaskingService::maskNip($this->nip);
+    }
+
+    public function getMaskedPhoneAttribute(): string
+    {
+        return \App\Services\SecurityMaskingService::maskPhone($this->nomor_telepon);
+    }
+
+    public function getMaskedEmailAttribute(): string
+    {
+        return \App\Services\SecurityMaskingService::maskEmail($this->email);
+    }
+
     public function penugasans()
     {
         return $this->hasMany(PenugasanPengajar::class);

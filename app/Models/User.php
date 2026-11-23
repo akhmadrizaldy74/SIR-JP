@@ -29,6 +29,21 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function getMaskedNikAttribute(): string
+    {
+        return \App\Services\SecurityMaskingService::maskNik($this->nik);
+    }
+
+    public function getMaskedPhoneAttribute(): string
+    {
+        return \App\Services\SecurityMaskingService::maskPhone($this->phone);
+    }
+
+    public function getMaskedEmailAttribute(): string
+    {
+        return \App\Services\SecurityMaskingService::maskEmail($this->email);
+    }
+
     protected function casts(): array
     {
         return [

@@ -43,16 +43,16 @@ use App\Http\Controllers\TahunKurikulumController;
 
 // Authentication (Admin Penyelenggara)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:15,1')->name('login.post');
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1')->name('register.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ==============================================================
 // PORTAL PRESENSI PESERTA DIKLAT (SEPARATE & MOBILE-OPTIMIZED)
 // ==============================================================
 Route::get('/presensi/login', [ParticipantAuthController::class, 'showLoginForm'])->name('portal.login');
-Route::post('/presensi/login', [ParticipantAuthController::class, 'login'])->name('portal.login.post');
+Route::post('/presensi/login', [ParticipantAuthController::class, 'login'])->middleware('throttle:15,1')->name('portal.login.post');
 Route::post('/presensi/logout', [ParticipantAuthController::class, 'logout'])->name('portal.logout');
 
 Route::middleware(\App\Http\Middleware\EnsureParticipantAuth::class)->prefix('presensi')->name('portal.')->group(function () {

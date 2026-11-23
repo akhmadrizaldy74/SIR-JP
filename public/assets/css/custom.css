@@ -705,3 +705,126 @@ div:where(.swal2-container) .swal2-cancel:hover {
 .card:hover .counter-animate {
   transform: scale(1.06);
 }
+
+/* ==========================================================================
+   Comprehensive Mobile & Tablet Responsive Enhancements (Enterprise Grade)
+   ========================================================================== */
+
+/* 1. Touch-Friendly & Smooth Momentum Table Scrolling */
+.table-responsive {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 #F1F5F9;
+  border-radius: 6px;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #F1F5F9;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background-color: #CBD5E1;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background-color: #94A3B8;
+}
+
+/* 2. Breakpoint Tablet & Mobile: Layout Wrapping & Header Adjustments */
+@media (max-width: 991.98px) {
+  .page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  .page-header > div {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb {
+    flex-wrap: wrap;
+  }
+
+  /* Filter rows wrap cleanly */
+  .filter-row,
+  form.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* 3. Mobile Specific Form & Card Optimizations (<= 767.98px) */
+@media (max-width: 767.98px) {
+  .app-navbar {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .card-body {
+    padding: 1rem !important;
+  }
+
+  /* Responsive action buttons inside table tools */
+  .table td .d-flex {
+    flex-wrap: nowrap;
+  }
+
+  /* Input groups expand gracefully */
+  .input-group {
+    max-width: 100% !important;
+  }
+
+  /* Modals fit mobile screens */
+  .modal-dialog {
+    margin: 0.75rem !important;
+    max-width: calc(100% - 1.5rem) !important;
+  }
+
+  .modal-content {
+    border-radius: 12px !important;
+  }
+
+  /* Floating button safe margin */
+  .btn-floating-pen {
+    bottom: 16px;
+    left: 16px;
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Dropdown pagination row on mobile */
+  #pelatihanPaginationWrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+}
+
+/* 4. Small Mobile Screen (< 480px) */
+@media (max-width: 479.98px) {
+  .page-title {
+    font-size: 1.1rem !important;
+  }
+
+  .btn {
+    font-size: 0.8rem;
+  }
+
+  /* Stat cards font reduction */
+  .stat-card h3 {
+    font-size: 1.5rem !important;
+  }
+}
+
