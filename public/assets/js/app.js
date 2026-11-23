@@ -46,6 +46,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       }
     });
+  });
+
   // Animasi Angka Berjalan (Count-Up Animation untuk Statistik Dashboard)
   initAnimatedCounters();
 });
