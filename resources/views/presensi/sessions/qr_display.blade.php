@@ -114,10 +114,32 @@
             </div>
 
             <!-- Petunjuk Peserta -->
-            <div class="mt-4 text-white-50 small">
-                <i class="bi bi-info-circle me-1"></i> Buka browser di HP Anda &rarr; Kunjungi 
-                <strong class="text-info font-monospace">{{ url('/presensi/login') }}</strong> &rarr; 
-                Login Kode Peserta & PIN &rarr; Scan QR Code ini.
+            @php
+                $lanHost = request()->getHost();
+                if (in_array($lanHost, ['localhost', '127.0.0.1', '::1'])) {
+                    $ip = gethostbyname(gethostname());
+                    if ($ip && filter_var($ip, FILTER_VALIDATE_IP) && $ip !== '127.0.0.1') {
+                        $lanHost = $ip;
+                    }
+                }
+                $lanPort = request()->getPort();
+                $portStr = ($lanPort && !in_array($lanPort, [80, 443])) ? ':' . $lanPort : '';
+                $phoneUrl = request()->getScheme() . '://' . $lanHost . $portStr . '/presensi';
+            @endphp
+            <div class="mt-4 p-3 rounded-3 text-start mx-auto" style="background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.15); max-width: 580px;">
+                <div class="fw-bold text-white mb-2 text-center">
+                    <i class="bi bi-phone me-1 text-warning"></i> Panduan Presensi Peserta Lewat HP
+                </div>
+                <div class="small text-white-50 mb-2">
+                    <strong class="text-white">Cara 1 (Paling Cepat):</strong> Buka <strong>Kamera bawaan HP / Google Lens</strong> Anda &rarr; Arahkan ke QR Code di atas &rarr; Ketuk tautan link yang muncul di layar HP.
+                </div>
+                <div class="small text-white-50">
+                    <strong class="text-white">Cara 2 (Lewat Portal):</strong> Buka browser di HP Anda (pastikan terhubung ke Wi-Fi yang sama), ketik:
+                    <div class="my-1 text-center">
+                        <span class="badge bg-dark bg-opacity-75 text-warning font-monospace fs-6 px-3 py-2 border border-warning border-opacity-50 user-select-all">{{ $phoneUrl }}</span>
+                    </div>
+                    Masuk dengan <strong>Kode Peserta</strong> & <strong>PIN</strong> Anda, lalu tekan tombol menu <strong>Scan QR</strong>.
+                </div>
             </div>
         </div>
     </main>

@@ -66,7 +66,8 @@ class ParticipantAuthController extends Controller
         $request->session()->regenerate();
         $request->session()->put('participant_id', $peserta->id);
 
-        return redirect()->route('portal.dashboard')->with('success', 'Selamat datang, ' . $peserta->nama . '!');
+        $intended = $request->session()->pull('url.intended_participant', route('portal.dashboard'));
+        return redirect()->to($intended)->with('success', 'Selamat datang, ' . $peserta->nama . '!');
     }
 
     public function logout(Request $request)

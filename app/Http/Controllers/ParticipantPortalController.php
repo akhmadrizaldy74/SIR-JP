@@ -92,6 +92,16 @@ class ParticipantPortalController extends Controller
     public function scan(Request $request)
     {
         $peserta = $this->getAuthenticatedPeserta();
+
+        // Jika peserta membuka link scan langsung (misal scan lewat kamera bawaan HP)
+        if ($request->filled('token')) {
+            $result = $this->attendanceService->checkInViaQr($peserta, $request->fullUrl());
+            if ($result['success']) {
+                return redirect()->route('portal.dashboard')->with('success', $result['message']);
+            }
+            return redirect()->route('portal.dashboard')->with('error', $result['message']);
+        }
+
         $sessionId = $request->get('session_id');
         $selectedSession = $sessionId ? AttendanceSession::find($sessionId) : null;
 

@@ -119,12 +119,20 @@ class AttendanceService
             'is_active' => true,
         ]);
 
-        // Payload yang dimasukkan ke dalam QR Code
-        $payload = json_encode([
-            'session_id' => $session->id,
-            'token' => $tokenHash,
-            'exp' => $expiredAt->timestamp,
-        ]);
+        // Dapatkan URL scan lengkap agar saat di-scan kamera HP bawaan langsung bisa diklik
+        $host = request()->getHost();
+        $scheme = request()->getScheme();
+        $port = request()->getPort();
+
+        if (in_array($host, ['localhost', '127.0.0.1', '::1'])) {
+            $lanIp = gethostbyname(gethostname());
+            if ($lanIp && filter_var($lanIp, FILTER_VALIDATE_IP) && $lanIp !== '127.0.0.1') {
+                $host = $lanIp;
+            }
+        }
+
+        $portStr = ($port && !in_array($port, [80, 443])) ? ':' . $port : '';
+        $payload = "{$scheme}://{$host}{$portStr}/presensi/scan?session_id={$session->id}&token={$tokenHash}";
 
         return [
             'token_record' => $qrToken,
@@ -139,9 +147,32 @@ class AttendanceService
      */
     public function checkInViaQr(Peserta $peserta, string $qrPayload): array
     {
-        $data = json_decode($qrPayload, true);
-        if (!$data || !isset($data['session_id']) || !isset($data['token'])) {
-            // Coba cek jika payload langsung berupa token string
+        $data = null;
+
+        // Cek jika payload berupa URL (misal scan lewat kamera bawaan HP)
+        if (str_contains($qrPayload, 'token=')) {
+            $query = parse_url($qrPayload, PHP_URL_QUERY);
+            if ($query) {
+                parse_str($query, $parsed);
+                if (!empty($parsed['token'])) {
+                    $data = [
+                        'token' => $parsed['token'],
+                        'session_id' => $parsed['session_id'] ?? null,
+                    ];
+                }
+            }
+        }
+
+        // Cek jika payload berupa JSON
+        if (!$data) {
+            $jsonParsed = json_decode($qrPayload, true);
+            if (is_array($jsonParsed) && isset($jsonParsed['token'])) {
+                $data = $jsonParsed;
+            }
+        }
+
+        // Fallback: anggap sebagai token string langsung
+        if (!$data || empty($data['token'])) {
             $data = ['token' => trim($qrPayload)];
         }
 

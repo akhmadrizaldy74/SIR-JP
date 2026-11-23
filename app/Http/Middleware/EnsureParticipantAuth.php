@@ -17,6 +17,7 @@ class EnsureParticipantAuth
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Sesi login peserta telah berakhir.'], 401);
             }
+            session()->put('url.intended_participant', $request->fullUrl());
             return redirect()->route('portal.login')->with('warning', 'Silakan masuk menggunakan Kode Peserta dan PIN Anda terlebih dahulu.');
         }
 
