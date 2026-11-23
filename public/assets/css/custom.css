@@ -46,8 +46,52 @@ body {
   z-index: 1030;
   display: flex;
   flex-direction: column;
-  transition: width 0.25s ease-in-out, transform 0.25s ease-in-out;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Sidebar Toggle Desktop (Hide / Show Offcanvas Halus) */
+body.sidebar-closed .app-sidebar {
+  transform: translateX(-100%);
+}
+
+body.sidebar-closed .app-main {
+  margin-left: 0 !important;
+}
+
+/* Sidebar Selalu Lebar Penuh (260px) Sesuai KCLC Kemnaker Corpu */
+.app-sidebar {
+  width: var(--sidebar-width) !important;
+}
+
+.sidebar-brand-text,
+.sidebar-section-title,
+.nav-text {
+  display: inline-block !important;
+}
+
+.app-sidebar .sidebar-brand {
+  justify-content: flex-start !important;
+}
+
+.app-sidebar .nav-link-custom {
+  justify-content: flex-start !important;
+  padding: 0.65rem 0.85rem !important;
+}
+
+.app-sidebar .nav-link-custom i {
+  margin-right: 0.5rem !important;
+  font-size: 1.15rem !important;
+}
+
+/* Main Content Area */
+.app-main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-header {
@@ -163,49 +207,6 @@ body {
 .sidebar-footer {
   padding: 1rem 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Sidebar Selalu Lebar Penuh (260px) Sesuai KCLC Kemnaker Corpu */
-.app-sidebar,
-body.sidebar-collapsed .app-sidebar {
-  width: var(--sidebar-width) !important;
-}
-
-.sidebar-brand-text,
-.sidebar-section-title,
-.nav-text,
-body.sidebar-collapsed .sidebar-brand-text,
-body.sidebar-collapsed .sidebar-section-title,
-body.sidebar-collapsed .nav-text {
-  display: inline-block !important;
-}
-
-.app-sidebar .sidebar-brand,
-body.sidebar-collapsed .sidebar-brand {
-  justify-content: flex-start !important;
-}
-
-.app-sidebar .nav-link-custom,
-body.sidebar-collapsed .nav-link-custom {
-  justify-content: flex-start !important;
-  padding: 0.65rem 0.85rem !important;
-}
-
-.app-sidebar .nav-link-custom i,
-body.sidebar-collapsed .nav-link-custom i {
-  margin-right: 0.5rem !important;
-  font-size: 1.15rem !important;
-}
-
-/* Main Content Area */
-.app-main,
-body.sidebar-collapsed .app-main {
-  flex: 1;
-  margin-left: var(--sidebar-width) !important;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  transition: margin-left 0.25s ease-in-out;
 }
 
 /* Top Navbar */

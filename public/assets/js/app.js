@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', function () {
       if (window.innerWidth < 992) {
         sidebar.classList.toggle('show-mobile');
         if (backdrop) backdrop.classList.toggle('show');
+      } else {
+        // Toggle slide-out / slide-in sidebar di laptop/desktop
+        document.body.classList.toggle('sidebar-closed');
       }
     });
   }
