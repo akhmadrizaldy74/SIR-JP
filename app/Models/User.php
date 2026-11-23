@@ -69,11 +69,14 @@ class User extends Authenticatable
     public function getAvailableRoles(): array
     {
         if (is_array($this->roles) && count($this->roles) > 0) {
-            return array_values(array_unique($this->roles));
+            $roles = array_map(function($r) {
+                return (in_array(strtolower($r), ['peserta', 'peserta diklat'])) ? 'Peserta' : $r;
+            }, $this->roles);
+            return array_values(array_unique($roles));
         }
 
         if ($this->role === 'peserta') {
-            return ['Peserta Diklat'];
+            return ['Peserta'];
         }
 
         if ($this->role === 'widyaiswara') {
@@ -97,6 +100,9 @@ class User extends Authenticatable
         $currentSessionRole = session('active_role');
 
         if ($currentSessionRole) {
+            if (in_array(strtolower($currentSessionRole), ['peserta', 'peserta diklat'])) {
+                $currentSessionRole = 'Peserta';
+            }
             foreach ($available as $role) {
                 if (strcasecmp($role, $currentSessionRole) === 0) {
                     return $role;

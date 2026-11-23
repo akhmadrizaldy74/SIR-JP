@@ -118,12 +118,13 @@
                                 @php
                                     $isChecked = false;
                                     if (is_array(old('roles', $user->roles))) {
-                                        $isChecked = in_array($rName, old('roles', $user->roles ?? []));
+                                        $isChecked = in_array($rName, old('roles', $user->roles ?? []))
+                                            || ($rName === 'Peserta' && in_array('Peserta Diklat', old('roles', $user->roles ?? [])));
                                     } elseif ($isEdit) {
                                         // Default fallback jika belum pernah set roles array
-                                        if ($user->role === 'peserta' && in_array($rName, ['Peserta', 'Peserta Diklat'])) {
+                                        if ($user->role === 'peserta' && $rName === 'Peserta') {
                                             $isChecked = true;
-                                        } elseif (in_array($user->role, ['penyelenggara', 'admin']) && in_array($rName, ['Administrator', 'Penyelenggara', 'Evaluasi', 'Kontributor', 'Pengajar', 'Peserta Diklat', 'Penguji', 'Peserta', 'Kurikulum'])) {
+                                        } elseif (in_array($user->role, ['penyelenggara', 'admin']) && in_array($rName, ['Administrator', 'Penyelenggara', 'Evaluasi', 'Kontributor', 'Pengajar', 'Penguji', 'Kurikulum'])) {
                                             $isChecked = true;
                                         } elseif ($user->role === 'widyaiswara' && in_array($rName, ['Pengajar'])) {
                                             $isChecked = true;

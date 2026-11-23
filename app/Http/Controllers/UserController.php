@@ -12,9 +12,9 @@ use Illuminate\Validation\Rule;
 class UserController extends Controller
 {
     public static array $availableRoles = [
-        ['Administrator', 'Pengajar', 'Evaluasi', 'Peserta Diklat'],
+        ['Administrator', 'Pengajar', 'Evaluasi', 'Kurikulum'],
         ['Kontributor', 'Pimpinan', 'Penyelenggara', 'Penguji'],
-        ['Tim Kurasi', 'Peserta', 'Guest', 'Kurikulum'],
+        ['Tim Kurasi', 'Peserta', 'Guest'],
     ];
 
     public static array $availableBidang = [

@@ -194,7 +194,7 @@ class UserRoleManagementTest extends TestCase
         $response->assertSee('Kembali');
         $response->assertSee('Roles');
         $response->assertSee('Administrator');
-        $response->assertSee('Peserta Diklat');
+        $response->assertSee('Peserta');
         $response->assertSee('Penyelenggara');
         $response->assertSee('Bidang');
         $response->assertSee('Pelatihan Kepemimpinan Struktural');
@@ -216,7 +216,7 @@ class UserRoleManagementTest extends TestCase
             'password' => Hash::make('password123'),
         ]);
 
-        $roles = ['Administrator', 'Pengajar', 'Peserta Diklat', 'Penyelenggara'];
+        $roles = ['Administrator', 'Pengajar', 'Peserta', 'Penyelenggara'];
         $bidang = ['Pelatihan Kepemimpinan Struktural', 'Pelatihan Dasar CPNS/PPPK', 'Pelatihan SDM Aparatur'];
 
         $response = $this->actingAs($this->admin)->put(route('users.update', $user->id), [
@@ -284,19 +284,19 @@ class UserRoleManagementTest extends TestCase
             'email' => "multi_portal_{$unique}@example.com",
             'username' => 'multi_portal_' . $unique,
             'role' => 'penyelenggara',
-            'roles' => ['Administrator', 'Penyelenggara', 'Peserta Diklat'],
+            'roles' => ['Administrator', 'Penyelenggara', 'Peserta'],
             'status' => 'Aktif',
             'password' => Hash::make('password123'),
         ]);
 
-        // Swipe / Ganti mode ke Peserta Diklat
-        $response = $this->actingAs($user)->get(route('switch-role', ['role' => 'Peserta Diklat']));
+        // Swipe / Ganti mode ke Peserta
+        $response = $this->actingAs($user)->get(route('switch-role', ['role' => 'Peserta']));
         $response->assertRedirect(route('portal.dashboard'));
 
         $portalResponse = $this->actingAs($user)->get(route('portal.dashboard'));
         $portalResponse->assertOk();
         $portalResponse->assertSee('KEMNAKER CORPU');
-        $portalResponse->assertSee('peserta_diklat');
+        $portalResponse->assertSee('peserta');
         $portalResponse->assertSee('Tugas');
 
         // Beralih kembali dari portal ke mode Administrator
