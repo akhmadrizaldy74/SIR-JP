@@ -17,6 +17,8 @@ class User extends Authenticatable
         'email',
         'phone',
         'role',
+        'roles',
+        'bidang',
         'avatar',
         'status',
         'password',
@@ -32,12 +34,28 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'roles' => 'array',
+            'bidang' => 'array',
         ];
     }
 
     public function isPenyelenggara(): bool
     {
-        return $this->role === 'penyelenggara';
+        return $this->role === 'penyelenggara' || $this->role === 'admin' 
+            || (is_array($this->roles) && (in_array('Administrator', $this->roles) || in_array('Penyelenggara', $this->roles)));
+    }
+
+    public function isPeserta(): bool
+    {
+        if ($this->role === 'peserta') {
+            return true;
+        }
+        if (is_array($this->roles)) {
+            $hasPeserta = in_array('Peserta', $this->roles) || in_array('Peserta Diklat', $this->roles);
+            $hasAdmin = in_array('Administrator', $this->roles) || in_array('Penyelenggara', $this->roles);
+            return $hasPeserta && !$hasAdmin;
+        }
+        return false;
     }
 
     public function logAktivitas()

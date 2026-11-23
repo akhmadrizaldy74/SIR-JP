@@ -11,6 +11,31 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    public static array $availableRoles = [
+        ['Administrator', 'Pengajar', 'Evaluasi', 'Peserta Diklat'],
+        ['Kontributor', 'Pimpinan', 'Penyelenggara', 'Penguji'],
+        ['Tim Kurasi', 'Peserta', 'Guest', 'Kurikulum'],
+    ];
+
+    public static array $availableBidang = [
+        [
+            'Pelatihan Kepemimpinan Struktural',
+            'Pelatihan Bidang Penempatan Tenaga Kerja dan Perluasan Kesempatan Kerja',
+            'Pelatihan Bidang Hubungan Industrial & Jamsos',
+            'Testing Instruktur',
+        ],
+        [
+            'Pelatihan Dasar CPNS/PPPK',
+            'Pelatihan Pengawasan Ketenagakerjaan',
+            'Pelatihan SDM Aparatur',
+        ],
+        [
+            'Pelatihan Bidang Pelatihan Vokasi dan Produktivitas',
+            'Pelatihan Pengujian Keselamatan dan Kesehatan Kerja',
+            'Pelatihan Teknis',
+        ],
+    ];
+
     /**
      * Tampilkan daftar seluruh pengguna sistem & peran (Role).
      */
@@ -32,7 +57,11 @@ class UserController extends Controller
         }
 
         if (!empty($role)) {
-            $query->where('role', $role);
+            $query->where(function ($q) use ($role) {
+                $q->where('role', $role)
+                  ->orWhereJsonContains('roles', $role)
+                  ->orWhereJsonContains('roles', ucfirst($role));
+            });
         }
 
         if (!empty($status)) {
@@ -60,25 +89,69 @@ class UserController extends Controller
     }
 
     /**
+     * Tampilkan form pembuatan pengguna baru.
+     */
+    public function create()
+    {
+        $user = new User();
+        $availableRoles = self::$availableRoles;
+        $availableBidang = self::$availableBidang;
+        $isEdit = false;
+
+        return view('users.edit', compact('user', 'availableRoles', 'availableBidang', 'isEdit'));
+    }
+
+    /**
+     * Tampilkan form edit pengguna dan roles/bidang sesuai sketsa.
+     */
+    public function edit(User $user)
+    {
+        $availableRoles = self::$availableRoles;
+        $availableBidang = self::$availableBidang;
+        $isEdit = true;
+
+        return view('users.edit', compact('user', 'availableRoles', 'availableBidang', 'isEdit'));
+    }
+
+    /**
      * Simpan pengguna baru dengan peran (Role) yang dipilih admin.
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name'     => ['required', 'string', 'max:255'],
-            'nik'      => ['required', 'string', 'size:16', 'unique:users,nik'],
+            'nik'      => ['nullable', 'string', 'max:20', Rule::unique('users', 'nik')],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'role'     => ['required', 'string', 'in:penyelenggara,admin,peserta,widyaiswara'],
-            'status'   => ['required', 'string', 'in:Aktif,Nonaktif'],
+            'username' => ['nullable', 'string', 'max:50', 'unique:users,username'],
+            'role'     => ['nullable', 'string'],
+            'roles'    => ['nullable', 'array'],
+            'bidang'   => ['nullable', 'array'],
+            'status'   => ['nullable', 'string', 'in:Aktif,Nonaktif'],
             'password' => ['required', 'string', 'min:6'],
-        ], [
-            'nik.size' => 'NIK harus tepat 16 digit.',
-            'nik.unique' => 'NIK sudah digunakan oleh akun lain.',
-            'email.unique' => 'Alamat email sudah terdaftar.',
-            'role.in' => 'Peran (Role) tidak valid.',
         ]);
 
-        $username = explode('@', $validated['email'])[0];
+        $rolesInput = $request->input('roles', []);
+        $primaryRole = $request->input('role');
+
+        if (!empty($rolesInput)) {
+            if (in_array('Administrator', $rolesInput) || in_array('Penyelenggara', $rolesInput)) {
+                $primaryRole = 'penyelenggara';
+            } elseif (in_array('Pengajar', $rolesInput)) {
+                $primaryRole = 'widyaiswara';
+            } elseif (in_array('Peserta', $rolesInput) || in_array('Peserta Diklat', $rolesInput)) {
+                $primaryRole = 'peserta';
+            }
+        }
+        if (!$primaryRole) {
+            $primaryRole = 'penyelenggara';
+        }
+
+        $nik = $request->input('nik');
+        if (empty($nik)) {
+            $nik = '10' . substr(str_pad((string) preg_replace('/\D/', '', md5($validated['email'])), 14, '0'), 0, 14);
+        }
+
+        $username = $validated['username'] ?? explode('@', $validated['email'])[0];
         $baseUsername = $username;
         $counter = 1;
         while (User::where('username', $username)->exists()) {
@@ -88,21 +161,23 @@ class UserController extends Controller
 
         $user = User::create([
             'name'     => $validated['name'],
-            'nik'      => $validated['nik'],
+            'nik'      => $nik,
             'email'    => $validated['email'],
             'username' => $username,
-            'role'     => $validated['role'],
-            'status'   => $validated['status'],
+            'role'     => $primaryRole,
+            'roles'    => !empty($rolesInput) ? $rolesInput : [$primaryRole],
+            'bidang'   => $request->input('bidang', []),
+            'status'   => $validated['status'] ?? 'Aktif',
             'password' => Hash::make($validated['password']),
         ]);
 
         // Jika peran peserta, buatkan profil peserta otomatis jika belum ada
-        if ($user->role === 'peserta') {
+        if ($user->role === 'peserta' || $user->isPeserta()) {
             Peserta::firstOrCreate(
-                ['nip' => $user->nik],
+                ['email' => $user->email],
                 [
+                    'nip' => $user->nik,
                     'nama' => $user->name,
-                    'email' => $user->email,
                     'jenis_kelamin' => 'Laki-laki',
                     'instansi' => 'PPSDM Kemnaker',
                 ]
@@ -111,31 +186,57 @@ class UserController extends Controller
 
         LogAktivitas::catat('Manajemen Pengguna', 'Tambah Pengguna Baru', "Menambahkan akun baru: {$user->name} ({$user->nik}) dengan Role: {$user->role}");
 
-        return back()->with('success', "Akun untuk {$user->name} berhasil dibuat dengan Role: {$user->role}!");
+        return redirect()->route('users.index')->with('success', "Akun untuk {$user->name} berhasil dibuat!");
     }
 
     /**
-     * Perbarui data atau ubah peran (Role) pengguna.
+     * Perbarui data atau ubah peran (Role) & bidang pengguna.
      */
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
             'name'     => ['required', 'string', 'max:255'],
-            'nik'      => ['required', 'string', 'size:16', Rule::unique('users')->ignore($user->id)],
-            'email'    => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'role'     => ['required', 'string', 'in:penyelenggara,admin,peserta,widyaiswara'],
-            'status'   => ['required', 'string', 'in:Aktif,Nonaktif'],
+            'nik'      => ['nullable', 'string', 'max:20', Rule::unique('users', 'nik')->ignore($user->id)],
+            'email'    => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'username' => ['nullable', 'string', 'max:50', Rule::unique('users', 'username')->ignore($user->id)],
+            'role'     => ['nullable', 'string'],
+            'roles'    => ['nullable', 'array'],
+            'bidang'   => ['nullable', 'array'],
+            'status'   => ['nullable', 'string', 'in:Aktif,Nonaktif'],
             'password' => ['nullable', 'string', 'min:6'],
-        ], [
-            'nik.size' => 'NIK harus tepat 16 digit.',
-            'role.in' => 'Peran (Role) tidak valid.',
         ]);
 
         $user->name = $validated['name'];
-        $user->nik = $validated['nik'];
+        if (!empty($validated['nik'])) {
+            $user->nik = $validated['nik'];
+        }
         $user->email = $validated['email'];
-        $user->role = $validated['role'];
-        $user->status = $validated['status'];
+        if (!empty($validated['username'])) {
+            $user->username = $validated['username'];
+        }
+
+        if ($request->has('roles')) {
+            $rolesInput = $request->input('roles', []);
+            $user->roles = $rolesInput;
+            if (in_array('Administrator', $rolesInput) || in_array('Penyelenggara', $rolesInput)) {
+                $user->role = 'penyelenggara';
+            } elseif (in_array('Pengajar', $rolesInput)) {
+                $user->role = 'widyaiswara';
+            } elseif (in_array('Peserta', $rolesInput) || in_array('Peserta Diklat', $rolesInput)) {
+                $user->role = 'peserta';
+            }
+        } elseif ($request->filled('role')) {
+            $user->role = $validated['role'];
+            $user->roles = [$validated['role']];
+        }
+
+        if ($request->has('bidang')) {
+            $user->bidang = $request->input('bidang', []);
+        }
+
+        if ($request->filled('status')) {
+            $user->status = $validated['status'];
+        }
 
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
@@ -144,21 +245,21 @@ class UserController extends Controller
         $user->save();
 
         // Jika role diubah menjadi peserta, pastikan data Peserta terhubung
-        if ($user->role === 'peserta') {
+        if ($user->role === 'peserta' || $user->isPeserta()) {
             Peserta::firstOrCreate(
-                ['nip' => $user->nik],
+                ['email' => $user->email],
                 [
+                    'nip' => $user->nik ?: 'NIK-' . substr(md5($user->email), 0, 10),
                     'nama' => $user->name,
-                    'email' => $user->email,
                     'jenis_kelamin' => 'Laki-laki',
                     'instansi' => 'PPSDM Kemnaker',
                 ]
             );
         }
 
-        LogAktivitas::catat('Manajemen Pengguna', 'Ubah Pengguna/Role', "Memperbarui akun {$user->name} menjadi Role: {$user->role}, Status: {$user->status}");
+        LogAktivitas::catat('Manajemen Pengguna', 'Ubah Pengguna/Role', "Memperbarui akun {$user->name} (Role: {$user->role})");
 
-        return back()->with('success', "Data akun {$user->name} berhasil diperbarui (Role: {$user->role})!");
+        return redirect()->route('users.index')->with('success', "Data akun {$user->name} berhasil diperbarui!");
     }
 
     /**

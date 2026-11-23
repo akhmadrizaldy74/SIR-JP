@@ -173,4 +173,68 @@ class UserRoleManagementTest extends TestCase
             'nip' => $nik,
         ]);
     }
+
+    public function test_admin_can_view_edit_users_page_matching_kclc_design(): void
+    {
+        $unique = rand(100000, 999999);
+        $user = User::create([
+            'name' => 'PPSDM Ketenagakerjaan ' . $unique,
+            'nik' => '320105' . $unique . '0005',
+            'email' => "ppsdm_{$unique}@gmail.com",
+            'username' => 'admin_' . $unique,
+            'role' => 'penyelenggara',
+            'status' => 'Aktif',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('users.edit', $user->id));
+
+        $response->assertOk();
+        $response->assertSee('Edit Users');
+        $response->assertSee('Kembali');
+        $response->assertSee('Roles');
+        $response->assertSee('Administrator');
+        $response->assertSee('Peserta Diklat');
+        $response->assertSee('Penyelenggara');
+        $response->assertSee('Bidang');
+        $response->assertSee('Pelatihan Kepemimpinan Struktural');
+        $response->assertSee('Pelatihan Dasar CPNS/PPPK');
+        $response->assertSee('Update');
+        $response->assertSee('Batal');
+    }
+
+    public function test_admin_can_update_user_with_multiple_roles_and_bidang(): void
+    {
+        $unique = rand(100000, 999999);
+        $user = User::create([
+            'name' => 'User Multi ' . $unique,
+            'nik' => '320106' . $unique . '0006',
+            'email' => "multi_{$unique}@gmail.com",
+            'username' => 'multi_' . $unique,
+            'role' => 'penyelenggara',
+            'status' => 'Aktif',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $roles = ['Administrator', 'Pengajar', 'Peserta Diklat', 'Penyelenggara'];
+        $bidang = ['Pelatihan Kepemimpinan Struktural', 'Pelatihan Dasar CPNS/PPPK', 'Pelatihan SDM Aparatur'];
+
+        $response = $this->actingAs($this->admin)->put(route('users.update', $user->id), [
+            'name' => 'PPSDM Ketenagakerjaan Updated',
+            'nik' => $user->nik,
+            'email' => $user->email,
+            'username' => 'admin_upd_' . $unique,
+            'roles' => $roles,
+            'bidang' => $bidang,
+            'status' => 'Aktif',
+        ]);
+
+        $response->assertRedirect(route('users.index'));
+        $response->assertSessionHas('success');
+
+        $user->refresh();
+        $this->assertEquals('PPSDM Ketenagakerjaan Updated', $user->name);
+        $this->assertEquals($roles, $user->roles);
+        $this->assertEquals($bidang, $user->bidang);
+    }
 }

@@ -4,10 +4,10 @@
 @section('page_title', 'Manajemen Pengguna & Role')
 
 @section('page_actions')
-<button type="button" class="btn btn-primary d-flex align-items-center gap-2 rounded-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCreateUser">
+<a href="{{ route('users.create') }}" class="btn btn-primary d-flex align-items-center gap-2 rounded-3 shadow-sm">
     <i class="bi bi-person-plus-fill"></i>
     <span>Tambah Pengguna</span>
-</button>
+</a>
 @endsection
 
 @section('content')
@@ -139,7 +139,20 @@
                             <span class="text-secondary small">{{ $u->email }}</span>
                         </td>
                         <td class="text-center">
-                            @if($u->role === 'peserta')
+                            @if(is_array($u->roles) && count($u->roles) > 0)
+                                <div class="d-flex flex-wrap justify-content-center gap-1">
+                                    @foreach(array_slice($u->roles, 0, 2) as $r)
+                                        <span class="badge rounded-pill px-2 py-1 small" style="background-color: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE;">
+                                            {{ $r }}
+                                        </span>
+                                    @endforeach
+                                    @if(count($u->roles) > 2)
+                                        <span class="badge rounded-pill bg-light text-secondary border px-2 py-1" title="{{ implode(', ', array_slice($u->roles, 2)) }}">
+                                            +{{ count($u->roles) - 2 }}
+                                        </span>
+                                    @endif
+                                </div>
+                            @elseif($u->role === 'peserta')
                                 <span class="badge rounded-pill px-3 py-1 fw-semibold" style="background-color: #ECFEFF; color: #0891B2; border: 1px solid #A5F3FC;">
                                     <i class="bi bi-mortarboard me-1"></i> Peserta Diklat
                                 </span>
@@ -165,9 +178,9 @@
                         </td>
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
-                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditUser{{ $u->id }}" title="Ubah Peran / Data">
+                                <a href="{{ route('users.edit', $u->id) }}" class="btn btn-outline-primary" title="Ubah Data / Role (Edit Users)">
                                     <i class="bi bi-pencil-square"></i>
-                                </button>
+                                </a>
                                 @if(auth()->id() !== $u->id)
                                     <form action="{{ route('users.destroy', $u->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun {{ $u->name }}?');">
                                         @csrf
