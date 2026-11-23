@@ -1,106 +1,112 @@
-@extends('portal.layout')
+@extends('layouts.auth')
 
-@section('title', 'Login Peserta Diklat')
+@section('title', 'Login Peserta Diklat - KCLC Learning Center')
 
 @section('content')
-<div class="d-flex flex-column align-items-center justify-content-center pt-4">
-    <!-- Logo & Header -->
-    <div class="text-center mb-4">
-        <div class="d-inline-flex align-items-center justify-content-center p-2 rounded-4 shadow-sm mb-3 bg-white" style="width: 76px; height: 76px; border: 1px solid #E2E8F0;">
-            <img src="{{ asset('assets/images/logo-kclc.png') }}" alt="Logo KC" style="height: 60px; width: 60px; object-fit: contain;">
+<div class="auth-greeting-title">HELLO!</div>
+<p class="auth-greeting-subtitle">
+    Masukkan Kode Peserta dan PIN akses 6-digit Anda untuk masuk ke portal pembelajaran diklat.
+</p>
+
+@include('partials.alerts')
+
+<form action="{{ route('portal.login.post') }}" method="POST">
+    @csrf
+
+    <!-- Kode Peserta -->
+    <div class="mb-3">
+        <label for="kode_peserta" class="form-label small fw-bold text-secondary text-uppercase" style="letter-spacing: 0.5px; font-size: 0.75rem;">
+            Kode Peserta
+        </label>
+        <div class="input-group auth-input-group @error('kode_peserta') border-danger @enderror">
+            <span class="input-group-text"><i class="bi bi-person-badge fs-5"></i></span>
+            <input type="text" 
+                   class="form-control text-uppercase fw-bold" 
+                   id="kode_peserta" 
+                   name="kode_peserta" 
+                   value="{{ old('kode_peserta') }}" 
+                   placeholder="Contoh: PST-2026-0001" 
+                   required 
+                   autofocus>
         </div>
-        <h4 class="fw-bold text-dark mb-1">Portal Presensi Diklat</h4>
-        <p class="text-muted small">Kemnaker Corpu Learning Center (KCLC) PPSDMK</p>
+        @error('kode_peserta')
+            <div class="text-danger small mt-1">{{ $message }}</div>
+        @enderror
     </div>
 
-    <!-- Login Card -->
-    <div class="card card-custom w-100 p-4 border shadow-sm">
-        <div class="mb-3 text-center border-bottom pb-3">
-            <span class="text-muted small">Masukkan <strong>Kode Peserta</strong> dan <strong>PIN</strong> yang diterbitkan oleh panitia diklat</span>
-        </div>
-
-        <form action="{{ route('portal.login.post') }}" method="POST">
-            @csrf
-
-            <!-- Kode Peserta -->
-            <div class="mb-3">
-                <label for="kode_peserta" class="form-label fw-semibold small text-secondary">KODE PESERTA</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-badge text-muted"></i></span>
-                    <input type="text" 
-                           class="form-control border-start-0 py-2 text-uppercase fw-bold @error('kode_peserta') is-invalid @enderror" 
-                           id="kode_peserta" 
-                           name="kode_peserta" 
-                           value="{{ old('kode_peserta') }}" 
-                           placeholder="Contoh: PST-2026-0001" 
-                           required 
-                           autofocus>
-                </div>
-                @error('kode_peserta')
-                    <div class="invalid-feedback d-block small">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <!-- PIN Akses -->
-            <div class="mb-4">
-                <label for="pin" class="form-label fw-semibold small text-secondary">PIN AKSES (6 DIGIT)</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-shield-lock text-muted"></i></span>
-                    <input type="password" 
-                           class="form-control border-start-0 border-end-0 py-2 fs-5 letter-spacing-2 @error('pin') is-invalid @enderror" 
-                           id="pin" 
-                           name="pin" 
-                           maxlength="10" 
-                           placeholder="••••••" 
-                           inputmode="numeric" 
-                           required>
-                    <button class="btn btn-outline-secondary border-start-0 bg-light" type="button" id="btnTogglePin">
-                        <i class="bi bi-eye" id="iconTogglePin"></i>
-                    </button>
-                </div>
-                @error('pin')
-                    <div class="invalid-feedback d-block small">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <!-- Tombol Masuk -->
-            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2">
-                <span>Masuk ke Portal</span>
-                <i class="bi bi-arrow-right"></i>
+    <!-- PIN Akses -->
+    <div class="mb-3">
+        <label for="pin" class="form-label small fw-bold text-secondary text-uppercase" style="letter-spacing: 0.5px; font-size: 0.75rem;">
+            PIN Akses (6 Digit)
+        </label>
+        <div class="input-group auth-input-group @error('pin') border-danger @enderror">
+            <span class="input-group-text"><i class="bi bi-shield-lock fs-5"></i></span>
+            <input type="password" 
+                   class="form-control fs-5 letter-spacing-2" 
+                   id="pin" 
+                   name="pin" 
+                   maxlength="10" 
+                   placeholder="••••••" 
+                   inputmode="numeric" 
+                   required>
+            <button class="btn btn-link text-muted pe-3 text-decoration-none" type="button" id="btnTogglePin">
+                <i class="bi bi-eye" id="iconTogglePin"></i>
             </button>
-        </form>
-
-        <div class="mt-4 text-center">
-            <small class="text-muted">
-                Belum memiliki Kode atau lupa PIN? <br>
-                <span class="text-secondary fw-semibold">Silakan hubungi Panitia Penyelenggara Diklat.</span>
-            </small>
         </div>
+        @error('pin')
+            <div class="text-danger small mt-1">{{ $message }}</div>
+        @enderror
     </div>
 
-    <!-- Link Admin Login -->
-    <div class="mt-4 text-center">
-        <a href="{{ route('login') }}" class="text-decoration-none text-muted small">
-            <i class="bi bi-person-fill-lock"></i> Login sebagai Administrator / Penyelenggara
+    <!-- Info Bantuan PIN Row Sesuai Template -->
+    <div class="d-flex justify-content-between align-items-center mb-4 text-muted small">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="rememberMePeserta" checked style="cursor: pointer;">
+            <label class="form-check-label text-secondary" for="rememberMePeserta" style="cursor: pointer;">
+                Ingat perangkat ini
+            </label>
+        </div>
+        <a href="javascript:void(0)" onclick="Swal.fire('Lupa Kode / PIN Peserta?', 'Kode Peserta dan PIN diterbitkan oleh panitia penyelenggara pelatihan. Silakan hubungi operator kelas atau admin diklat untuk reset PIN Anda.', 'info');" class="text-muted text-decoration-none">
+            Lupa PIN akses?
         </a>
     </div>
+
+    <!-- Tombol NEXT Sesuai Template -->
+    <button type="submit" class="btn btn-auth-next w-100 mb-3">
+        <span>NEXT</span>
+        <i class="bi bi-arrow-right"></i>
+    </button>
+</form>
+
+<!-- Navigation Switcher ke Login Penyelenggara -->
+<div class="text-center pt-2 border-top">
+    <div class="small text-muted mb-2">
+        Login sebagai Panitia / Penyelenggara?
+        <a href="{{ route('login') }}" class="fw-bold text-primary text-decoration-none ms-1">
+            Login Penyelenggara SIR-JP &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Quick Test Credentials Box -->
+<div class="mt-4 p-2 rounded-3 bg-light border text-center small text-muted">
+    <i class="bi bi-info-circle me-1 text-primary"></i> Akun Peserta Uji Coba: <strong class="user-select-all text-dark">PST-2026-0001</strong> / PIN: <strong class="user-select-all text-dark">123456</strong>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-    document.getElementById('btnTogglePin').addEventListener('click', function() {
-        const pinInput = document.getElementById('pin');
-        const icon = document.getElementById('iconTogglePin');
-        if (pinInput.type === 'password') {
-            pinInput.type = 'text';
-            icon.classList.remove('bi-eye');
-            icon.classList.add('bi-eye-slash');
-        } else {
-            pinInput.type = 'password';
-            icon.classList.remove('bi-eye-slash');
-            icon.classList.add('bi-eye');
-        }
-    });
+    const btnTogglePin = document.getElementById('btnTogglePin');
+    const inputPin = document.getElementById('pin');
+    const iconToggle = document.getElementById('iconTogglePin');
+
+    if (btnTogglePin && inputPin && iconToggle) {
+        btnTogglePin.addEventListener('click', function() {
+            const isPassword = inputPin.getAttribute('type') === 'password';
+            inputPin.setAttribute('type', isPassword ? 'text' : 'password');
+            iconToggle.classList.toggle('bi-eye');
+            iconToggle.classList.toggle('bi-eye-slash');
+        });
+    }
 </script>
 @endsection
