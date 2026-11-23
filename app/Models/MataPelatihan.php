@@ -14,8 +14,10 @@ class MataPelatihan extends Model
 
     protected $fillable = [
         'angkatan_id',
+        'pelatihan_id',
         'nama_mata_pelatihan',
         'rencana_jp',
+        'tahun_kurikulum',
         'deskripsi',
         'keterangan',
     ];
@@ -25,6 +27,11 @@ class MataPelatihan extends Model
         return [
             'rencana_jp' => 'float',
         ];
+    }
+
+    public function pelatihan()
+    {
+        return $this->belongsTo(Pelatihan::class, 'pelatihan_id');
     }
 
     public function angkatan()

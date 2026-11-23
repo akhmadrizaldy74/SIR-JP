@@ -216,7 +216,7 @@
                 </li>
             </ul>
 
-            <!-- LEARNING MANAGEMENT SYSTEM (LMS DIKLAT KCLC) -->
+            <!-- KURIKULUM & LMS DIKLAT -->
             <div class="sidebar-section-title text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px; color: #94A3B8;">
                 Learning Management System
             </div>
@@ -224,11 +224,43 @@
                 LMS DIKLAT
             </div>
             <ul class="nav flex-column mb-3">
+                <!-- Kurikulum Dropdown Group Sesuai Gambar KCLC -->
+                @php
+                    $isKurikulumActive = request()->routeIs('jenis-pelatihan.*') || request()->routeIs('pelatihan.*') || request()->routeIs('mata-pelatihan.*') || request()->routeIs('tahun-kurikulum.*');
+                @endphp
                 <li class="nav-item">
-                    <a class="nav-link-custom {{ request()->routeIs('pelatihan.*') ? 'active' : '' }}" href="{{ route('pelatihan.index') }}">
-                        <i class="bi bi-mortarboard-fill"></i>
-                        <span class="nav-text">Pelatihan Diklat</span>
+                    <a class="nav-link-custom d-flex justify-content-between align-items-center {{ $isKurikulumActive ? 'active' : '' }}" 
+                       data-bs-toggle="collapse" href="#menuKurikulum" role="button" aria-expanded="{{ $isKurikulumActive ? 'true' : 'false' }}">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-grid-fill"></i>
+                            <span class="nav-text">Kurikulum</span>
+                        </div>
+                        <i class="bi bi-chevron-down small transition-icon"></i>
                     </a>
+                    <div class="collapse {{ $isKurikulumActive ? 'show' : '' }} ps-3" id="menuKurikulum">
+                        <ul class="nav flex-column py-1 border-start border-secondary ms-2 ps-2">
+                            <li class="nav-item">
+                                <a class="nav-link-custom py-1 small {{ request()->routeIs('jenis-pelatihan.*') ? 'active' : '' }}" href="{{ route('jenis-pelatihan.index') }}">
+                                    <i class="bi bi-dash"></i> <span class="nav-text">Jenis Pelatihan</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link-custom py-1 small {{ request()->routeIs('pelatihan.*') ? 'active' : '' }}" href="{{ route('pelatihan.index') }}">
+                                    <i class="bi bi-dash"></i> <span class="nav-text">Pelatihan</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link-custom py-1 small {{ request()->routeIs('mata-pelatihan.*') ? 'active' : '' }}" href="{{ route('mata-pelatihan.index') }}">
+                                    <i class="bi bi-dash"></i> <span class="nav-text">Mata Pelatihan</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link-custom py-1 small {{ request()->routeIs('tahun-kurikulum.*') ? 'active' : '' }}" href="{{ route('tahun-kurikulum.index') }}">
+                                    <i class="bi bi-dash"></i> <span class="nav-text">Tahun Kurikulum</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
 
                 <!-- Data Kelas Dropdown Group Sesuai Gambar KCLC -->

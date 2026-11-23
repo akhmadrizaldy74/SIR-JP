@@ -32,6 +32,8 @@ use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\ParticipantAccessController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MoocController;
+use App\Http\Controllers\JenisPelatihanController;
+use App\Http\Controllers\TahunKurikulumController;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,8 +85,12 @@ Route::middleware('auth')->group(function () {
     // 3. Data Narasumber (Tabel terpisah dari Widyaiswara)
     Route::resource('narasumber', NarasumberController::class);
 
-    // 4. Data Pelatihan
+    // 4. Data Pelatihan & Kurikulum KCLC
+    Route::resource('jenis-pelatihan', JenisPelatihanController::class);
+    Route::patch('jenis-pelatihan/{jenis_pelatihan}/toggle', [JenisPelatihanController::class, 'toggle'])->name('jenis-pelatihan.toggle');
     Route::resource('pelatihan', PelatihanController::class);
+    Route::patch('pelatihan/{pelatihan}/toggle', [PelatihanController::class, 'toggle'])->name('pelatihan.toggle');
+    Route::resource('tahun-kurikulum', TahunKurikulumController::class);
 
     // 5. Data Angkatan
     Route::resource('angkatan', AngkatanController::class);

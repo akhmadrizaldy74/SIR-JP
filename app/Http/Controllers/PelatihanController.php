@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pelatihan;
+use App\Models\JenisPelatihan;
 use App\Models\LogAktivitas;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -12,8 +13,9 @@ class PelatihanController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $kategori = $request->get('kategori');
+        $kategori = $request->get('kategori') ?? $request->get('jenis');
         $status = $request->get('status');
+        $perPage = (int) $request->get('per_page', 10);
 
         $query = Pelatihan::withCount('angkatans');
 
@@ -33,12 +35,16 @@ class PelatihanController extends Controller
             $query->where('status', $status);
         }
 
-        $pelatihans = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+        $pelatihans = $query->orderBy('created_at', 'desc')->paginate($perPage)->withQueryString();
 
-        $kategoriOptions = ['Manajerial', 'Teknis', 'Fungsional', 'Sosio Kultural'];
+        $kategoriOptions = ['Pelatihan Teknis', 'Pelatihan Fungsional', 'Pelatihan Manajemen Aparatur', 'Manajerial', 'Teknis', 'Fungsional', 'Sosio Kultural'];
+        $jenisPelatihans = JenisPelatihan::where('status', true)->get();
+        if ($jenisPelatihans->count() > 0) {
+            $kategoriOptions = array_unique(array_merge($jenisPelatihans->pluck('nama_jenis')->toArray(), $kategoriOptions));
+        }
         $statusOptions = ['Direncanakan', 'Berjalan', 'Selesai', 'Dibatalkan'];
 
-        return view('pelatihan.index', compact('pelatihans', 'search', 'kategori', 'status', 'kategoriOptions', 'statusOptions'));
+        return view('pelatihan.index', compact('pelatihans', 'search', 'kategori', 'status', 'kategoriOptions', 'statusOptions', 'perPage', 'jenisPelatihans'));
     }
 
     public function create()
@@ -118,5 +124,19 @@ class PelatihanController extends Controller
         LogAktivitas::catat('Pelatihan', 'Hapus Data', 'Menghapus data Pelatihan: ' . $nama);
 
         return redirect()->route('pelatihan.index')->with('success', 'Data Pelatihan berhasil dihapus.');
+    }
+
+    public function toggle(Pelatihan $pelatihan)
+    {
+        $pelatihan->status = ($pelatihan->status === 'Berjalan' || $pelatihan->status === 'Direncanakan') ? 'Selesai' : 'Berjalan';
+        $pelatihan->save();
+
+        LogAktivitas::catat('Pelatihan', 'Toggle Status', 'Mengubah status pelatihan ' . $pelatihan->nama_pelatihan . ' menjadi ' . $pelatihan->status);
+
+        return response()->json([
+            'success' => true,
+            'status' => $pelatihan->status,
+            'is_active' => in_array($pelatihan->status, ['Berjalan', 'Direncanakan']),
+        ]);
     }
 }
