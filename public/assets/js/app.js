@@ -58,16 +58,12 @@ function initAnimatedCounters() {
   const elements = document.querySelectorAll('.counter-animate');
   if (!elements.length) return;
 
-  const observer = new IntersectionObserver((entries, obs) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        animateRandomShuffle(entry.target);
-        obs.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-
-  elements.forEach(el => observer.observe(el));
+  elements.forEach((el, index) => {
+    // Delay sedikit per kartu agar ada efek bergelombang yang sangat jelas terlihat
+    setTimeout(() => {
+      animateRandomShuffle(el);
+    }, index * 40);
+  });
 
   function animateRandomShuffle(el) {
     const raw = (el.getAttribute('data-target') || el.innerText || '').trim();
@@ -80,11 +76,13 @@ function initAnimatedCounters() {
     const targetDigits = finalFormatted.split('');
     const len = targetDigits.length;
 
-    const duration = 1200; // Total durasi acak (1.2 detik)
+    const duration = 1600; // Durasi acak 1.6 detik agar sangat jelas terlihat mata
     const startTime = performance.now();
 
-    function getRandomDigit(char) {
-      if (char === ',' || char === '.') return char;
+    function getRandomChar(expectedChar) {
+      if (expectedChar === ',' || expectedChar === '.' || expectedChar === '/' || expectedChar === ' ') {
+        return expectedChar;
+      }
       return Math.floor(Math.random() * 10).toString();
     }
 
@@ -92,15 +90,19 @@ function initAnimatedCounters() {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
-      // Berapa banyak digit dari kiri yang sudah 'terkunci' ke angka aslinya
-      const lockedCount = Math.floor(progress * len);
+      // Angka acak berputar cepat: dari progress 0 sampai 0.5 semua digit acak
+      // Setelah progress > 0.5 digit mulai terkunci satu per satu dari kiri ke kanan
+      let lockedCount = 0;
+      if (progress > 0.4) {
+        lockedCount = Math.floor(((progress - 0.4) / 0.6) * len);
+      }
 
       let output = '';
       for (let i = 0; i < len; i++) {
         if (i < lockedCount || progress >= 1) {
           output += targetDigits[i];
         } else {
-          output += getRandomDigit(targetDigits[i]);
+          output += getRandomChar(targetDigits[i]);
         }
       }
 
