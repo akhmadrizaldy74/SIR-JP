@@ -85,7 +85,7 @@ class OktoberExcelFormatVerificationTest extends TestCase
     public function test_penyelenggara_can_register_with_nik(): void
     {
         $uniqueNik = '327101' . rand(1000000000, 9999999999);
-        $uniqueEmail = 'andi.' . rand(100, 999) . '@kemnaker.go.id';
+        $uniqueEmail = 'andi.' . time() . '_' . rand(10000, 99999) . '@kemnaker.go.id';
 
         $response = $this->post('/register', [
             'name' => 'Andi Kurniawan, S.Kom.',

@@ -1,19 +1,16 @@
 <aside class="app-sidebar">
-    <div class="sidebar-header d-flex align-items-center justify-content-between px-3">
-        <a href="{{ route('dashboard') }}" class="sidebar-brand d-flex align-items-center gap-2 text-decoration-none">
-            <!-- Logo KC KEMNAKER CORPU Presisi Gambar -->
-            <div class="brand-logo-kc d-flex align-items-center">
-                <img src="{{ asset('assets/images/logo-kclc.png') }}" alt="Logo Kemnaker Corpu" style="height: 38px; width: 38px; object-fit: contain;" class="me-2 flex-shrink-0">
-                <div class="d-flex flex-column text-start sidebar-brand-text">
-                    <span class="fw-bold text-white lh-1" style="font-size: 0.95rem; letter-spacing: 0.5px;">KEMNAKER CORPU</span>
-                    <span class="text-white-50" style="font-size: 0.65rem;">Lebih Cerdas Lebih Unggul</span>
-                </div>
+    <div class="sidebar-header">
+        <a href="{{ route('dashboard') }}" class="sidebar-brand">
+            <img src="{{ asset('assets/images/logo-kclc.png') }}" alt="Logo Kemnaker Corpu" style="height: 38px; width: 38px; object-fit: contain;">
+            <div class="d-flex flex-column text-start">
+                <div class="sidebar-brand-title">KEMNAKER CORPU</div>
+                <div class="sidebar-brand-subtitle">Lebih Cerdas Lebih Unggul</div>
             </div>
         </a>
     </div>
 
     <div class="sidebar-menu-wrapper">
-        <div class="sidebar-section-title text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px; color: #94A3B8;">
+        <div class="sidebar-section-title">
             MENU
         </div>
         <ul class="nav flex-column mb-2">

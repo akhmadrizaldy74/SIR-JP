@@ -6,6 +6,48 @@
 
 @section('styles')
 <style>
+    .presensi-choice-label {
+        border: 1.5px solid #E2E8F0;
+        background-color: #FFFFFF;
+        color: #1E293B;
+        border-radius: 10px;
+        padding: 1rem 0.75rem;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+    }
+    .presensi-choice-label:hover {
+        border-color: #94A3B8;
+        background-color: #F8FAFC;
+    }
+    .presensi-choice-label .choice-icon {
+        font-size: 1.75rem;
+        color: #1B4965;
+        margin-bottom: 0.35rem;
+        transition: color 0.15s ease-in-out;
+    }
+    .presensi-choice-label .choice-title {
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #1E293B;
+        line-height: 1.2;
+    }
+    .presensi-choice-label .choice-desc {
+        font-size: 0.7rem;
+        color: #64748B;
+        margin-top: 2px;
+    }
+    /* Pilihan Aktif Sesuai Sketsa User: Solid Dark Blue Petrol */
+    .btn-check:checked + .presensi-choice-label {
+        background-color: #1B4965 !important;
+        border-color: #1B4965 !important;
+        box-shadow: 0 4px 14px rgba(27, 73, 101, 0.28);
+    }
+    .btn-check:checked + .presensi-choice-label .choice-icon,
+    .btn-check:checked + .presensi-choice-label .choice-title,
+    .btn-check:checked + .presensi-choice-label .choice-desc {
+        color: #FFFFFF !important;
+    }
+
     .kclc-card {
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
@@ -199,17 +241,17 @@
                 <div class="modal fade" id="modalPresensi{{ $sess->id }}" tabindex="-1" aria-labelledby="modalPresensiLabel{{ $sess->id }}" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered modal-lg">
                         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                            <!-- Modal Header Navy -->
-                            <div class="modal-header text-white py-3 px-4" style="background-color: #0B1727;">
+                            <!-- Modal Header Bersih & Simple Sesuai Permintaan (Tidak Mencolok) -->
+                            <div class="modal-header bg-white py-3 px-4 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: rgba(56, 189, 248, 0.2); color: #38BDF8;">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #F1F5F9; color: #1B4965;">
                                         <i class="bi bi-person-check fs-6"></i>
                                     </div>
-                                    <h6 class="modal-title fw-bold mb-0 text-white" id="modalPresensiLabel{{ $sess->id }}">
+                                    <h6 class="modal-title fw-bold mb-0 text-dark" id="modalPresensiLabel{{ $sess->id }}">
                                         Form Presensi Peserta: Pertemuan {{ $idx + 1 }}
                                     </h6>
                                 </div>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
 
                             <form action="{{ route('portal.presensi.direct.post', $sess->id) }}" method="POST" enctype="multipart/form-data">
@@ -224,54 +266,54 @@
                                                 <i class="bi bi-clock me-1"></i> {{ substr($sess->jam_mulai, 0, 5) }} - {{ substr($sess->jam_selesai, 0, 5) }} WIB
                                             </div>
                                         </div>
-                                        <div class="badge px-3 py-2 rounded-pill bg-primary-subtle text-primary border border-primary-subtle align-self-start align-self-sm-center">
-                                            <i class="bi bi-geo-alt me-1"></i> {{ $ruanganNama }}
+                                        <div class="badge px-3 py-2 rounded-pill bg-light text-dark border align-self-start align-self-sm-center">
+                                            <i class="bi bi-geo-alt me-1 text-primary"></i> {{ $ruanganNama }}
                                         </div>
                                     </div>
 
-                                    <!-- 4 KOTAK STATUS SESUAI GAMBAR TEMPLATE USER (HADIR, SAKIT, IZIN, DISPENSASI) -->
+                                    <!-- 4 KOTAK STATUS UNIFORM DARK BLUE PETROL SESUAI GAMBAR TEMPLATE USER -->
                                     <div class="mb-4">
-                                        <label class="form-label fw-bold text-dark small text-uppercase" style="letter-spacing: 0.5px;">
+                                        <label class="form-label fw-bold text-dark small text-uppercase mb-2" style="letter-spacing: 0.5px;">
                                             1. Pilih Status Kehadiran <span class="text-danger">*</span>
                                         </label>
                                         <div class="row g-2">
                                             <!-- Box 1: Hadir -->
                                             <div class="col-6 col-md-3">
                                                 <input type="radio" class="btn-check" name="status_kehadiran" id="statusHadir{{ $sess->id }}" value="Hadir" checked autocomplete="off">
-                                                <label class="btn btn-outline-primary w-100 p-3 rounded-3 text-center d-flex flex-column align-items-center justify-content-center h-100 border-2" for="statusHadir{{ $sess->id }}">
-                                                    <i class="bi bi-check-circle-fill fs-3 mb-1 text-success"></i>
-                                                    <span class="fw-bold">Hadir</span>
-                                                    <span class="small text-muted" style="font-size: 0.72rem;">Mengikuti Sesi</span>
+                                                <label class="presensi-choice-label w-100 text-center d-flex flex-column align-items-center justify-content-center h-100" for="statusHadir{{ $sess->id }}">
+                                                    <i class="bi bi-check-circle-fill choice-icon"></i>
+                                                    <span class="choice-title">Hadir</span>
+                                                    <span class="choice-desc">Mengikuti Sesi</span>
                                                 </label>
                                             </div>
 
                                             <!-- Box 2: Sakit -->
                                             <div class="col-6 col-md-3">
                                                 <input type="radio" class="btn-check" name="status_kehadiran" id="statusSakit{{ $sess->id }}" value="Sakit" autocomplete="off">
-                                                <label class="btn btn-outline-warning w-100 p-3 rounded-3 text-center d-flex flex-column align-items-center justify-content-center h-100 border-2" for="statusSakit{{ $sess->id }}">
-                                                    <i class="bi bi-heart-pulse-fill fs-3 mb-1 text-warning"></i>
-                                                    <span class="fw-bold text-dark">Sakit</span>
-                                                    <span class="small text-muted" style="font-size: 0.72rem;">Kondisi Sakit</span>
+                                                <label class="presensi-choice-label w-100 text-center d-flex flex-column align-items-center justify-content-center h-100" for="statusSakit{{ $sess->id }}">
+                                                    <i class="bi bi-heart-pulse-fill choice-icon"></i>
+                                                    <span class="choice-title">Sakit</span>
+                                                    <span class="choice-desc">Kondisi Sakit</span>
                                                 </label>
                                             </div>
 
                                             <!-- Box 3: Izin -->
                                             <div class="col-6 col-md-3">
                                                 <input type="radio" class="btn-check" name="status_kehadiran" id="statusIzin{{ $sess->id }}" value="Izin" autocomplete="off">
-                                                <label class="btn btn-outline-info w-100 p-3 rounded-3 text-center d-flex flex-column align-items-center justify-content-center h-100 border-2" for="statusIzin{{ $sess->id }}">
-                                                    <i class="bi bi-envelope-paper-fill fs-3 mb-1 text-info"></i>
-                                                    <span class="fw-bold text-dark">Izin</span>
-                                                    <span class="small text-muted" style="font-size: 0.72rem;">Ada Keperluan</span>
+                                                <label class="presensi-choice-label w-100 text-center d-flex flex-column align-items-center justify-content-center h-100" for="statusIzin{{ $sess->id }}">
+                                                    <i class="bi bi-envelope-paper-fill choice-icon"></i>
+                                                    <span class="choice-title">Izin</span>
+                                                    <span class="choice-desc">Ada Keperluan</span>
                                                 </label>
                                             </div>
 
                                             <!-- Box 4: Dispensasi -->
                                             <div class="col-6 col-md-3">
                                                 <input type="radio" class="btn-check" name="status_kehadiran" id="statusDispensasi{{ $sess->id }}" value="Dispensasi" autocomplete="off">
-                                                <label class="btn btn-outline-secondary w-100 p-3 rounded-3 text-center d-flex flex-column align-items-center justify-content-center h-100 border-2" for="statusDispensasi{{ $sess->id }}">
-                                                    <i class="bi bi-briefcase-fill fs-3 mb-1 text-secondary"></i>
-                                                    <span class="fw-bold text-dark">Dispensasi</span>
-                                                    <span class="small text-muted" style="font-size: 0.72rem;">Tugas Kedinasan</span>
+                                                <label class="presensi-choice-label w-100 text-center d-flex flex-column align-items-center justify-content-center h-100" for="statusDispensasi{{ $sess->id }}">
+                                                    <i class="bi bi-briefcase-fill choice-icon"></i>
+                                                    <span class="choice-title">Dispensasi</span>
+                                                    <span class="choice-desc">Tugas Kedinasan</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -279,7 +321,7 @@
 
                                     <!-- KOTAK 5: KETERANGAN SESUAI GAMBAR TEMPLATE USER -->
                                     <div class="mb-4">
-                                        <label for="keterangan{{ $sess->id }}" class="form-label fw-bold text-dark small text-uppercase" style="letter-spacing: 0.5px;">
+                                        <label for="keterangan{{ $sess->id }}" class="form-label fw-bold text-dark small text-uppercase mb-2" style="letter-spacing: 0.5px;">
                                             2. Keterangan / Catatan
                                         </label>
                                         <textarea name="keterangan" id="keterangan{{ $sess->id }}" rows="2" class="form-control" placeholder="Tuliskan keterangan singkat (wajib diisi apabila izin/sakit/dispensasi)..."></textarea>
@@ -287,7 +329,7 @@
 
                                     <!-- KOTAK 6: BUKTI FOTO / PDF SESUAI GAMBAR TEMPLATE USER -->
                                     <div class="mb-3">
-                                        <label for="buktiFile{{ $sess->id }}" class="form-label fw-bold text-dark small text-uppercase" style="letter-spacing: 0.5px;">
+                                        <label for="buktiFile{{ $sess->id }}" class="form-label fw-bold text-dark small text-uppercase mb-2" style="letter-spacing: 0.5px;">
                                             3. Bukti Kehadiran / Surat Izin (Foto atau PDF)
                                         </label>
                                         <input type="file" name="bukti_file" id="buktiFile{{ $sess->id }}" class="form-control" accept="image/*,application/pdf" capture="user">
@@ -297,12 +339,12 @@
                                     </div>
                                 </div>
 
-                                <!-- Modal Footer -->
+                                <!-- Modal Footer Sederhana & Elegan -->
                                 <div class="modal-footer border-0 px-4 pb-4 pt-0 d-flex justify-content-between align-items-center">
                                     <span class="text-muted small"><span class="text-danger">*</span> Presensi mandiri tanpa perlu scan QR</span>
                                     <div class="d-flex gap-2">
                                         <button type="button" class="btn btn-light px-3 fw-medium" data-bs-dismiss="modal">Batal</button>
-                                        <button type="submit" class="btn text-white fw-bold px-4 rounded-2 shadow-sm" style="background-color: #2563EB;">
+                                        <button type="submit" class="btn text-white fw-bold px-4 rounded-2 shadow-sm" style="background-color: #1B4965;">
                                             <i class="bi bi-send-check me-1"></i> Simpan Presensi
                                         </button>
                                     </div>

@@ -95,52 +95,34 @@ body.sidebar-closed .app-main {
 }
 
 .sidebar-header {
-  height: var(--navbar-height);
-  padding: 0 1.25rem;
+  height: 68px;
+  padding: 1.25rem 1rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  justify-content: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: #0B1727;
 }
 
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  color: #FFFFFF;
+  gap: 10px;
   text-decoration: none;
-  font-weight: 700;
-  font-size: 1.15rem;
+}
+
+.sidebar-brand-title {
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 0.95rem;
   letter-spacing: 0.5px;
+  line-height: 1.1;
 }
 
-.brand-icon {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, #2563EB, #60A5FA);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 1.25rem;
-}
-
-.sidebar-brand-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar-brand-text .title {
-  font-size: 1.1rem;
-  line-height: 1.2;
-}
-
-.sidebar-brand-text .subtitle {
-  font-size: 0.68rem;
-  font-weight: 400;
-  color: #93C5FD;
-  letter-spacing: 0.3px;
+.sidebar-brand-subtitle {
+  color: #64748B;
+  font-size: 0.65rem;
+  line-height: 1.1;
 }
 
 .sidebar-menu-wrapper {
@@ -153,11 +135,11 @@ body.sidebar-closed .app-main {
 
 .sidebar-section-title {
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  color: #94A3B8;
-  padding: 0.5rem 0.75rem 0.25rem;
-  letter-spacing: 0.75px;
+  color: #64748B;
+  padding: 1.25rem 0.75rem 0.35rem 0.75rem;
+  letter-spacing: 0.8px;
 }
 
 .nav-item {
@@ -167,11 +149,11 @@ body.sidebar-closed .app-main {
 .nav-link-custom {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
   padding: 0.65rem 0.85rem;
-  color: #E2E8F0;
+  color: #94A3B8;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 0.88rem;
   font-weight: 500;
   border-radius: 8px;
   transition: all 0.15s ease-in-out;
@@ -181,12 +163,12 @@ body.sidebar-closed .app-main {
   font-size: 1.15rem;
   width: 22px;
   text-align: center;
-  color: #93C5FD;
+  color: #94A3B8;
   transition: color 0.15s;
 }
 
 .nav-link-custom:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
   color: #FFFFFF;
 }
 
@@ -195,13 +177,29 @@ body.sidebar-closed .app-main {
 }
 
 .nav-link-custom.active {
-  background-color: var(--secondary-blue);
+  background-color: #2563EB;
   color: #FFFFFF;
+  font-weight: 600;
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
 }
 
 .nav-link-custom.active i {
   color: #FFFFFF;
+}
+
+#menuDataKelas .nav-link-custom,
+#menuPresensi .nav-link-custom {
+  color: #94A3B8;
+  font-size: 0.82rem;
+}
+#menuDataKelas .nav-link-custom:hover,
+#menuPresensi .nav-link-custom:hover {
+  color: #FFFFFF;
+}
+#menuDataKelas .nav-link-custom.active,
+#menuPresensi .nav-link-custom.active {
+  color: #FFFFFF;
+  background-color: #2563EB;
 }
 
 .sidebar-footer {
