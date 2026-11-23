@@ -50,166 +50,170 @@
     <div class="text-muted small">Ringkasan data dan aktivitas sistem pembelajaran</div>
 </div>
 
-<!-- Row 1: 3 Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-lg-4 col-md-6">
+<!-- 10 Stat Cards: Fluid Responsive Grid (Tanpa Celah / Bolong) -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-5 g-3 mb-4">
+    <!-- Card 1 -->
+    <div class="col">
         <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #EEF2FF; color: #4F46E5;">
+                    <div class="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0" style="width: 44px; height: 44px; background-color: #EEF2FF; color: #4F46E5;">
                         <i class="bi bi-easel fs-4"></i>
                     </div>
                     <div>
-                        <div class="text-muted small fw-medium">Pelatihan Diklat</div>
+                        <div class="text-muted small fw-medium text-truncate">Pelatihan Diklat</div>
                         <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_pelatihan'] }}">{{ $kclcStats['total_pelatihan'] }}</h3>
                     </div>
                 </div>
-                <span class="badge rounded-pill fw-medium" style="background-color: #EEF2FF; color: #4F46E5; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Pelatihan</span>
+                <span class="badge rounded-pill fw-medium" style="background-color: #EEF2FF; color: #4F46E5; font-size: 0.72rem; padding: 0.35rem 0.6rem;">Pelatihan</span>
             </div>
         </div>
     </div>
 
-    <div class="col-lg-4 col-md-6">
+    <!-- Card 2 -->
+    <div class="col">
         <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #E0F2FE; color: #0284C7;">
+                    <div class="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0" style="width: 44px; height: 44px; background-color: #E0F2FE; color: #0284C7;">
                         <i class="bi bi-journal-text fs-4"></i>
                     </div>
                     <div>
-                        <div class="text-muted small fw-medium">Kelas</div>
+                        <div class="text-muted small fw-medium text-truncate">Kelas</div>
                         <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_kelas'] }}">{{ $kclcStats['total_kelas'] }}</h3>
                     </div>
                 </div>
-                <span class="badge rounded-pill fw-medium" style="background-color: #E0F2FE; color: #0284C7; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Kelas</span>
+                <span class="badge rounded-pill fw-medium" style="background-color: #E0F2FE; color: #0284C7; font-size: 0.72rem; padding: 0.35rem 0.6rem;">Kelas</span>
             </div>
         </div>
     </div>
 
-    <div class="col-lg-4 col-md-6">
+    <!-- Card 3 -->
+    <div class="col">
         <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #ECFDF5; color: #059669;">
+                    <div class="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0" style="width: 44px; height: 44px; background-color: #ECFDF5; color: #059669;">
                         <i class="bi bi-door-open fs-4"></i>
                     </div>
                     <div>
-                        <div class="text-muted small fw-medium">Ruangan</div>
+                        <div class="text-muted small fw-medium text-truncate">Ruangan</div>
                         <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_ruangan'] }}">{{ $kclcStats['total_ruangan'] }}</h3>
                     </div>
                 </div>
-                <span class="badge rounded-pill fw-medium" style="background-color: #D1FAE5; color: #059669; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Ruangan</span>
+                <span class="badge rounded-pill fw-medium" style="background-color: #D1FAE5; color: #059669; font-size: 0.72rem; padding: 0.35rem 0.6rem;">Ruangan</span>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Row 2: 3 Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-lg-4 col-md-6">
+    <!-- Card 4 -->
+    <div class="col">
         <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #FEF3C7; color: #D97706;">
+                    <div class="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0" style="width: 44px; height: 44px; background-color: #FEF3C7; color: #D97706;">
                         <i class="bi bi-card-checklist fs-4"></i>
                     </div>
                     <div>
-                        <div class="text-muted small fw-medium">Form Aspek Penilaian Sikap</div>
+                        <div class="text-muted small fw-medium text-truncate">Penilaian Sikap</div>
                         <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_sikap'] }}">{{ $kclcStats['total_sikap'] }}</h3>
                     </div>
                 </div>
-                <span class="badge rounded-pill fw-medium" style="background-color: #FEF3C7; color: #D97706; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Penilaian</span>
+                <span class="badge rounded-pill fw-medium" style="background-color: #FEF3C7; color: #D97706; font-size: 0.72rem; padding: 0.35rem 0.6rem;">Penilaian</span>
             </div>
         </div>
     </div>
 
-    <div class="col-lg-4 col-md-6">
+    <!-- Card 5 -->
+    <div class="col">
         <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #FEE2E2; color: #DC2626;">
+                    <div class="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0" style="width: 44px; height: 44px; background-color: #FEE2E2; color: #DC2626;">
                         <i class="bi bi-file-earmark-check fs-4"></i>
                     </div>
                     <div>
-                        <div class="text-muted small fw-medium">Form Evaluasi</div>
+                        <div class="text-muted small fw-medium text-truncate">Form Evaluasi</div>
                         <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_evaluasi'] }}">{{ $kclcStats['total_evaluasi'] }}</h3>
                     </div>
                 </div>
-                <span class="badge rounded-pill fw-medium" style="background-color: #FEE2E2; color: #DC2626; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Evaluasi</span>
+                <span class="badge rounded-pill fw-medium" style="background-color: #FEE2E2; color: #DC2626; font-size: 0.72rem; padding: 0.35rem 0.6rem;">Evaluasi</span>
             </div>
         </div>
     </div>
 
-    <div class="col-lg-4 col-md-6">
+    <!-- Card 6 -->
+    <div class="col">
         <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #EEF2FF; color: #4F46E5;">
+                    <div class="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0" style="width: 44px; height: 44px; background-color: #EEF2FF; color: #4F46E5;">
                         <i class="bi bi-people-fill fs-4"></i>
                     </div>
                     <div>
-                        <div class="text-muted small fw-medium">Angkatan</div>
+                        <div class="text-muted small fw-medium text-truncate">Angkatan</div>
                         <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_angkatan'] }}">{{ $kclcStats['total_angkatan'] }}</h3>
                     </div>
                 </div>
-                <span class="badge rounded-pill fw-medium" style="background-color: #EEF2FF; color: #4F46E5; font-size: 0.75rem; padding: 0.35rem 0.65rem;">Angkatan</span>
+                <span class="badge rounded-pill fw-medium" style="background-color: #EEF2FF; color: #4F46E5; font-size: 0.72rem; padding: 0.35rem 0.6rem;">Angkatan</span>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Row 3: 4 Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-lg-3 col-md-6">
+    <!-- Card 7 -->
+    <div class="col">
         <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
             <div class="d-flex align-items-center gap-3">
-                <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #EEF2FF; color: #4F46E5;">
+                <div class="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0" style="width: 44px; height: 44px; background-color: #EEF2FF; color: #4F46E5;">
                     <i class="bi bi-easel fs-4"></i>
                 </div>
                 <div>
-                    <div class="text-muted small fw-medium">Pelatihan Diklat</div>
+                    <div class="text-muted small fw-medium text-truncate">Pelatihan Diklat</div>
                     <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_pelatihan'] }}">{{ $kclcStats['total_pelatihan'] }}</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-lg-3 col-md-6">
+    <!-- Card 8 -->
+    <div class="col">
         <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
             <div class="d-flex align-items-center gap-3">
-                <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #E0F2FE; color: #0284C7;">
+                <div class="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0" style="width: 44px; height: 44px; background-color: #E0F2FE; color: #0284C7;">
                     <i class="bi bi-person-fill fs-4"></i>
                 </div>
                 <div>
-                    <div class="text-muted small fw-medium">Peserta</div>
+                    <div class="text-muted small fw-medium text-truncate">Peserta</div>
                     <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_peserta'] }}">{{ number_format($kclcStats['total_peserta']) }}</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-lg-3 col-md-6">
+    <!-- Card 9 -->
+    <div class="col">
         <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
             <div class="d-flex align-items-center gap-3">
-                <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #ECFDF5; color: #059669;">
+                <div class="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0" style="width: 44px; height: 44px; background-color: #ECFDF5; color: #059669;">
                     <i class="bi bi-check-circle-fill fs-4"></i>
                 </div>
                 <div>
-                    <div class="text-muted small fw-medium">Presensi Hadir</div>
+                    <div class="text-muted small fw-medium text-truncate">Presensi Hadir</div>
                     <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_presensi'] }}">{{ number_format($kclcStats['total_presensi']) }}</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-lg-3 col-md-6">
+    <!-- Card 10 -->
+    <div class="col">
         <div class="card p-3 border shadow-sm rounded-3 bg-white h-100">
             <div class="d-flex align-items-center gap-3">
-                <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 46px; height: 46px; background-color: #FEF3C7; color: #D97706;">
+                <div class="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0" style="width: 44px; height: 44px; background-color: #FEF3C7; color: #D97706;">
                     <i class="bi bi-clipboard2-check fs-4"></i>
                 </div>
                 <div>
-                    <div class="text-muted small fw-medium">Evaluasi Selesai</div>
+                    <div class="text-muted small fw-medium text-truncate">Evaluasi Selesai</div>
                     <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['evaluasi_selesai'] }}">{{ $kclcStats['evaluasi_selesai'] }}</h3>
                 </div>
             </div>
