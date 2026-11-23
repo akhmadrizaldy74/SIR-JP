@@ -278,7 +278,11 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold text-dark mb-0 text-uppercase" style="letter-spacing: 0.5px;">@yield('page_title', 'DASHBOARD DIKLAT')</h5>
                 <div class="text-muted small" style="font-size: 0.8rem;">
-                    <span class="text-secondary">home_diklat</span> &gt; <span class="fw-semibold text-dark">@yield('breadcrumb', 'Dashboard Diklat')</span>
+                    @hasSection('custom_breadcrumb')
+                        @yield('custom_breadcrumb')
+                    @else
+                        <span class="text-secondary">home_diklat</span> &gt; <span class="fw-semibold text-dark">@yield('breadcrumb', 'Dashboard Diklat')</span>
+                    @endif
                 </div>
             </div>
 

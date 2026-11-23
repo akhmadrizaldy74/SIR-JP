@@ -23,6 +23,7 @@ use App\Http\Controllers\AspekPenilaianSikapController;
 use App\Http\Controllers\FormEvaluasiController;
 use App\Http\Controllers\ParticipantAuthController;
 use App\Http\Controllers\ParticipantPortalController;
+use App\Http\Controllers\ParticipantTugasController;
 use App\Http\Controllers\AttendanceSessionController;
 use App\Http\Controllers\AttendanceManualController;
 use App\Http\Controllers\AttendanceRequestController;
@@ -57,6 +58,11 @@ Route::middleware(\App\Http\Middleware\EnsureParticipantAuth::class)->prefix('pr
     Route::get('/riwayat', [ParticipantPortalController::class, 'riwayat'])->name('riwayat');
     Route::get('/pengajuan', [ParticipantPortalController::class, 'pengajuan'])->name('pengajuan');
     Route::post('/pengajuan', [ParticipantPortalController::class, 'submitPengajuan'])->name('pengajuan.post');
+
+    // Modul Tugas Peserta
+    Route::get('/tugas', [ParticipantTugasController::class, 'index'])->name('tugas.index');
+    Route::post('/tugas/{id}/upload', [ParticipantTugasController::class, 'upload'])->name('tugas.upload');
+    Route::get('/tugas/{id}/download', [ParticipantTugasController::class, 'download'])->name('tugas.download');
 });
 
 // Protected Routes (Penyelenggara)

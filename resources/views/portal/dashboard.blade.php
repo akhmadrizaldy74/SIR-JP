@@ -326,9 +326,9 @@
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-2 small rounded-2" style="font-size: 0.75rem;" onclick="Swal.fire('Tugas Peserta', 'Tugas Praktik 1: Penyusunan Rencana Kerja (Batas: 28 Nov 2026).', 'warning');">
+                    <a href="{{ route('portal.tugas.index') }}" class="btn btn-outline-secondary btn-sm py-1 px-2 small rounded-2 text-decoration-none" style="font-size: 0.75rem;">
                         <i class="bi bi-eye"></i> Detail
-                    </button>
+                    </a>
                 </div>
 
                 <!-- 5. POS TEST -->
