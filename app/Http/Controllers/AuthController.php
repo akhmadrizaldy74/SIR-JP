@@ -156,6 +156,56 @@ class AuthController extends Controller
             ->with('success', 'Selamat datang! Akun Penyelenggara Anda berhasil didaftarkan.');
     }
 
+    public function switchRole(Request $request, string $role)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $available = $user->getAvailableRoles();
+        $targetRole = null;
+
+        foreach ($available as $avail) {
+            if (strcasecmp($avail, $role) === 0 || strcasecmp(\Illuminate\Support\Str::slug($avail), \Illuminate\Support\Str::slug($role)) === 0) {
+                $targetRole = $avail;
+                break;
+            }
+        }
+
+        if (!$targetRole) {
+            return back()->with('error', 'Peran (Role) tidak tersedia untuk akun Anda.');
+        }
+
+        session(['active_role' => $targetRole]);
+
+        // Jika beralih ke mode Peserta
+        if (in_array(strtolower($targetRole), ['peserta', 'peserta diklat'])) {
+            $peserta = \App\Models\Peserta::where('nip', $user->nik)
+                ->orWhere('email', $user->email)
+                ->first();
+
+            if (!$peserta) {
+                $peserta = \App\Models\Peserta::create([
+                    'nip' => $user->nik ?: 'NIK-' . substr(md5($user->email), 0, 10),
+                    'nama' => $user->name,
+                    'email' => $user->email,
+                    'jenis_kelamin' => 'Laki-laki',
+                    'instansi' => 'PPSDM Kemnaker',
+                ]);
+            }
+
+            session(['participant_id' => $peserta->id]);
+
+            return redirect()->route('portal.dashboard')
+                ->with('success', "Mode berhasil diubah menjadi {$targetRole}.");
+        }
+
+        // Jika beralih ke mode Penyelenggara atau Administrator
+        return redirect()->route('dashboard')
+            ->with('success', "Mode berhasil diubah menjadi {$targetRole}.");
+    }
+
     public function logout(Request $request)
     {
         if (Auth::check()) {

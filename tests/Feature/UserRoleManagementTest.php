@@ -237,4 +237,74 @@ class UserRoleManagementTest extends TestCase
         $this->assertEquals($roles, $user->roles);
         $this->assertEquals($bidang, $user->bidang);
     }
+
+    public function test_user_can_switch_mode_between_administrator_and_penyelenggara_and_sidebar_adjusts(): void
+    {
+        $unique = rand(100000, 999999);
+        $user = User::create([
+            'name' => 'Akhmad Rizaldy ' . $unique,
+            'nik' => '320107' . $unique . '0007',
+            'email' => "rizaldy_{$unique}@example.com",
+            'username' => 'rizaldy_' . $unique,
+            'role' => 'penyelenggara',
+            'roles' => ['Administrator', 'Penyelenggara'],
+            'status' => 'Aktif',
+            'password' => Hash::make('password123'),
+        ]);
+
+        // 1. Masuk dalam mode Administrator
+        $this->actingAs($user)->get(route('switch-role', ['role' => 'Administrator']));
+
+        $adminDashboard = $this->actingAs($user)->get(route('dashboard'));
+        $adminDashboard->assertOk();
+        $adminDashboard->assertSeeText('LMS DIKLAT', false);
+        $adminDashboard->assertSeeText('REKAPITULASI JP (SIR-JP)', false);
+        $adminDashboard->assertSeeText('MANAJEMEN SISTEM', false);
+        $adminDashboard->assertSee('administrator');
+
+        // 2. Swipe / Ganti mode menjadi Penyelenggara
+        $switchResponse = $this->actingAs($user)->get(route('switch-role', ['role' => 'Penyelenggara']));
+        $switchResponse->assertRedirect(route('dashboard'));
+
+        $penyelenggaraDashboard = $this->actingAs($user)->get(route('dashboard'));
+        $penyelenggaraDashboard->assertOk();
+        $penyelenggaraDashboard->assertSeeText('LMS DIKLAT', false);
+        // Sidebar Penyelenggara tidak menampilkan SIR-JP & Manajemen Sistem
+        $penyelenggaraDashboard->assertDontSeeText('REKAPITULASI JP (SIR-JP)', false);
+        $penyelenggaraDashboard->assertDontSeeText('MANAJEMEN SISTEM', false);
+        $penyelenggaraDashboard->assertSee('admin_penyelenggara');
+    }
+
+    public function test_user_can_switch_mode_to_peserta_and_is_redirected_to_portal_with_participant_sidebar(): void
+    {
+        $unique = rand(100000, 999999);
+        $user = User::create([
+            'name' => 'Multi Role User ' . $unique,
+            'nik' => '320108' . $unique . '0008',
+            'email' => "multi_portal_{$unique}@example.com",
+            'username' => 'multi_portal_' . $unique,
+            'role' => 'penyelenggara',
+            'roles' => ['Administrator', 'Penyelenggara', 'Peserta Diklat'],
+            'status' => 'Aktif',
+            'password' => Hash::make('password123'),
+        ]);
+
+        // Swipe / Ganti mode ke Peserta Diklat
+        $response = $this->actingAs($user)->get(route('switch-role', ['role' => 'Peserta Diklat']));
+        $response->assertRedirect(route('portal.dashboard'));
+
+        $portalResponse = $this->actingAs($user)->get(route('portal.dashboard'));
+        $portalResponse->assertOk();
+        $portalResponse->assertSee('KEMNAKER CORPU');
+        $portalResponse->assertSee('peserta_diklat');
+        $portalResponse->assertSee('Tugas');
+
+        // Beralih kembali dari portal ke mode Administrator
+        $backResponse = $this->actingAs($user)->get(route('switch-role', ['role' => 'Administrator']));
+        $backResponse->assertRedirect(route('dashboard'));
+
+        $finalResponse = $this->actingAs($user)->get(route('dashboard'));
+        $finalResponse->assertOk();
+        $finalResponse->assertSeeText('REKAPITULASI JP (SIR-JP)', false);
+    }
 }

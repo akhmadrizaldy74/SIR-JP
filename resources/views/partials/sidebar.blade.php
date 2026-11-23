@@ -1,4 +1,8 @@
 <aside class="app-sidebar">
+    @php
+        $currentActiveRole = auth()->check() ? auth()->user()->getActiveRole() : 'Administrator';
+        $isAdministrator = strcasecmp($currentActiveRole, 'Administrator') === 0;
+    @endphp
     <div class="sidebar-header">
         <a href="{{ route('dashboard') }}" class="sidebar-brand">
             <img src="{{ asset('assets/images/logo-kclc.png') }}" alt="Logo Kemnaker Corpu" style="height: 38px; width: 38px; object-fit: contain;">
@@ -141,6 +145,7 @@
             </li>
         </ul>
 
+        @if($isAdministrator)
         <!-- ============================================== -->
         <!-- SISTEM REKAPITULASI JAM PELAJARAN (SIR-JP)     -->
         <!-- ============================================== -->
@@ -236,6 +241,7 @@
                 </a>
             </li>
         </ul>
+        @endif
 
         <div class="sidebar-section-title" style="font-size: 0.7rem;">Sesi Pengguna</div>
         <ul class="nav flex-column mb-4">

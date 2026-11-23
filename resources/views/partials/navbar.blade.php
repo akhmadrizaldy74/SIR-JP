@@ -16,38 +16,56 @@
             <i class="bi bi-bell fs-5"></i>
         </button>
 
-        <!-- User Profile Dropdown Sesuai Gambar KCLC: AKHMAD RIZALDY / admin_penyelenggara -->
+        <!-- User Profile Dropdown Sesuai Gambar KCLC -->
+        @php
+            $currentUser = auth()->user();
+            $currentActiveRole = $currentUser ? $currentUser->getActiveRole() : 'Penyelenggara';
+            $allRoles = $currentUser ? $currentUser->getAvailableRoles() : ['Penyelenggara'];
+            $roleSubtitle = strtolower(str_replace(' ', '_', $currentActiveRole));
+            if ($currentActiveRole === 'Penyelenggara') {
+                $roleSubtitle = 'admin_penyelenggara';
+            }
+        @endphp
         <div class="dropdown d-flex align-items-center">
             <button class="btn btn-link text-decoration-none d-flex align-items-center gap-2 p-0 text-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <div class="avatar-circle rounded-circle bg-light border d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
                     <i class="bi bi-person-fill text-secondary fs-5"></i>
                 </div>
                 <div class="text-start d-none d-sm-block">
-                    <div class="fw-bold text-dark lh-1" style="font-size: 0.85rem; letter-spacing: 0.3px;">{{ strtoupper(auth()->user()->name ?? 'AKHMAD RIZALDY') }}</div>
-                    <span class="text-muted text-capitalize" style="font-size: 0.72rem;">{{ auth()->user()->role ?? 'penyelenggara' }}</span>
+                    <div class="fw-bold text-dark lh-1" style="font-size: 0.85rem; letter-spacing: 0.3px;">{{ strtoupper($currentUser->name ?? 'AKHMAD RIZALDY') }}</div>
+                    <span class="text-muted" style="font-size: 0.72rem;">{{ $roleSubtitle }}</span>
                 </div>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm border py-2" style="min-width: 200px;">
-                <li class="px-3 py-2 border-bottom">
-                    <div class="fw-bold text-dark">{{ auth()->user()->name ?? 'AKHMAD RIZALDY' }}</div>
-                    <div class="text-muted small">{{ auth()->user()->email ?? 'penyelenggara@sir-jp.go.id' }}</div>
-                </li>
-                <li>
-                    <a class="dropdown-item py-2" href="{{ route('profile.index') }}">
-                        <i class="bi bi-person me-2 text-primary"></i> Profil Saya
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item py-2" href="{{ route('profile.password') }}">
-                        <i class="bi bi-key me-2 text-warning"></i> Ganti Password
-                    </a>
-                </li>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border py-2" style="min-width: 220px; border-radius: 8px;">
+                @foreach($allRoles as $roleOpt)
+                    @php
+                        $isActiveMode = strcasecmp($currentActiveRole, $roleOpt) === 0;
+                    @endphp
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center justify-content-between py-2 px-3 {{ $isActiveMode ? 'fw-bold text-dark' : 'text-secondary' }}" 
+                           href="{{ route('switch-role', ['role' => $roleOpt]) }}">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-person text-secondary"></i>
+                                <span>{{ $roleOpt }}</span>
+                            </div>
+                            @if($isActiveMode)
+                                <span class="badge" style="background-color: #DCFCE7; color: #16A34A; font-size: 0.68rem; font-weight: 600; padding: 3px 8px; border-radius: 4px;">Active</span>
+                            @endif
+                        </a>
+                    </li>
+                @endforeach
+
                 <li><hr class="dropdown-divider my-1"></li>
+                <li>
+                    <a class="dropdown-item py-2 px-3 text-secondary d-flex align-items-center gap-2" href="{{ route('profile.index') }}">
+                        <i class="bi bi-person-gear"></i> Profil Saya
+                    </a>
+                </li>
                 <li>
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="dropdown-item py-2 text-danger">
-                            <i class="bi bi-box-arrow-right me-2"></i> Keluar
+                        <button type="submit" class="dropdown-item py-2 px-3 text-danger d-flex align-items-center gap-2 border-0 bg-transparent w-100">
+                            <i class="bi bi-box-arrow-right"></i> Logout
                         </button>
                     </form>
                 </li>

@@ -336,14 +336,54 @@
                 </button>
 
                 <!-- Profile User Sesuai Gambar: Faizal Haqqi / peserta_diklat -->
-                <div class="d-flex align-items-center gap-2 ps-2 border-start">
-                    <div class="avatar-circle rounded-circle bg-light border d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                        <i class="bi bi-person-fill text-secondary fs-5"></i>
-                    </div>
-                    <div class="text-start d-none d-sm-block">
-                        <div class="fw-bold text-dark lh-1" style="font-size: 0.85rem;">{{ $peserta->nama ?? (auth()->check() ? auth()->user()->name : 'Peserta Diklat') }}</div>
-                        <span class="text-muted" style="font-size: 0.72rem;">{{ auth()->check() && auth()->user()->role ? auth()->user()->role . '_diklat' : 'peserta_diklat' }}</span>
-                    </div>
+                @php
+                    $portalAuthUser = auth()->user();
+                    $portalRoles = $portalAuthUser ? $portalAuthUser->getAvailableRoles() : [];
+                    $hasMultiPortalRoles = count($portalRoles) > 1;
+                @endphp
+                <div class="dropdown d-flex align-items-center ps-2 border-start">
+                    <button class="btn btn-link text-decoration-none d-flex align-items-center gap-2 p-0 text-dark dropdown-toggle" 
+                            type="button" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false">
+                        <div class="avatar-circle rounded-circle bg-light border d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                            <i class="bi bi-person-fill text-secondary fs-5"></i>
+                        </div>
+                        <div class="text-start d-none d-sm-block">
+                            <div class="fw-bold text-dark lh-1" style="font-size: 0.85rem;">{{ $peserta->nama ?? ($portalAuthUser ? $portalAuthUser->name : 'Peserta Diklat') }}</div>
+                            <span class="text-muted" style="font-size: 0.72rem;">peserta_diklat</span>
+                        </div>
+                    </button>
+                    @if($hasMultiPortalRoles)
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border py-2" style="min-width: 220px; border-radius: 8px;">
+                        @foreach($portalRoles as $roleOpt)
+                            @php
+                                $isCurrentPeserta = strcasecmp('Peserta Diklat', $roleOpt) === 0 || strcasecmp('Peserta', $roleOpt) === 0;
+                            @endphp
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center justify-content-between py-2 px-3 {{ $isCurrentPeserta ? 'fw-bold text-dark' : 'text-secondary' }}" 
+                                   href="{{ route('switch-role', ['role' => $roleOpt]) }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-person text-secondary"></i>
+                                        <span>{{ $roleOpt }}</span>
+                                    </div>
+                                    @if($isCurrentPeserta)
+                                        <span class="badge" style="background-color: #DCFCE7; color: #16A34A; font-size: 0.68rem; font-weight: 600; padding: 3px 8px; border-radius: 4px;">Active</span>
+                                    @endif
+                                </a>
+                            </li>
+                        @endforeach
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li>
+                            <form action="{{ route('portal.logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="dropdown-item py-2 px-3 text-danger d-flex align-items-center gap-2 border-0 bg-transparent w-100">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                    @endif
                 </div>
             </div>
         </header>

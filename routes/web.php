@@ -197,6 +197,9 @@ Route::middleware('auth')->group(function () {
     // 14. Manajemen Pengguna Sistem & Peran (Role)
     Route::resource('users', UserController::class);
 
+    // 15. Ganti Mode Peran / Swipe Role Dinamis Sesuai KCLC
+    Route::get('/switch-role/{role}', [AuthController::class, 'switchRole'])->name('switch-role');
+
     // JSON API Endpoints untuk Interaktivitas Dinamis Form
     Route::get('/api/angkatans-by-pelatihan/{pelatihanId}', [PenugasanPengajarController::class, 'getAngkatansByPelatihan']);
     Route::get('/api/mata-pelatihans-by-angkatan/{angkatanId}', [PenugasanPengajarController::class, 'getMataPelatihansByAngkatan']);

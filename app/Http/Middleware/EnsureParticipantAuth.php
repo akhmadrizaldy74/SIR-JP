@@ -14,25 +14,32 @@ class EnsureParticipantAuth
     public function handle(Request $request, Closure $next): Response
     {
         if (!session()->has('participant_id')) {
-            // Jika login via auth web dengan role peserta, sambungkan sesi otomatis
-            if (auth()->check() && auth()->user()->role === 'peserta') {
+            // Jika login via auth web dan memiliki role peserta atau aktif dalam mode peserta
+            if (auth()->check()) {
                 $user = auth()->user();
-                $peserta = \App\Models\Peserta::where('nip', $user->nik)
-                    ->orWhere('email', $user->email)
-                    ->first();
+                $available = $user->getAvailableRoles();
+                $hasPesertaRole = $user->role === 'peserta' 
+                    || in_array('Peserta', $available) 
+                    || in_array('Peserta Diklat', $available);
 
-                if (!$peserta) {
-                    $peserta = \App\Models\Peserta::create([
-                        'nip' => $user->nik,
-                        'nama' => $user->name,
-                        'email' => $user->email,
-                        'jenis_kelamin' => 'Laki-laki',
-                        'instansi' => 'PPSDM Kemnaker',
-                    ]);
+                if ($hasPesertaRole) {
+                    $peserta = \App\Models\Peserta::where('nip', $user->nik)
+                        ->orWhere('email', $user->email)
+                        ->first();
+
+                    if (!$peserta) {
+                        $peserta = \App\Models\Peserta::create([
+                            'nip' => $user->nik ?: 'NIK-' . substr(md5($user->email), 0, 10),
+                            'nama' => $user->name,
+                            'email' => $user->email,
+                            'jenis_kelamin' => 'Laki-laki',
+                            'instansi' => 'PPSDM Kemnaker',
+                        ]);
+                    }
+
+                    session(['participant_id' => $peserta->id]);
+                    return $next($request);
                 }
-
-                session(['participant_id' => $peserta->id]);
-                return $next($request);
             }
 
             if ($request->expectsJson()) {
