@@ -143,7 +143,7 @@
                                 <div>{{ $rec->keterangan ?? '-' }}</div>
                                 @if($rec && $rec->bukti_file)
                                     <div class="mt-1">
-                                        <a href="{{ asset('storage/' . $rec->bukti_file) }}" target="_blank" class="badge bg-primary text-white text-decoration-none">
+                                        <a href="{{ route('portal.presensi.bukti', $rec->id) }}" target="_blank" class="badge bg-primary text-white text-decoration-none shadow-sm">
                                             <i class="bi bi-paperclip me-1"></i> Bukti Lampiran
                                         </a>
                                     </div>

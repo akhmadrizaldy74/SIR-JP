@@ -81,6 +81,26 @@
                     @enderror
                 </div>
 
+                <!-- Link Virtual Meeting (Zoom / Google Meet) -->
+                <div class="mb-3">
+                    <label for="link_meeting" class="form-label fw-semibold small text-secondary">
+                        TAUTAN ZOOM / GOOGLE MEET (OPSIONAL)
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light text-primary"><i class="bi bi-camera-video"></i></span>
+                        <input type="text" 
+                               name="link_meeting" 
+                               id="link_meeting" 
+                               class="form-control @error('link_meeting') is-invalid @enderror" 
+                               value="{{ old('link_meeting') }}" 
+                               placeholder="Contoh: https://us04web.zoom.us/j/123456789 atau https://meet.google.com/xyz-abcd-efg">
+                    </div>
+                    <small class="text-muted">Jika diisi, tombol 'Gabung Zoom Meeting' akan otomatis muncul di dashboard peserta.</small>
+                    @error('link_meeting')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+
                 <!-- Tanggal & Jam Pelaksanaan -->
                 <div class="row g-3 mb-3">
                     <div class="col-md-4">

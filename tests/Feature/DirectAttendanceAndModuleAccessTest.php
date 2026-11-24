@@ -186,4 +186,69 @@ class DirectAttendanceAndModuleAccessTest extends TestCase
         $this->assertContains('kuis', $stored);
         $this->assertNotContains('ujian', $stored);
     }
+
+    public function test_peserta_and_admin_can_view_uploaded_attendance_proof_without_403()
+    {
+        $fakePdf = UploadedFile::fake()->create('surat_dokter.pdf', 300, 'application/pdf');
+
+        $this->withSession(['participant_id' => $this->peserta->id])
+            ->post(route('portal.presensi.direct.post', $this->session->id), [
+                'status_kehadiran' => 'Sakit',
+                'keterangan' => 'Izin sakit.',
+                'bukti_file' => $fakePdf,
+            ]);
+
+        $presensi = Presensi::where('attendance_session_id', $this->session->id)
+            ->where('peserta_id', $this->peserta->id)
+            ->first();
+
+        $this->assertNotNull($presensi->bukti_file);
+
+        // 1. Peserta pemilik bukti bisa melihat bukti tanpa 403
+        $respPeserta = $this->withSession(['participant_id' => $this->peserta->id])
+            ->get(route('portal.presensi.bukti', $presensi->id));
+        $respPeserta->assertOk();
+
+        // 2. Admin/Pengajar bisa melihat bukti
+        $respAdmin = $this->actingAs($this->admin)
+            ->get(route('portal.presensi.bukti', $presensi->id));
+        $respAdmin->assertOk();
+
+        // 3. Peserta lain dicegah (403)
+        $unique = rand(1000, 9999);
+        $otherPeserta = Peserta::create([
+            'nip' => '198' . time() . $unique,
+            'nama' => 'Peserta Lain ' . $unique,
+            'email' => 'other' . $unique . '@kemnaker.go.id',
+            'jenis_kelamin' => 'Laki-laki',
+        ]);
+        $respOther = $this->withSession(['participant_id' => $otherPeserta->id])
+            ->get(route('portal.presensi.bukti', $presensi->id));
+        $respOther->assertStatus(403);
+    }
+
+    public function test_pengajar_can_update_meeting_link_and_it_shows_on_participant_dashboard()
+    {
+        $zoomUrl = 'https://us04web.zoom.us/j/9876543210';
+
+        // Admin / Pengajar update link meeting
+        $response = $this->actingAs($this->admin)
+            ->patch(route('attendance-sessions.update_meeting_link', $this->session->id), [
+                'link_meeting' => $zoomUrl,
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->session->refresh();
+        $this->assertEquals($zoomUrl, $this->session->link_meeting);
+
+        // Peserta melihat link meeting di dashboard portal
+        $portalResponse = $this->withSession(['participant_id' => $this->peserta->id])
+            ->get(route('portal.dashboard'));
+
+        $portalResponse->assertOk();
+        $portalResponse->assertSee($zoomUrl);
+        $portalResponse->assertSee('Gabung Zoom / Kelas Daring');
+    }
 }

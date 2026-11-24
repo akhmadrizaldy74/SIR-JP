@@ -50,6 +50,25 @@
                     Kelas: <strong>{{ $attendanceSession->kelasMapel->nama_kelas ?? '-' }}</strong> &bull;
                     Ruangan: <strong>{{ $attendanceSession->kelasMapel->ruangan->nama_ruangan ?? ($attendanceSession->jadwal->ruangan ?? '-') }}</strong>
                 </div>
+                @if($attendanceSession->link_meeting)
+                    <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                            <i class="bi bi-camera-video-fill me-1"></i> Zoom / Meet:
+                        </span>
+                        <a href="{{ $attendanceSession->link_meeting }}" target="_blank" class="small fw-semibold text-truncate text-primary" style="max-width: 320px;">
+                            {{ $attendanceSession->link_meeting }}
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#modalZoomLink" title="Ubah Link Zoom">
+                            <i class="bi bi-pencil-square"></i> Ubah Link
+                        </button>
+                    </div>
+                @else
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1" data-bs-toggle="modal" data-bs-target="#modalZoomLink">
+                            <i class="bi bi-camera-video me-1"></i> + Bagikan Link Zoom ke Peserta
+                        </button>
+                    </div>
+                @endif
             </div>
             <div>
                 @if($attendanceSession->status === 'Aktif')
@@ -176,7 +195,16 @@
                                 <span class="text-muted">-</span>
                             @endif
                         </td>
-                        <td class="small text-muted">{{ $rec->keterangan ?? '-' }}</td>
+                        <td class="small text-muted">
+                            <div>{{ $rec->keterangan ?? '-' }}</div>
+                            @if($rec && $rec->bukti_file)
+                                <div class="mt-1">
+                                    <a href="{{ route('portal.presensi.bukti', $rec->id) }}" target="_blank" class="badge bg-primary text-white text-decoration-none shadow-sm">
+                                        <i class="bi bi-paperclip me-1"></i> Bukti Lampiran
+                                    </a>
+                                </div>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
@@ -185,6 +213,44 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Modal Update Link Zoom / Virtual Meeting -->
+<div class="modal fade" id="modalZoomLink" tabindex="-1" aria-labelledby="modalZoomLinkLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 shadow border-0">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalZoomLinkLabel">
+                    <i class="bi bi-camera-video text-primary me-2"></i> Tautan Zoom / Virtual Meeting
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('attendance-sessions.update_meeting_link', $attendanceSession->id) }}" method="POST">
+                @csrf
+                @method('PATCH')
+                <div class="modal-body">
+                    <p class="text-muted small">
+                        Masukkan tautan Zoom Meeting atau Google Meet untuk sesi pembelajaran ini. Tautan ini akan otomatis muncul sebagai tombol aksi langsung pada portal presensi peserta di pertemuan ini.
+                    </p>
+                    <div class="mb-3">
+                        <label for="link_meeting_input" class="form-label fw-semibold small">URL Meeting Zoom / Meet</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-primary"><i class="bi bi-link-45deg"></i></span>
+                            <input type="text" name="link_meeting" id="link_meeting_input" class="form-control" 
+                                   value="{{ old('link_meeting', $attendanceSession->link_meeting) }}"
+                                   placeholder="https://us04web.zoom.us/j/123456789 atau https://meet.google.com/xyz">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary px-3 fw-bold">
+                        <i class="bi bi-send me-1"></i> Simpan & Bagikan ke Peserta
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 @endsection

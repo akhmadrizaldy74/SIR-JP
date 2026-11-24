@@ -15,6 +15,7 @@ class AttendanceSession extends Model
         'jadwal_id',
         'kelas_mapel_id',
         'judul_sesi',
+        'link_meeting',
         'tanggal',
         'jam_mulai',
         'jam_selesai',

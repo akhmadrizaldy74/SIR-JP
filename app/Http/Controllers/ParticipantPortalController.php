@@ -10,6 +10,7 @@ use App\Models\Presensi;
 use App\Models\AttendanceRequest;
 use App\Models\LogAktivitas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ParticipantPortalController extends Controller
 {
@@ -350,5 +351,40 @@ class ParticipantPortalController extends Controller
         }
 
         return redirect()->back()->with('success', $result['message']);
+    }
+
+    /**
+     * Tampilkan atau buka berkas lampiran bukti presensi secara aman dan terproteksi.
+     */
+    public function viewBukti(int $id)
+    {
+        $presensi = Presensi::findOrFail($id);
+
+        // Otorisasi: Peserta hanya dapat melihat buktinya sendiri; Staf/Pengajar/Admin dapat melihat semua bukti peserta
+        if (session()->has('participant_id')) {
+            $pesertaId = session('participant_id');
+            if ($presensi->peserta_id !== $pesertaId) {
+                abort(403, 'Anda tidak memiliki hak akses untuk melihat berkas bukti peserta lain.');
+            }
+        } elseif (auth()->check()) {
+            $user = auth()->user();
+            if ($user->isGuest()) {
+                abort(403, 'Akses dibatasi untuk akun Guest.');
+            }
+        } else {
+            abort(403, 'Silakan login terlebih dahulu untuk mengakses bukti.');
+        }
+
+        if (!$presensi->bukti_file || !Storage::disk('public')->exists($presensi->bukti_file)) {
+            abort(404, 'Berkas lampiran bukti tidak ditemukan pada server.');
+        }
+
+        $path = Storage::disk('public')->path($presensi->bukti_file);
+        $mime = mime_content_type($path) ?: 'application/octet-stream';
+
+        return response()->file($path, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . basename($presensi->bukti_file) . '"'
+        ]);
     }
 }

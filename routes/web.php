@@ -55,6 +55,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/presensi/login', [ParticipantAuthController::class, 'showLoginForm'])->name('portal.login');
 Route::post('/presensi/login', [ParticipantAuthController::class, 'login'])->middleware('throttle:15,1')->name('portal.login.post');
 Route::post('/presensi/logout', [ParticipantAuthController::class, 'logout'])->name('portal.logout');
+Route::get('/presensi/bukti/{id}', [ParticipantPortalController::class, 'viewBukti'])->name('portal.presensi.bukti');
 
 Route::middleware(\App\Http\Middleware\EnsureParticipantAuth::class)->prefix('presensi')->name('portal.')->group(function () {
     Route::get('/', [ParticipantPortalController::class, 'dashboard'])->name('dashboard');
@@ -124,6 +125,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('attendance-sessions', AttendanceSessionController::class);
     Route::post('attendance-sessions/{attendance_session}/activate', [AttendanceSessionController::class, 'activate'])->name('attendance-sessions.activate');
     Route::post('attendance-sessions/{attendance_session}/close', [AttendanceSessionController::class, 'close'])->name('attendance-sessions.close');
+    Route::patch('attendance-sessions/{attendance_session}/meeting-link', [AttendanceSessionController::class, 'updateMeetingLink'])->name('attendance-sessions.update_meeting_link');
     Route::get('attendance-sessions/{attendance_session}/qr-display', [AttendanceSessionController::class, 'qrDisplay'])->name('attendance-sessions.qr_display');
     Route::get('attendance-sessions/{attendance_session}/qr-token', [AttendanceSessionController::class, 'getLatestQrToken'])->name('attendance-sessions.qr_token');
 

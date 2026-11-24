@@ -87,6 +87,7 @@ class AttendanceSessionController extends Controller
             'tanggal' => 'required|date',
             'jam_mulai' => 'required',
             'jam_selesai' => 'required',
+            'link_meeting' => 'nullable|string|max:500',
             'toleransi_terlambat_menit' => 'required|integer|min:0|max:120',
             'status' => 'required|in:Draft,Aktif',
         ], [
@@ -112,6 +113,7 @@ class AttendanceSessionController extends Controller
             'jadwal_id' => $jadwal->id,
             'kelas_mapel_id' => $kelasMapelId,
             'judul_sesi' => $validated['judul_sesi'],
+            'link_meeting' => $request->input('link_meeting'),
             'tanggal' => $validated['tanggal'],
             'jam_mulai' => $validated['jam_mulai'],
             'jam_selesai' => $validated['jam_selesai'],
@@ -207,6 +209,21 @@ class AttendanceSessionController extends Controller
             'ttl' => $tokenData['ttl'],
             'expired_at' => $tokenData['expired_at']->toIso8601String(),
         ]);
+    }
+
+    public function updateMeetingLink(Request $request, AttendanceSession $attendanceSession)
+    {
+        $validated = $request->validate([
+            'link_meeting' => 'nullable|string|max:500',
+        ]);
+
+        $attendanceSession->update([
+            'link_meeting' => $validated['link_meeting'],
+        ]);
+
+        LogAktivitas::catat('Presensi', 'Update Link Zoom Sesi', 'Memperbarui tautan virtual meeting sesi: ' . $attendanceSession->judul_sesi);
+
+        return back()->with('success', 'Tautan Zoom / Virtual Meeting berhasil diperbarui dan disiarkan ke portal peserta!');
     }
 
     public function destroy(AttendanceSession $attendanceSession)

@@ -238,21 +238,35 @@ class NotificationService
     {
         $notifications = [];
 
-        // A. Sesi Presensi Aktif Terbuka
+        // A. Sesi Presensi Aktif Terbuka & Link Zoom
         try {
-            $activeSessions = AttendanceSession::where('is_open', true)->latest()->take(2)->get();
+            $activeSessionsQuery = AttendanceSession::with('jadwal.mataPelatihan')
+                ->where('status', 'Aktif');
+
+            if ($peserta && $peserta->angkatan_id) {
+                $activeSessionsQuery->where(function($q) use ($peserta) {
+                    $q->whereHas('kelasMapel', fn($k) => $k->where('angkatan_id', $peserta->angkatan_id))
+                      ->orWhereHas('jadwal.mataPelatihan', fn($m) => $m->where('angkatan_id', $peserta->angkatan_id));
+                });
+            }
+
+            $activeSessions = $activeSessionsQuery->latest()->take(3)->get();
             foreach ($activeSessions as $as) {
+                $judul = $as->judul_sesi;
+                $hasZoom = !empty($as->link_meeting);
                 $notifications[] = [
                     'id' => 'sesi_pres_' . $as->id,
-                    'title' => 'Sesi Presensi Aktif Dibuka!',
-                    'message' => "Sesi presensi {$as->nama_sesi} sedang dibuka. Silakan lakukan absensi sekarang.",
+                    'title' => $hasZoom ? 'Tautan Zoom & Presensi Dibuka!' : 'Sesi Presensi Aktif Dibuka!',
+                    'message' => $hasZoom 
+                        ? "Pengajar telah membagikan tautan Zoom untuk {$judul}. Silakan masuk ke kelas daring dan lakukan presensi."
+                        : "Sesi presensi {$judul} sedang dibuka. Silakan lakukan absensi sekarang.",
                     'url' => route('portal.dashboard'),
-                    'time_formatted' => $this->formatDiffForHumans($as->opened_at ?? $as->created_at),
-                    'created_at' => $as->opened_at ?? $as->created_at,
-                    'icon' => 'bi-qr-code-scan',
+                    'time_formatted' => $this->formatDiffForHumans($as->waktu_buka_presensi ?? $as->created_at),
+                    'created_at' => $as->waktu_buka_presensi ?? $as->created_at,
+                    'icon' => $hasZoom ? 'bi-camera-video-fill' : 'bi-qr-code-scan',
                     'bg_color' => '#DCFCE7',
                     'text_color' => '#15803D',
-                    'badge' => 'Presensi Dibuka',
+                    'badge' => $hasZoom ? 'Zoom & Presensi' : 'Presensi Dibuka',
                 ];
             }
         } catch (\Throwable $e) {

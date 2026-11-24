@@ -268,7 +268,9 @@
                             ?? ($sess->jadwal->widyaiswara->nama 
                             ?? ($sess->jadwal->pengajar ?? 'Alfiah Pira Mundiarsih, S.Sos., M.A.'));
                         $ruanganNama = $sess->kelasMapel->ruangan->nama_ruangan 
-                            ?? ($sess->jadwal->ruangan ?? 'Zoom Meeting');
+                            ?? ($sess->jadwal->ruangan ?? 'Ruang Kelas');
+                        $zoomMeetingUrl = $sess->link_meeting 
+                            ?: (\Illuminate\Support\Str::startsWith($sess->jadwal->ruangan ?? '', ['http://', 'https://']) ? $sess->jadwal->ruangan : null);
                         $isSessOpen = $sess->isBuka();
                     @endphp
 
@@ -284,7 +286,7 @@
                                     <div class="d-flex align-items-center gap-2 mb-1">
                                         <h6 class="fw-bold text-dark mb-0">Pertemuan {{ $idx + 1 }}</h6>
                                         <span class="badge" style="background-color: #E0E7FF; color: #4338CA; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;">
-                                            {{ $sess->jadwal->jp ?? 1 }} JP
+                                             {{ $sess->jadwal->jp ?? 1 }} JP
                                         </span>
                                     </div>
                                     <div class="text-muted small mb-1">
@@ -297,10 +299,24 @@
                                         </span>
                                         <span class="badge bg-secondary-subtle text-secondary small py-0 px-2" style="font-size: 0.68rem;">widyaiswara</span>
                                     </div>
-                                    <div class="small text-primary mt-1">
-                                        <i class="bi bi-camera-video me-1"></i> {{ $ruanganNama }}
-                                        <i class="bi bi-copy text-muted ms-1 cursor-pointer" title="Salin Info Pertemuan" onclick="navigator.clipboard.writeText('Pertemuan {{ $idx + 1 }}: {{ $ruanganNama }}'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Tersalin!', showConfirmButton: false, timer: 1200});"></i>
-                                    </div>
+                                    
+                                    @if($zoomMeetingUrl)
+                                        <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
+                                            <a href="{{ $zoomMeetingUrl }}" target="_blank" class="btn btn-sm btn-primary rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center gap-1 text-white fw-semibold" style="font-size: 0.82rem; background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);">
+                                                <i class="bi bi-camera-video-fill"></i>
+                                                <span>Gabung Zoom / Kelas Daring</span>
+                                                <i class="bi bi-box-arrow-up-right ms-1 small"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 0.78rem;" title="Salin Tautan Zoom" onclick="navigator.clipboard.writeText('{{ $zoomMeetingUrl }}'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Tautan Zoom tersalin!', showConfirmButton: false, timer: 1500});">
+                                                <i class="bi bi-copy me-1"></i> Salin
+                                            </button>
+                                        </div>
+                                    @else
+                                        <div class="small text-primary mt-1">
+                                            <i class="bi bi-geo-alt me-1"></i> {{ $ruanganNama }}
+                                            <i class="bi bi-copy text-muted ms-1 cursor-pointer" title="Salin Info Ruangan" onclick="navigator.clipboard.writeText('Pertemuan {{ $idx + 1 }}: {{ $ruanganNama }}'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Tersalin!', showConfirmButton: false, timer: 1200});"></i>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 
@@ -313,7 +329,7 @@
                                             <span>{{ $presensiUser->status_kehadiran }} ({{ $presensiUser->waktu_check_in ? $presensiUser->waktu_check_in->format('H:i') : 'OK' }})</span>
                                         </button>
                                         @if($presensiUser->bukti_file)
-                                            <a href="{{ asset('storage/' . $presensiUser->bukti_file) }}" target="_blank" class="btn btn-outline-secondary btn-sm px-2 py-2 rounded-2" title="Lihat Bukti Foto/PDF">
+                                            <a href="{{ route('portal.presensi.bukti', $presensiUser->id) }}" target="_blank" class="btn btn-outline-secondary btn-sm px-2 py-2 rounded-2" title="Lihat Bukti Foto/PDF">
                                                 <i class="bi bi-paperclip"></i>
                                             </a>
                                         @endif
