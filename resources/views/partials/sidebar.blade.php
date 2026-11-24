@@ -1,13 +1,14 @@
 <aside class="app-sidebar">
     @php
+        $isGuest = auth()->check() && auth()->user()->isGuest();
         $currentActiveRole = auth()->check() ? auth()->user()->getActiveRole() : (session()->has('participant_id') ? 'Peserta' : 'Administrator');
-        $isAdministrator = strcasecmp($currentActiveRole, 'Administrator') === 0;
-        $isPeserta = strcasecmp($currentActiveRole, 'Peserta') === 0 || strcasecmp($currentActiveRole, 'Peserta Diklat') === 0 || (session()->has('participant_id') && !auth()->check());
-        $isPenyelenggara = strcasecmp($currentActiveRole, 'Penyelenggara') === 0;
-        $isPengajar = strcasecmp($currentActiveRole, 'Pengajar') === 0;
+        $isAdministrator = !$isGuest && strcasecmp($currentActiveRole, 'Administrator') === 0;
+        $isPeserta = !$isGuest && (strcasecmp($currentActiveRole, 'Peserta') === 0 || strcasecmp($currentActiveRole, 'Peserta Diklat') === 0 || (session()->has('participant_id') && !auth()->check()));
+        $isPenyelenggara = !$isGuest && strcasecmp($currentActiveRole, 'Penyelenggara') === 0;
+        $isPengajar = !$isGuest && strcasecmp($currentActiveRole, 'Pengajar') === 0;
     @endphp
     <div class="sidebar-header">
-        <a href="{{ $isPeserta ? route('portal.dashboard') : route('dashboard') }}" class="sidebar-brand">
+        <a href="{{ $isGuest ? route('guest.dashboard') : ($isPeserta ? route('portal.dashboard') : route('dashboard')) }}" class="sidebar-brand">
             <img src="{{ asset('assets/images/logo-kclc.png') }}" alt="Logo Kemnaker Corpu" style="height: 38px; width: 38px; object-fit: contain;">
             <div class="d-flex flex-column text-start">
                 <div class="sidebar-brand-title">KEMNAKER CORPU</div>
@@ -17,7 +18,40 @@
     </div>
 
     <div class="sidebar-menu-wrapper">
-        @if($isPeserta)
+        @if($isGuest)
+            <!-- ============================================================== -->
+            <!-- SIDEBAR KHUSUS GUEST (MENUNGGU PENUGASAN ROLE OLEH ADMIN)       -->
+            <!-- ============================================================== -->
+            <div class="sidebar-section-title">
+                STATUS AKUN
+            </div>
+            <ul class="nav flex-column mb-3">
+                <li class="nav-item">
+                    <a class="nav-link-custom active" href="{{ route('guest.dashboard') }}">
+                        <i class="bi bi-hourglass-split text-warning"></i>
+                        <span class="nav-text">Status Guest</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link-custom {{ request()->routeIs('profile.*') ? 'active' : '' }}" href="{{ route('profile.index') }}">
+                        <i class="bi bi-person-circle"></i>
+                        <span class="nav-text">Profil Saya</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-section-title">
+                BANTUAN
+            </div>
+            <ul class="nav flex-column mb-3">
+                <li class="nav-item">
+                    <a class="nav-link-custom" href="mailto:admin.corpu@kemnaker.go.id">
+                        <i class="bi bi-envelope-at-fill"></i>
+                        <span class="nav-text">Hubungi Admin</span>
+                    </a>
+                </li>
+            </ul>
+        @elseif($isPeserta)
             <!-- ============================================================== -->
             <!-- SIDEBAR KHUSUS PESERTA (UNIFORM MODEL & CSS DENGAN ADMIN)      -->
             <!-- ============================================================== -->

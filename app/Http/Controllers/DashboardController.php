@@ -26,6 +26,11 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
+        // Jika pengguna dalam status 'guest', arahkan ke dashboard guest
+        if (auth()->check() && auth()->user()->isGuest()) {
+            return redirect()->route('guest.dashboard');
+        }
+
         // Jika pengguna dalam mode aktif 'peserta', arahkan ke dashboard portal peserta
         if (auth()->check()) {
             $activeRole = auth()->user()->getActiveRole();

@@ -75,6 +75,7 @@ class UserController extends Controller
         $countPenyelenggara = User::whereIn('role', ['penyelenggara', 'admin'])->count();
         $countPeserta = User::where('role', 'peserta')->count();
         $countWidyaiswara = User::where('role', 'widyaiswara')->count();
+        $countGuest = User::where('role', 'guest')->orWhereJsonContains('roles', 'Guest')->count();
 
         return view('users.index', compact(
             'users',
@@ -84,7 +85,8 @@ class UserController extends Controller
             'countAll',
             'countPenyelenggara',
             'countPeserta',
-            'countWidyaiswara'
+            'countWidyaiswara',
+            'countGuest'
         ));
     }
 
@@ -140,6 +142,8 @@ class UserController extends Controller
                 $primaryRole = 'widyaiswara';
             } elseif (in_array('Peserta', $rolesInput) || in_array('Peserta Diklat', $rolesInput)) {
                 $primaryRole = 'peserta';
+            } elseif (in_array('Guest', $rolesInput)) {
+                $primaryRole = 'guest';
             }
         }
         if (!$primaryRole) {
@@ -224,6 +228,10 @@ class UserController extends Controller
                 $user->role = 'widyaiswara';
             } elseif (in_array('Peserta', $rolesInput) || in_array('Peserta Diklat', $rolesInput)) {
                 $user->role = 'peserta';
+            } elseif (in_array('Guest', $rolesInput)) {
+                $user->role = 'guest';
+            } else {
+                $user->role = !empty($rolesInput) ? 'penyelenggara' : 'guest';
             }
         } elseif ($request->filled('role')) {
             $user->role = $validated['role'];

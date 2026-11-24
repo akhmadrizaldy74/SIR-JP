@@ -49,7 +49,7 @@
                     <td class="text-center">
                         <div class="d-flex align-items-center justify-content-center gap-2">
                             <!-- Tombol Edit -->
-                            <a href="{{ route('pelatihan.edit', $item->id) }}" 
+                            <a href="{{ route('pelatihan.edit', ['pelatihan' => $item->id, 'redirect_to' => route('mooc.pelatihan')]) }}" 
                                class="btn btn-sm d-inline-flex align-items-center justify-content-center" 
                                style="width: 32px; height: 32px; background-color: #E0F2FE; border: none; border-radius: 6px; color: #0284C7;"
                                title="Edit Modul Kursus">

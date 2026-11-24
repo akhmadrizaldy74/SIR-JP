@@ -34,6 +34,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MoocController;
 use App\Http\Controllers\JenisPelatihanController;
 use App\Http\Controllers\TahunKurikulumController;
+use App\Http\Controllers\GuestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,6 +79,7 @@ Route::middleware('auth')->group(function () {
 
     // 1. Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/guest', [GuestController::class, 'index'])->name('guest.dashboard');
 
     // 2. Data Widyaiswara
     Route::resource('widyaiswara', WidyaiswaraController::class);

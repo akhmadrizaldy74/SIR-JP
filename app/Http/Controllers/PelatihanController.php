@@ -113,6 +113,10 @@ class PelatihanController extends Controller
 
         LogAktivitas::catat('Pelatihan', 'Ubah Data', 'Memperbarui data Pelatihan: ' . $pelatihan->nama_pelatihan);
 
+        if ($request->filled('redirect_to')) {
+            return redirect($request->input('redirect_to'))->with('success', 'Data Pelatihan berhasil diperbarui.');
+        }
+
         return redirect()->route('pelatihan.index')->with('success', 'Data Pelatihan berhasil diperbarui.');
     }
 

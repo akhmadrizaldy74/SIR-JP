@@ -86,6 +86,12 @@ class AuthController extends Controller
                     ->with('success', 'Selamat datang di Portal Diklat, ' . $user->name . '!');
             }
 
+            // Guest role redirect
+            if ($user->isGuest()) {
+                return redirect()->route('guest.dashboard')
+                    ->with('info', 'Selamat datang! Akun Anda berstatus Guest dan sedang menunggu penetapan hak akses oleh Administrator.');
+            }
+
             return redirect()->intended(route('dashboard'))
                 ->with('success', 'Selamat datang kembali, ' . Auth::user()->name . '!');
         }
@@ -143,17 +149,19 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'username' => $username,
             'phone' => $validated['phone'] ?? null,
-            'role' => 'penyelenggara',
+            'role' => 'guest',
+            'roles' => ['Guest'],
+            'bidang' => [],
             'status' => 'Aktif',
             'password' => Hash::make($validated['password']),
         ]);
 
         Auth::login($user);
 
-        LogAktivitas::catat('Autentikasi', 'Registrasi Penyelenggara Baru', 'Registrasi akun baru via NIK: ' . $user->nik);
+        LogAktivitas::catat('Autentikasi', 'Registrasi Akun Baru (Guest)', 'Registrasi akun baru Guest via NIK: ' . $user->nik);
 
         return redirect()->route('dashboard')
-            ->with('success', 'Selamat datang! Akun Penyelenggara Anda berhasil didaftarkan.');
+            ->with('info', 'Selamat datang! Akun Anda berhasil terdaftar dengan status Guest. Silakan tunggu Administrator menetapkan peran dan hak akses Anda.');
     }
 
     public function switchRole(Request $request, string $role)

@@ -56,22 +56,59 @@ class User extends Authenticatable
 
     public function isPenyelenggara(): bool
     {
+        if ($this->isGuest()) {
+            return false;
+        }
         return $this->role === 'penyelenggara' || $this->role === 'admin' 
             || (is_array($this->roles) && (in_array('Administrator', $this->roles) || in_array('Penyelenggara', $this->roles)));
     }
 
     public function isAdministrator(): bool
     {
+        if ($this->isGuest()) {
+            return false;
+        }
         return strcasecmp($this->getActiveRole(), 'Administrator') === 0;
     }
 
     public function isPengajar(): bool
     {
+        if ($this->isGuest()) {
+            return false;
+        }
         return strcasecmp($this->getActiveRole(), 'Pengajar') === 0;
+    }
+
+    public function isGuest(): bool
+    {
+        if (strcasecmp($this->role, 'guest') === 0) {
+            if (is_array($this->roles) && count($this->roles) > 0) {
+                $nonGuest = array_filter($this->roles, function($r) {
+                    return !in_array(strtolower($r), ['guest']);
+                });
+                if (count($nonGuest) > 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        if (is_array($this->roles) && count($this->roles) > 0) {
+            $hasGuest = in_array('Guest', $this->roles) || in_array('guest', $this->roles);
+            $nonGuest = array_filter($this->roles, function($r) {
+                return !in_array(strtolower($r), ['guest']);
+            });
+            return $hasGuest && count($nonGuest) === 0;
+        }
+
+        return false;
     }
 
     public function isPeserta(): bool
     {
+        if ($this->isGuest()) {
+            return false;
+        }
         if ($this->role === 'peserta') {
             return true;
         }
@@ -88,6 +125,10 @@ class User extends Authenticatable
      */
     public function getAvailableRoles(): array
     {
+        if ($this->isGuest()) {
+            return ['Guest'];
+        }
+
         if (is_array($this->roles) && count($this->roles) > 0) {
             $roles = array_map(function($r) {
                 return (in_array(strtolower($r), ['peserta', 'peserta diklat'])) ? 'Peserta' : $r;
@@ -116,6 +157,10 @@ class User extends Authenticatable
      */
     public function getActiveRole(): string
     {
+        if ($this->isGuest()) {
+            return 'Guest';
+        }
+
         $available = $this->getAvailableRoles();
         $currentSessionRole = session('active_role');
 
@@ -142,7 +187,11 @@ class User extends Authenticatable
             return 'Pengajar';
         }
 
-        return $available[0] ?? 'Penyelenggara';
+        if (in_array('Peserta', $available)) {
+            return 'Peserta';
+        }
+
+        return $available[0] ?? 'Guest';
     }
 
     public function logAktivitas()

@@ -802,21 +802,23 @@
     </div>
 
     <!-- Footer Controls: Dropdown Opsi 5 / 10 & Pagination Sesuai Permintaan User -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pt-3 mt-2 border-top">
-        <div class="d-flex align-items-center gap-2 text-nowrap flex-wrap">
-            <span class="text-muted small fw-medium">Tampilkan:</span>
-            <select id="selectPelatihanPerPage" class="form-select form-select-sm" style="width: 75px; border-color: #CBD5E1; font-weight: 600;">
-                <option value="5" selected>5</option>
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-            </select>
-            <span class="text-muted small">data per halaman</span>
-            <span class="text-muted small ms-2 border-start ps-2" id="pelatihanTableInfo">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pt-3 mt-2 border-top">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="d-inline-flex align-items-center gap-1 text-nowrap">
+                <span class="text-muted small fw-medium">Tampilkan:</span>
+                <select id="selectPelatihanPerPage" class="form-select form-select-sm" style="width: 75px; border-color: #CBD5E1; font-weight: 600;">
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+                <span class="text-muted small">data per halaman</span>
+            </div>
+            <span class="text-muted small ms-md-2 border-start ps-2 text-nowrap" id="pelatihanTableInfo">
                 Menampilkan 1 s/d 5 dari {{ count($pelatihanStats) }} data
             </span>
         </div>
-        <div id="pelatihanPaginationWrapper" class="flex-shrink-0 ms-auto">
+        <div id="pelatihanPaginationWrapper" class="overflow-auto py-1 ms-md-auto">
             <ul class="pagination pagination-sm mb-0 gap-1 flex-nowrap align-items-center" id="pelatihanPaginationList">
                 <!-- Diisi via JavaScript dengan windowing agar rapi dan tidak meluber -->
             </ul>

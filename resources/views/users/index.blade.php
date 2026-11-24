@@ -67,6 +67,23 @@
     </div>
 </div>
 
+@if(isset($countGuest) && $countGuest > 0)
+    <div class="alert alert-warning border-0 shadow-sm rounded-3 d-flex align-items-center justify-content-between p-3 mb-4" style="background-color: #FEF3C7; color: #92400E; border-left: 4px solid #F59E0B !important;">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle d-flex align-items-center justify-content-center bg-warning text-dark fw-bold" style="width: 38px; height: 38px;">
+                <i class="bi bi-person-exclamation fs-5"></i>
+            </div>
+            <div>
+                <strong class="d-block">Perhatian Administrator: Terdapat {{ $countGuest }} Akun Guest Baru</strong>
+                <span class="small">Pengguna baru mendaftar dengan peran tamu (Guest). Klik tombol di samping untuk menetapkan peran dan hak akses pengguna.</span>
+            </div>
+        </div>
+        <a href="{{ route('users.index', ['role' => 'guest']) }}" class="btn btn-warning btn-sm fw-semibold shadow-sm text-dark px-3 text-nowrap">
+            <i class="bi bi-pencil-square me-1"></i> Tinjau &amp; Beri Akses
+        </a>
+    </div>
+@endif
+
 <!-- Filter Bar -->
 <div class="card border-0 shadow-sm rounded-3 p-3 mb-4 bg-white">
     <form method="GET" action="{{ route('users.index') }}" class="row g-2 align-items-end">
@@ -81,6 +98,7 @@
             <label class="form-label small fw-semibold text-secondary mb-1">PERAN (ROLE)</label>
             <select name="role" class="form-select form-select-sm" onchange="this.form.submit()">
                 <option value="">Semua Peran (Role)</option>
+                <option value="guest" {{ $role === 'guest' ? 'selected' : '' }}>Guest (Menunggu Penugasan Role)</option>
                 <option value="penyelenggara" {{ $role === 'penyelenggara' ? 'selected' : '' }}>Penyelenggara / Admin</option>
                 <option value="peserta" {{ $role === 'peserta' ? 'selected' : '' }}>Peserta Diklat</option>
                 <option value="widyaiswara" {{ $role === 'widyaiswara' ? 'selected' : '' }}>Widyaiswara</option>
@@ -139,7 +157,11 @@
                             <span class="text-secondary small">{{ $u->email }}</span>
                         </td>
                         <td class="text-center">
-                            @if(is_array($u->roles) && count($u->roles) > 0)
+                            @if($u->isGuest())
+                                <span class="badge rounded-pill px-3 py-1 fw-semibold" style="background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A;">
+                                    <i class="bi bi-clock-history me-1"></i> Guest (Perlu Diset)
+                                </span>
+                            @elseif(is_array($u->roles) && count($u->roles) > 0)
                                 <div class="d-flex flex-wrap justify-content-center gap-1">
                                     @foreach(array_slice($u->roles, 0, 2) as $r)
                                         <span class="badge rounded-pill px-2 py-1 small" style="background-color: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE;">

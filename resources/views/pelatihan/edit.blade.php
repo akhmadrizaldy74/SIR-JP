@@ -21,6 +21,9 @@
                 <form action="{{ route('pelatihan.update', $pelatihan) }}" method="POST">
                     @csrf
                     @method('PUT')
+                    @if(request()->filled('redirect_to'))
+                        <input type="hidden" name="redirect_to" value="{{ request('redirect_to') }}">
+                    @endif
 
                     <div class="row">
                         <div class="col-md-4 mb-3">
@@ -83,7 +86,7 @@
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <a href="{{ route('pelatihan.index') }}" class="btn btn-outline-secondary">
+                        <a href="{{ request('redirect_to', route('pelatihan.index')) }}" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left me-1"></i> Batal
                         </a>
                         <button type="submit" class="btn btn-navy">
