@@ -171,6 +171,37 @@
                 </li>
             </ul>
 
+            <!-- ABSENSI & JADWAL PEMBELAJARAN -->
+            <div class="sidebar-section-title pt-0 text-white-50" style="font-size: 0.75rem; font-weight: 700;">
+                ABSENSI & KELAS
+            </div>
+            <ul class="nav flex-column mb-3">
+                <li class="nav-item">
+                    <a class="nav-link-custom {{ request()->routeIs('attendance-sessions.*') || request()->routeIs('attendance-manual.*') ? 'active' : '' }}" href="{{ route('attendance-sessions.index') }}">
+                        <i class="bi bi-clipboard-check"></i>
+                        <span class="nav-text">Absensi Peserta</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link-custom {{ request()->routeIs('presensi.rekap') ? 'active' : '' }}" href="{{ route('presensi.rekap') }}">
+                        <i class="bi bi-file-earmark-spreadsheet"></i>
+                        <span class="nav-text">Rekapitulasi Absensi</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link-custom {{ request()->routeIs('jadwal.*') ? 'active' : '' }}" href="{{ route('jadwal.index') }}">
+                        <i class="bi bi-calendar3"></i>
+                        <span class="nav-text">Jadwal Mengajar</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link-custom {{ request()->routeIs('realisasi.*') ? 'active' : '' }}" href="{{ route('realisasi.index') }}">
+                        <i class="bi bi-person-check-fill"></i>
+                        <span class="nav-text">Absen Pengajar (Klaim JP)</span>
+                    </a>
+                </li>
+            </ul>
+
             <!-- LMS DIKLAT -->
             <div class="sidebar-section-title pt-0 text-white-50" style="font-size: 0.75rem; font-weight: 700;">
                 LMS DIKLAT

@@ -6,7 +6,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h4 class="fw-bold text-dark mb-1">Sesi Presensi Pembelajaran</h4>
-        <div class="text-muted small">Kelola sesi presensi per mata pelatihan, tampilkan QR Code, dan verifikasi kehadiran</div>
+        <div class="text-muted small">Kelola absensi peserta per mata pelatihan, buka presensi langsung, dan pantau kehadiran kelas</div>
     </div>
     <a href="{{ route('attendance-sessions.create') }}" class="btn btn-primary d-flex align-items-center gap-2 rounded-3 shadow-sm">
         <i class="bi bi-plus-circle"></i>
@@ -99,33 +99,33 @@
 
                 <!-- Footer Card Actions -->
                 <div class="card-footer bg-white border-top p-2 d-flex justify-content-between align-items-center">
-                    <div class="d-flex gap-1">
+                    <div class="d-flex gap-1 align-items-center">
+                        <a href="{{ route('attendance-sessions.show', $sess->id) }}" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold" title="Buka & Kelola Absensi">
+                            <i class="bi bi-person-check-fill me-1"></i> Absensi Peserta
+                        </a>
+                        <a href="{{ route('attendance-manual.index', $sess->id) }}" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Kelola Presensi Manual">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
                         @if($sess->status === 'Aktif')
-                            <a href="{{ route('attendance-sessions.qr_display', $sess->id) }}" target="_blank" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" title="Tampilkan Layar QR Proyektor">
-                                <i class="bi bi-qr-code-scan"></i> Layar QR
+                            <a href="{{ route('attendance-sessions.qr_display', $sess->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Layar QR Proyektor (Opsional untuk kelas tatap muka)">
+                                <i class="bi bi-qr-code"></i>
                             </a>
                         @endif
-                        <a href="{{ route('attendance-sessions.show', $sess->id) }}" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Detail & Monitor Presensi">
-                            <i class="bi bi-eye"></i> Monitor
-                        </a>
-                        <a href="{{ route('attendance-manual.index', $sess->id) }}" class="btn btn-sm btn-outline-info rounded-pill px-2" title="Input / Koreksi Presensi Manual">
-                            <i class="bi bi-pencil-square"></i> Manual
-                        </a>
                     </div>
 
                     <div>
                         @if($sess->status === 'Draft')
                             <form action="{{ route('attendance-sessions.activate', $sess->id) }}" method="POST" class="d-inline">
                                 @csrf
-                                <button type="submit" class="btn btn-sm btn-success rounded-pill px-2 py-1" title="Buka Presensi Sekarang">
-                                    <i class="bi bi-play-fill"></i> Buka
+                                <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 py-1 fw-bold" title="Buka Presensi Sekarang">
+                                    <i class="bi bi-play-fill me-1"></i> Buka Presensi
                                 </button>
                             </form>
                         @elseif($sess->status === 'Aktif')
                             <button type="button" 
-                                    class="btn btn-sm btn-warning text-dark rounded-pill px-2 py-1" 
+                                    class="btn btn-sm btn-outline-warning text-dark rounded-pill px-2 py-1 fw-semibold" 
                                     title="Tutup Sesi Presensi"
-                                    onclick="confirmAction('close-sess-{{ $sess->id }}', 'Apakah Anda yakin ingin menutup sesi presensi ini? Presensi QR tidak dapat dilakukan lagi setelah ditutup.', 'Tutup Sesi Presensi', 'Ya, Tutup Sesi !', true)">
+                                    onclick="confirmAction('close-sess-{{ $sess->id }}', 'Apakah Anda yakin ingin menutup sesi presensi ini? Presensi peserta pada pertemuan ini akan ditutup.', 'Tutup Sesi Presensi', 'Ya, Tutup Sesi !', true)">
                                 <i class="bi bi-stop-fill"></i> Tutup
                             </button>
                             <form id="close-sess-{{ $sess->id }}" action="{{ route('attendance-sessions.close', $sess->id) }}" method="POST" class="d-none">

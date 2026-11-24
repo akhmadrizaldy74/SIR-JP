@@ -251,4 +251,46 @@ class DirectAttendanceAndModuleAccessTest extends TestCase
         $portalResponse->assertSee($zoomUrl);
         $portalResponse->assertSee('Gabung Zoom / Kelas Daring');
     }
+
+    public function test_pengajar_has_absensi_in_sidebar_and_can_mark_attendance_without_qr()
+    {
+        $unique = time() . rand(100, 999);
+        $pengajar = User::create([
+            'name' => 'Widyaiswara Test ' . $unique,
+            'username' => 'pengajar' . $unique,
+            'email' => 'pengajar' . $unique . '@kemnaker.go.id',
+            'password' => bcrypt('password'),
+            'role' => 'pengajar',
+            'roles' => ['Pengajar'],
+            'status' => 'Aktif',
+        ]);
+
+        // 1. Pengajar melihat menu Absensi Peserta di sidebar
+        $resp = $this->actingAs($pengajar)->get(route('dashboard'));
+        $resp->assertOk();
+        $resp->assertSee('Absensi Peserta');
+        $resp->assertSee('Rekapitulasi Absensi');
+        $resp->assertSee('Absen Pengajar (Klaim JP)');
+
+        // 2. Pengajar membuka halaman sesi absensi
+        $respSession = $this->actingAs($pengajar)->get(route('attendance-sessions.show', $this->session->id));
+        $respSession->assertOk();
+        $respSession->assertSee('Tandai Semua Hadir');
+        $respSession->assertSee('Ubah Status');
+
+        // 3. Pengajar menandai peserta hadir langsung tanpa QR
+        $respMark = $this->actingAs($pengajar)
+            ->post(route('attendance-manual.update', $this->session->id), [
+                'peserta_id' => $this->peserta->id,
+                'status' => 'Hadir',
+                'alasan_perubahan' => 'Presensi langsung oleh pengajar di kelas online',
+            ]);
+
+        $respMark->assertRedirect();
+        $this->assertDatabaseHas('presensis', [
+            'attendance_session_id' => $this->session->id,
+            'peserta_id' => $this->peserta->id,
+            'status_kehadiran' => 'Hadir',
+        ]);
+    }
 }

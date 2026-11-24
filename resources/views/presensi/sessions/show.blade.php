@@ -17,19 +17,22 @@
                     </button>
                 </form>
             @elseif($attendanceSession->status === 'Aktif')
-                <a href="{{ route('attendance-sessions.qr_display', $attendanceSession->id) }}" target="_blank" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">
-                    <i class="bi bi-qr-code-scan me-1"></i> Buka Layar QR Proyektor
+                <a href="{{ route('attendance-manual.index', $attendanceSession->id) }}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">
+                    <i class="bi bi-person-check-fill me-1"></i> Kelola Absensi Peserta
                 </a>
-                <form action="{{ route('attendance-sessions.close', $attendanceSession->id) }}" method="POST" onsubmit="return confirm('Tutup sesi presensi? Presensi QR peserta akan dihentikan.');">
+                <form action="{{ route('attendance-sessions.close', $attendanceSession->id) }}" method="POST" onsubmit="return confirm('Tutup sesi presensi untuk pertemuan ini?');">
                     @csrf
-                    <button type="submit" class="btn btn-sm btn-warning text-dark rounded-pill px-3 fw-semibold">
+                    <button type="submit" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3 fw-semibold">
                         <i class="bi bi-stop-circle me-1"></i> Tutup Sesi
                     </button>
                 </form>
+                <a href="{{ route('attendance-sessions.qr_display', $attendanceSession->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Layar QR Proyektor (Opsional untuk kelas tatap muka)">
+                    <i class="bi bi-qr-code"></i>
+                </a>
             @endif
 
-            <a href="{{ route('attendance-manual.index', $attendanceSession->id) }}" class="btn btn-sm btn-outline-info rounded-pill px-3">
-                <i class="bi bi-pencil-square me-1"></i> Input Manual
+            <a href="{{ route('realisasi.create', ['jadwal_id' => $attendanceSession->jadwal_id]) }}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold">
+                <i class="bi bi-check2-circle me-1"></i> Absen Pengajar (Klaim JP)
             </a>
             <a href="{{ route('class-documentations.index', ['attendance_session_id' => $attendanceSession->id]) }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                 <i class="bi bi-camera me-1"></i> Foto Kegiatan ({{ $attendanceSession->documentations->count() }})
@@ -144,9 +147,22 @@
             <h5 class="fw-bold text-dark mb-0">Daftar Kehadiran Peserta</h5>
             <div class="text-muted small">Tingkat kehadiran: <strong class="text-success">{{ $stats['persen_kehadiran'] }}%</strong></div>
         </div>
-        <div>
-            <a href="{{ route('attendance-manual.index', $attendanceSession->id) }}" class="btn btn-sm btn-primary rounded-pill px-3">
-                <i class="bi bi-pencil-square me-1"></i> Kelola & Update Manual
+        <div class="d-flex align-items-center gap-2">
+            @if(count($stats['pesertas']) > 0)
+                <form action="{{ route('attendance-manual.bulk', $attendanceSession->id) }}" method="POST" onsubmit="return confirm('Tandai SEMUA peserta sebagai HADIR?');">
+                    @csrf
+                    @foreach($stats['pesertas'] as $p)
+                        <input type="hidden" name="peserta_ids[]" value="{{ $p->id }}">
+                    @endforeach
+                    <input type="hidden" name="target_status" value="Hadir">
+                    <input type="hidden" name="alasan_perubahan" value="Presensi langsung oleh pengajar di kelas">
+                    <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm fw-semibold">
+                        <i class="bi bi-check2-all me-1"></i> Tandai Semua Hadir
+                    </button>
+                </form>
+            @endif
+            <a href="{{ route('attendance-manual.index', $attendanceSession->id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                <i class="bi bi-pencil-square me-1"></i> Kelola Presensi Detail
             </a>
         </div>
     </div>
@@ -163,6 +179,7 @@
                     <th>Waktu Check-in</th>
                     <th>Metode</th>
                     <th>Keterangan</th>
+                    <th class="text-center" style="width: 140px;">Ubah Kehadiran</th>
                 </tr>
             </thead>
             <tbody>
@@ -205,10 +222,64 @@
                                 </div>
                             @endif
                         </td>
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle py-0 px-2 rounded-pill" type="button" data-bs-toggle="dropdown" style="font-size: 0.76rem;">
+                                    Ubah Status
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    <li>
+                                        <form action="{{ route('attendance-manual.update', $attendanceSession->id) }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="peserta_id" value="{{ $pst->id }}">
+                                            <input type="hidden" name="status" value="Hadir">
+                                            <input type="hidden" name="alasan_perubahan" value="Presensi langsung oleh pengajar">
+                                            <button type="submit" class="dropdown-item small text-success fw-semibold"><i class="bi bi-check-circle me-1"></i> Hadir</button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form action="{{ route('attendance-manual.update', $attendanceSession->id) }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="peserta_id" value="{{ $pst->id }}">
+                                            <input type="hidden" name="status" value="Terlambat">
+                                            <input type="hidden" name="alasan_perubahan" value="Presensi langsung oleh pengajar">
+                                            <button type="submit" class="dropdown-item small text-primary"><i class="bi bi-clock-history me-1"></i> Terlambat</button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form action="{{ route('attendance-manual.update', $attendanceSession->id) }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="peserta_id" value="{{ $pst->id }}">
+                                            <input type="hidden" name="status" value="Izin">
+                                            <input type="hidden" name="alasan_perubahan" value="Presensi langsung oleh pengajar">
+                                            <button type="submit" class="dropdown-item small text-warning"><i class="bi bi-envelope-paper me-1"></i> Izin</button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form action="{{ route('attendance-manual.update', $attendanceSession->id) }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="peserta_id" value="{{ $pst->id }}">
+                                            <input type="hidden" name="status" value="Sakit">
+                                            <input type="hidden" name="alasan_perubahan" value="Presensi langsung oleh pengajar">
+                                            <button type="submit" class="dropdown-item small text-danger"><i class="bi bi-hospital me-1"></i> Sakit</button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form action="{{ route('attendance-manual.update', $attendanceSession->id) }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="peserta_id" value="{{ $pst->id }}">
+                                            <input type="hidden" name="status" value="Alpa">
+                                            <input type="hidden" name="alasan_perubahan" value="Presensi langsung oleh pengajar">
+                                            <button type="submit" class="dropdown-item small text-secondary"><i class="bi bi-x-circle me-1"></i> Alpa</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">Belum ada data peserta yang terdaftar pada kelas/angkatan ini.</td>
+                        <td colspan="9" class="text-center text-muted py-4">Belum ada data peserta yang terdaftar pada kelas/angkatan ini.</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -37,7 +37,7 @@ class HybridAttendanceTest extends TestCase
 
     private function createDummyContext(): array
     {
-        $unique = rand(10000, 99999);
+        $unique = time() . rand(1000, 9999);
 
         $pelatihan = Pelatihan::create([
             'kode_pelatihan' => 'PEL-ATT-' . $unique,
