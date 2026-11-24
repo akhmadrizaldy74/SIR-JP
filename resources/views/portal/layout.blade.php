@@ -82,9 +82,79 @@
                     <button type="button" class="btn btn-link text-secondary p-1" onclick="document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()" title="Fullscreen">
                         <i class="bi bi-fullscreen fs-5"></i>
                     </button>
-                    <button type="button" class="btn btn-link text-secondary p-1" title="Notifikasi">
-                        <i class="bi bi-bell fs-5"></i>
-                    </button>
+                    <!-- Notification Bell Dinamis Berbasis Peran Peserta -->
+                    @php
+                        $notifService = app(\App\Services\NotificationService::class);
+                        $portalNotifications = $notifService->getNotificationsForUser(auth()->user());
+                        $portalUnreadCount = $notifService->getUnreadCount(auth()->user());
+                    @endphp
+                    <div class="dropdown">
+                        <button type="button" class="btn btn-link text-secondary p-1 position-relative" data-bs-toggle="dropdown" aria-expanded="false" title="Notifikasi ({{ $portalUnreadCount }} baru)">
+                            <i class="bi bi-bell fs-5"></i>
+                            @if($portalUnreadCount > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; padding: 0.25em 0.45em;">
+                                    {{ $portalUnreadCount > 9 ? '9+' : $portalUnreadCount }}
+                                </span>
+                            @endif
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-0 mt-2" style="width: 360px; max-width: 90vw; border-radius: 12px; overflow: hidden; z-index: 1060;">
+                            <div class="d-flex align-items-center justify-content-between px-3 py-2.5 text-white" style="background-color: #0B1727;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-bell-fill text-warning"></i>
+                                    <span class="fw-bold small">Notifikasi Peserta</span>
+                                    @if($portalUnreadCount > 0)
+                                        <span class="badge bg-danger rounded-pill px-2" style="font-size: 0.7rem;">{{ $portalUnreadCount }} Baru</span>
+                                    @endif
+                                </div>
+                                @if(count($portalNotifications) > 0)
+                                    <form action="{{ route('notifications.mark-all-read') }}" method="POST" class="m-0">
+                                        @csrf
+                                        <button type="submit" class="btn btn-link text-white-50 p-0 text-decoration-none small" style="font-size: 0.75rem;" title="Tandai semua telah dibaca">
+                                            <i class="bi bi-check2-all"></i> Tandai Dibaca
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+
+                            <div class="list-group list-group-flush" style="max-height: 380px; overflow-y: auto;">
+                                @forelse($portalNotifications as $notif)
+                                    <a href="{{ route('notifications.read', ['id' => $notif['id'], 'redirect' => $notif['url']]) }}" 
+                                       class="list-group-item list-group-item-action d-flex align-items-start gap-2.5 py-2.5 px-3 border-bottom transition-all">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-1" 
+                                             style="width: 36px; height: 36px; background-color: {{ $notif['bg_color'] }}; color: {{ $notif['text_color'] }}; font-size: 1rem;">
+                                            <i class="bi {{ $notif['icon'] }}"></i>
+                                        </div>
+                                        <div class="flex-grow-1 overflow-hidden">
+                                            <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                                                <strong class="text-dark small text-truncate" style="font-size: 0.825rem;">{{ $notif['title'] }}</strong>
+                                                <span class="badge rounded-pill px-2 py-0.5 text-nowrap" style="font-size: 0.65rem; background-color: {{ $notif['bg_color'] }}; color: {{ $notif['text_color'] }};">
+                                                    {{ $notif['badge'] }}
+                                                </span>
+                                            </div>
+                                            <p class="text-muted small mb-1 lh-sm" style="font-size: 0.785rem;">
+                                                {{ $notif['message'] }}
+                                            </p>
+                                            <span class="text-secondary" style="font-size: 0.7rem;">
+                                                <i class="bi bi-clock me-1"></i>{{ $notif['time_formatted'] }}
+                                            </span>
+                                        </div>
+                                    </a>
+                                @empty
+                                    <div class="text-center py-4 px-3 text-muted">
+                                        <i class="bi bi-bell-slash fs-3 d-block mb-2 text-secondary opacity-50"></i>
+                                        <div class="small fw-semibold">Tidak ada notifikasi baru</div>
+                                        <span class="small" style="font-size: 0.75rem;">Seluruh informasi presensi & tugas up to date.</span>
+                                    </div>
+                                @endforelse
+                            </div>
+
+                            @if(count($portalNotifications) > 0)
+                                <div class="bg-light px-3 py-2 text-center border-top">
+                                    <span class="text-muted small" style="font-size: 0.75rem;">Notifikasi diperbarui otomatis untuk aktivitas pelatihan Anda</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
 
                     <!-- Profile User Sesuai Model Admin & Role Switcher -->
                     @php

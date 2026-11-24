@@ -20,7 +20,8 @@ class EnsureNotGuest
                 $request->routeIs('guest.*') || 
                 $request->routeIs('logout') || 
                 $request->routeIs('profile.*') || 
-                $request->routeIs('switch-role')
+                $request->routeIs('switch-role') ||
+                $request->routeIs('notifications.*')
             ) {
                 return $next($request);
             }
