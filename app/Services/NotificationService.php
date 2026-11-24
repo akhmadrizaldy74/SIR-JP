@@ -81,15 +81,18 @@ class NotificationService
     {
         $notifications = [];
 
-        // A. Akun Guest Baru Menunggu Penetapan Peran
+        // A. Akun Guest Baru Menunggu Penetapan Peran (Ambil ID terbaru)
         $guestUsers = User::where(function ($q) {
             $q->where('role', 'guest')
               ->orWhereJsonContains('roles', 'Guest')
               ->orWhereJsonContains('roles', 'guest');
         })
-        ->latest()
-        ->take(5)
-        ->get();
+        ->orderByDesc('id')
+        ->take(25)
+        ->get()
+        ->filter(function ($u) {
+            return $u->isGuest();
+        });
 
         foreach ($guestUsers as $guest) {
             $notifications[] = [
@@ -335,10 +338,13 @@ class NotificationService
         usort($items, function ($a, $b) {
             $tA = isset($a['created_at']) ? Carbon::parse($a['created_at'])->timestamp : 0;
             $tB = isset($b['created_at']) ? Carbon::parse($b['created_at'])->timestamp : 0;
+            if ($tA === $tB) {
+                return strnatcmp($b['id'] ?? '', $a['id'] ?? '');
+            }
             return $tB <=> $tA;
         });
 
-        return array_slice($items, 0, 8);
+        return array_slice($items, 0, 20);
     }
 
     /**
@@ -350,6 +356,9 @@ class NotificationService
             return 'Baru saja';
         }
         $c = Carbon::parse($dateTime);
+        if (abs(now()->diffInSeconds($c)) < 45) {
+            return 'Baru saja';
+        }
         return $c->diffForHumans();
     }
 }

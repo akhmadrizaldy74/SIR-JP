@@ -15,6 +15,34 @@ class NotificationController extends Controller
     }
 
     /**
+     * Endpoint API JSON Live Feed untuk real-time polling background & on-click refresh.
+     */
+    public function live(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user && !session()->has('participant_id')) {
+            return response()->json([
+                'unread_count' => 0,
+                'count' => 0,
+                'notifications' => [],
+                'html' => '',
+            ], 401);
+        }
+
+        $notifications = $this->notificationService->getNotificationsForUser($user);
+        $unreadCount = $this->notificationService->getUnreadCount($user);
+
+        $html = view('partials.notifications_list', compact('notifications'))->render();
+
+        return response()->json([
+            'unread_count' => $unreadCount,
+            'count' => count($notifications),
+            'notifications' => $notifications,
+            'html' => $html,
+        ]);
+    }
+
+    /**
      * Tandai semua notifikasi telah dibaca.
      */
     public function markAllRead(Request $request)

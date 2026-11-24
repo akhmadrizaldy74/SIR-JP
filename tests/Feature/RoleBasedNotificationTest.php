@@ -126,4 +126,28 @@ class RoleBasedNotificationTest extends TestCase
         $response->assertRedirect($targetUrl);
         $this->assertTrue(in_array('guest_' . $guest->id, session('read_notifications', [])));
     }
+
+    public function test_live_notifications_endpoint_returns_json_and_html(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'roles' => ['Administrator'],
+        ]);
+
+        $guest = User::factory()->create([
+            'name' => 'Guest Live Test',
+            'role' => 'guest',
+            'roles' => ['Guest'],
+        ]);
+
+        $response = $this->actingAs($admin)->getJson(route('notifications.live'));
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'unread_count',
+            'count',
+            'notifications',
+            'html',
+        ]);
+        $this->assertStringContainsString('Guest Live Test', $response->json('html'));
+    }
 }

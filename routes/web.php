@@ -218,13 +218,14 @@ Route::middleware('auth')->group(function () {
     // 16. Ganti Mode Peran / Swipe Role Dinamis Sesuai KCLC
     Route::get('/switch-role/{role}', [AuthController::class, 'switchRole'])->name('switch-role');
 
-    // 17. Fitur Notifikasi Pintar Berbasis Peran
-    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
-    Route::get('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markSingleRead'])->name('notifications.read');
-
     // JSON API Endpoints untuk Interaktivitas Dinamis Form
     Route::get('/api/angkatans-by-pelatihan/{pelatihanId}', [PenugasanPengajarController::class, 'getAngkatansByPelatihan']);
     Route::get('/api/mata-pelatihans-by-angkatan/{angkatanId}', [PenugasanPengajarController::class, 'getMataPelatihansByAngkatan']);
     Route::get('/api/pengajars-by-mata-pelatihan/{mataPelatihanId}', [JadwalController::class, 'getPengajarsByMataPelatihan']);
     Route::post('/api/pengajar-quick-store', [JadwalController::class, 'quickStorePengajar'])->name('api.pengajar.quick_store');
 });
+
+// 17. Fitur Notifikasi Pintar Berbasis Peran & Sesi (Universal Admin, Guest & Portal Peserta)
+Route::get('/notifications/live', [\App\Http\Controllers\NotificationController::class, 'live'])->name('notifications.live');
+Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+Route::get('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markSingleRead'])->name('notifications.read');

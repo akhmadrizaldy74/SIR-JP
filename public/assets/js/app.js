@@ -53,6 +53,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Animasi Angka Berjalan (Count-Up Animation untuk Statistik Dashboard)
   initAnimatedCounters();
+
+  // Inisialisasi Sistem Notifikasi Cerdas Realtime (Polling 4 Detik & Instant On-Click)
+  initRealtimeNotifications();
 });
 
 /**
@@ -301,4 +304,141 @@ function confirmAction(formId, message, title, confirmText, isDanger) {
       if (form) form.submit();
     }
   });
+}
+
+/**
+ * Real-time Smart Notification System
+ * Background polling setiap 4 detik & instant refresh seketika lonceng diklik.
+ */
+function initRealtimeNotifications() {
+  const bellBtn = document.getElementById('notificationBellBtn');
+  const badgeCount = document.getElementById('notificationBadgeCount');
+  const headerBadge = document.getElementById('notificationHeaderBadge');
+  const listContainer = document.getElementById('notificationListContainer');
+  const markAllReadForm = document.getElementById('markAllReadForm');
+
+  if (!bellBtn && !listContainer) return;
+
+  let isFetching = false;
+  let lastUnreadCount = null;
+
+  function updateUI(data) {
+    if (!data) return;
+
+    const unread = typeof data.unread_count === 'number' ? data.unread_count : 0;
+
+    // 1. Update Badge Lonceng
+    if (badgeCount) {
+      if (unread > 0) {
+        badgeCount.textContent = unread > 9 ? '9+' : unread;
+        badgeCount.style.display = '';
+      } else {
+        badgeCount.style.display = 'none';
+      }
+    }
+
+    // 2. Update Header Badge Dropdown
+    if (headerBadge) {
+      if (unread > 0) {
+        headerBadge.textContent = unread + ' Baru';
+        headerBadge.style.display = '';
+      } else {
+        headerBadge.style.display = 'none';
+      }
+    }
+
+    // 3. Update Tombol Tandai Dibaca
+    if (markAllReadForm) {
+      markAllReadForm.style.display = unread > 0 ? '' : 'none';
+    }
+
+    // 4. Update Konten List Notifikasi
+    if (typeof data.html === 'string' && listContainer) {
+      listContainer.innerHTML = data.html;
+    }
+
+    // 5. Efek animasi halus jika bertambah
+    if (lastUnreadCount !== null && unread > lastUnreadCount && bellBtn) {
+      bellBtn.classList.add('animate-pulse');
+      setTimeout(() => bellBtn.classList.remove('animate-pulse'), 1200);
+    }
+    lastUnreadCount = unread;
+  }
+
+  function fetchNotifications(force = false) {
+    if (isFetching && !force) return;
+    isFetching = true;
+
+    fetch('/notifications/live', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Live notification HTTP ' + res.status);
+        return res.json();
+      })
+      .then((data) => {
+        updateUI(data);
+      })
+      .catch(() => {
+        // Silent catch agar tidak mengganggu antarmuka pengguna
+      })
+      .finally(() => {
+        isFetching = false;
+      });
+  }
+
+  // A. Panggilan awal saat DOM selesai dimuat
+  fetchNotifications(true);
+
+  // B. Panggilan instan seketika tombol lonceng diklik atau dropdown dibuka
+  if (bellBtn) {
+    bellBtn.addEventListener('click', function () {
+      fetchNotifications(true);
+    });
+
+    const parentDropdown = bellBtn.closest('.dropdown');
+    if (parentDropdown) {
+      parentDropdown.addEventListener('show.bs.dropdown', function () {
+        fetchNotifications(true);
+      });
+    }
+  }
+
+  // C. Background Polling berkala setiap 4 detik untuk update realtime tanpa reload
+  setInterval(function () {
+    fetchNotifications(false);
+  }, 4000);
+
+  // D. Form "Tandai Dibaca" AJAX submit
+  if (markAllReadForm) {
+    markAllReadForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const tokenInput = markAllReadForm.querySelector('input[name="_token"]');
+      const csrf = tokenInput ? tokenInput.value : '';
+
+      fetch(markAllReadForm.action, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrf,
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(() => {
+          if (badgeCount) badgeCount.style.display = 'none';
+          if (headerBadge) headerBadge.style.display = 'none';
+          if (markAllReadForm) markAllReadForm.style.display = 'none';
+          lastUnreadCount = 0;
+          fetchNotifications(true);
+        })
+        .catch(() => {
+          markAllReadForm.submit();
+        });
+    });
+  }
 }
