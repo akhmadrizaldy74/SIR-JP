@@ -222,12 +222,15 @@
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
                                 @if(auth()->id() !== $u->id)
-                                    <form action="{{ route('users.destroy', $u->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun {{ $u->name }}?');">
+                                    <button type="button" 
+                                            class="btn btn-outline-danger" 
+                                            title="Hapus Akun"
+                                            onclick="confirmDelete('del-user-form-{{ $u->id }}', 'Apakah Anda yakin ingin menghapus akun {{ addslashes($u->name) }}?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    <form id="del-user-form-{{ $u->id }}" action="{{ route('users.destroy', $u->id) }}" method="POST" class="d-none">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger" title="Hapus Akun">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
                                     </form>
                                 @endif
                             </div>

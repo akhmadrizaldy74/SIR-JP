@@ -285,3 +285,20 @@ function confirmDelete(formId, message) {
     }
   });
 }
+
+/**
+ * Universal helper for general actions with SweetAlert2
+ */
+function confirmAction(formId, message, title, confirmText, isDanger) {
+  SirAlert.confirm({
+    title: title || 'Konfirmasi !',
+    text: message || 'Apakah Anda yakin ingin melanjutkan tindakan ini?',
+    confirmButtonText: confirmText || 'Ya, Lanjutkan !',
+    cancelButtonText: 'Batal',
+    isDanger: isDanger === true,
+    onConfirm: function () {
+      const form = document.getElementById(formId);
+      if (form) form.submit();
+    }
+  });
+}

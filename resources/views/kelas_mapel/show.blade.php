@@ -244,12 +244,15 @@
                                 </td>
                                 <td>{{ $kmp->kelompok ?? '--' }}</td>
                                 <td class="text-center">
-                                    <form action="{{ route('kelas-mapel.pengajar.destroy', ['kelas_mapel' => $kelasMapel->id, 'pengajar' => $kmp->id]) }}" method="POST">
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-danger" 
+                                            title="Hapus Pengajar" 
+                                            onclick="confirmDelete('del-kmp-{{ $kmp->id }}', 'Hapus penugasan pengajar ini?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    <form id="del-kmp-{{ $kmp->id }}" action="{{ route('kelas-mapel.pengajar.destroy', ['kelas_mapel' => $kelasMapel->id, 'pengajar' => $kmp->id]) }}" method="POST" class="d-none">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus Pengajar" onclick="return confirm('Hapus penugasan pengajar ini?')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
                                     </form>
                                 </td>
                             </tr>

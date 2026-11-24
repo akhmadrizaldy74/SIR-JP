@@ -122,11 +122,14 @@
                                 </button>
                             </form>
                         @elseif($sess->status === 'Aktif')
-                            <form action="{{ route('attendance-sessions.close', $sess->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menutup sesi presensi ini? Presensi QR tidak dapat dilakukan lagi setelah ditutup.');">
+                            <button type="button" 
+                                    class="btn btn-sm btn-warning text-dark rounded-pill px-2 py-1" 
+                                    title="Tutup Sesi Presensi"
+                                    onclick="confirmAction('close-sess-{{ $sess->id }}', 'Apakah Anda yakin ingin menutup sesi presensi ini? Presensi QR tidak dapat dilakukan lagi setelah ditutup.', 'Tutup Sesi Presensi', 'Ya, Tutup Sesi !', true)">
+                                <i class="bi bi-stop-fill"></i> Tutup
+                            </button>
+                            <form id="close-sess-{{ $sess->id }}" action="{{ route('attendance-sessions.close', $sess->id) }}" method="POST" class="d-none">
                                 @csrf
-                                <button type="submit" class="btn btn-sm btn-warning text-dark rounded-pill px-2 py-1" title="Tutup Sesi Presensi">
-                                    <i class="bi bi-stop-fill"></i> Tutup
-                                </button>
                             </form>
                         @endif
                     </div>

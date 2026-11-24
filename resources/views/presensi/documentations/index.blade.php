@@ -100,12 +100,15 @@
                             <a href="{{ route('class-documentations.view', $doc->id) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-2" title="Lihat Foto Penuh">
                                 <i class="bi bi-arrows-fullscreen"></i>
                             </a>
-                            <form action="{{ route('class-documentations.destroy', $doc->id) }}" method="POST" onsubmit="return confirm('Hapus foto dokumentasi ini?');">
+                            <button type="button" 
+                                    class="btn btn-xs btn-outline-danger py-0 px-2" 
+                                    title="Hapus"
+                                    onclick="confirmDelete('del-doc-{{ $doc->id }}', 'Hapus foto dokumentasi ini?')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <form id="del-doc-{{ $doc->id }}" action="{{ route('class-documentations.destroy', $doc->id) }}" method="POST" class="d-none">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-xs btn-outline-danger py-0 px-2" title="Hapus">
-                                    <i class="bi bi-trash"></i>
-                                </button>
                             </form>
                         </div>
                     </div>
