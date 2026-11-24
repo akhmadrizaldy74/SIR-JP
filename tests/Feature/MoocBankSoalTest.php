@@ -118,4 +118,68 @@ class MoocBankSoalTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee($uniqueKeyword);
     }
+
+    public function test_admin_can_add_update_and_delete_butir_soal(): void
+    {
+        $pelatihan = Pelatihan::create([
+            'nama_pelatihan' => 'Pelatihan Uji Butir Soal ' . rand(1000, 9999),
+            'kode_pelatihan' => 'BUTIR-' . uniqid(),
+            'status' => 'Berjalan',
+            'tanggal_mulai' => now()->toDateString(),
+            'tanggal_selesai' => now()->addDays(30)->toDateString(),
+        ]);
+
+        // 1. Tambah butir soal baru
+        $response = $this->actingAs($this->admin)->post(route('mooc.bank-soal.butir.add', $pelatihan->id), [
+            'tipe' => 'pretest',
+            'pertanyaan' => 'Pertanyaan Baru Uji Coba K3?',
+            'pilihan_a' => 'Opsi A Benar Sekali',
+            'pilihan_b' => 'Opsi B',
+            'pilihan_c' => 'Opsi C',
+            'pilihan_d' => 'Opsi D',
+            'kunci' => 'A',
+            'bobot' => 15,
+        ]);
+
+        $response->assertRedirect(route('mooc.bank-soal'));
+        $pelatihan->refresh();
+        $items = $pelatihan->getBankSoalItems();
+        $added = collect($items)->firstWhere('pertanyaan', 'Pertanyaan Baru Uji Coba K3?');
+        $this->assertNotNull($added);
+        $this->assertEquals('A', $added['kunci']);
+        $this->assertEquals(15, $added['bobot']);
+
+        // 2. Ubah / edit butir soal
+        $responseEdit = $this->actingAs($this->admin)->put(route('mooc.bank-soal.butir.update', [
+            'id' => $pelatihan->id,
+            'soalId' => $added['id'],
+        ]), [
+            'tipe' => 'pretest',
+            'pertanyaan' => 'Pertanyaan Sesudah Diedit Revisi?',
+            'pilihan_a' => 'Opsi A',
+            'pilihan_b' => 'Opsi B Baru',
+            'pilihan_c' => 'Opsi C',
+            'pilihan_d' => 'Opsi D',
+            'kunci' => 'B',
+            'bobot' => 25,
+        ]);
+
+        $responseEdit->assertRedirect(route('mooc.bank-soal'));
+        $pelatihan->refresh();
+        $updated = collect($pelatihan->getBankSoalItems())->firstWhere('id', $added['id']);
+        $this->assertEquals('Pertanyaan Sesudah Diedit Revisi?', $updated['pertanyaan']);
+        $this->assertEquals('B', $updated['kunci']);
+        $this->assertEquals(25, $updated['bobot']);
+
+        // 3. Hapus butir soal
+        $responseDelete = $this->actingAs($this->admin)->delete(route('mooc.bank-soal.butir.delete', [
+            'id' => $pelatihan->id,
+            'soalId' => $added['id'],
+        ]));
+
+        $responseDelete->assertRedirect(route('mooc.bank-soal'));
+        $pelatihan->refresh();
+        $deleted = collect($pelatihan->getBankSoalItems())->firstWhere('id', $added['id']);
+        $this->assertNull($deleted);
+    }
 }

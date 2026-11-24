@@ -210,114 +210,255 @@
                         </div>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
+                    @php
+                        $allItems = $p->getBankSoalItems();
+                        $tabs = [
+                            'pretest' => [
+                                'label' => 'Pre-Test',
+                                'icon' => 'bi-flag',
+                                'desc' => 'Daftar pertanyaan diagnostik awal sebelum materi dimulai.',
+                                'badge_color' => 'bg-primary',
+                                'items' => array_values(array_filter($allItems, fn($i) => ($i['tipe'] ?? '') === 'pretest')),
+                            ],
+                            'kuis' => [
+                                'label' => 'Kuis Modul',
+                                'icon' => 'bi-lightning-charge',
+                                'desc' => 'Kuis formatif dirancang untuk menguji pemahaman peserta di setiap sesi materi.',
+                                'badge_color' => 'bg-warning text-dark',
+                                'items' => array_values(array_filter($allItems, fn($i) => ($i['tipe'] ?? '') === 'kuis')),
+                            ],
+                            'posttest' => [
+                                'label' => 'Post-Test',
+                                'icon' => 'bi-award',
+                                'desc' => 'Soal evaluasi akhir (Post-Test) untuk menentukan kelulusan diklat.',
+                                'badge_color' => 'bg-danger',
+                                'items' => array_values(array_filter($allItems, fn($i) => ($i['tipe'] ?? '') === 'posttest')),
+                            ],
+                        ];
+                    @endphp
+
                     <div class="modal-body p-4">
                         <!-- Navigation Tabs -->
                         <ul class="nav nav-pills mb-3 border-bottom pb-2" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active rounded-pill px-3 py-1.5 small fw-semibold" id="pretest-tab-{{ $p->id }}" data-bs-toggle="pill" data-bs-target="#pretest-{{ $p->id }}" type="button" role="tab">
-                                    <i class="bi bi-flag me-1"></i>Pre-Test (10 Soal)
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link rounded-pill px-3 py-1.5 small fw-semibold" id="kuis-tab-{{ $p->id }}" data-bs-toggle="pill" data-bs-target="#kuis-{{ $p->id }}" type="button" role="tab">
-                                    <i class="bi bi-lightning-charge me-1"></i>Kuis Modul (10 Soal)
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link rounded-pill px-3 py-1.5 small fw-semibold" id="posttest-tab-{{ $p->id }}" data-bs-toggle="pill" data-bs-target="#posttest-{{ $p->id }}" type="button" role="tab">
-                                    <i class="bi bi-award me-1"></i>Post-Test (5 Soal)
-                                </button>
-                            </li>
+                            @foreach($tabs as $tabKey => $tabData)
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link {{ $loop->first ? 'active' : '' }} rounded-pill px-3 py-1.5 small fw-semibold" 
+                                            id="{{ $tabKey }}-tab-{{ $p->id }}" 
+                                            data-bs-toggle="pill" 
+                                            data-bs-target="#tab-pane-{{ $tabKey }}-{{ $p->id }}" 
+                                            type="button" 
+                                            role="tab">
+                                        <i class="bi {{ $tabData['icon'] }} me-1"></i>{{ $tabData['label'] }} ({{ count($tabData['items']) }} Soal)
+                                    </button>
+                                </li>
+                            @endforeach
                         </ul>
 
                         <div class="tab-content">
-                            <!-- Tab Pre-Test -->
-                            <div class="tab-pane fade show active" id="pretest-{{ $p->id }}" role="tabpanel">
+                            @foreach($tabs as $tabKey => $tabData)
+                            <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" 
+                                 id="tab-pane-{{ $tabKey }}-{{ $p->id }}" 
+                                 role="tabpanel">
+                                
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="small text-muted">Daftar pertanyaan diagnostik awal sebelum materi dimulai.</span>
-                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2.5" onclick="Swal.fire({title: 'Tambah Soal Baru', text: 'Formulir input butir soal baru pilihan ganda siap ditambahkan.', icon: 'info'})">
-                                        <i class="bi bi-plus-circle me-1"></i> Tambah Soal
+                                    <span class="small text-muted">{{ $tabData['desc'] }}</span>
+                                    <button type="button" 
+                                            class="btn btn-outline-primary btn-sm rounded-pill px-2.5 d-inline-flex align-items-center gap-1"
+                                            data-bs-toggle="collapse" 
+                                            data-bs-target="#collapseAddSoal-{{ $p->id }}-{{ $tabKey }}">
+                                        <i class="bi bi-plus-circle"></i> Tambah Soal
                                     </button>
                                 </div>
 
-                                <!-- Contoh Soal 1 -->
-                                <div class="card border rounded-3 p-3 mb-2 bg-light shadow-none">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <span class="badge bg-primary rounded-pill">Soal #1 (Bobot: 10 Poin)</span>
-                                        <span class="badge bg-success-subtle text-success">Kunci Jawaban: B</span>
-                                    </div>
-                                    <p class="small fw-semibold text-dark mb-2">
-                                        Apa prinsip utama dalam pelaksanaan tata kelola kepemimpinan dan pelayanan ketenagakerjaan berbasis Corporate University?
-                                    </p>
-                                    <div class="small text-secondary ps-2">
-                                        <div>A. Sentralisasi seluruh keputusan teknis tanpa delegasi</div>
-                                        <div class="fw-bold text-success"><i class="bi bi-check-circle-fill me-1"></i>B. Integrasi pembelajaran terpadu selaras dengan tujuan strategis organisasi</div>
-                                        <div>C. Mengurangi jam pelatihan pegawai aparatur sipil negara</div>
-                                        <div>D. Pembatasan akses informasi antar unit kerja</div>
+                                <!-- Form Tambah Butir Soal Baru (Collapsible) -->
+                                <div class="collapse mb-3" id="collapseAddSoal-{{ $p->id }}-{{ $tabKey }}">
+                                    <div class="card border border-primary-subtle rounded-3 p-3 bg-light-subtle shadow-sm">
+                                        <form action="{{ route('mooc.bank-soal.butir.add', $p->id) }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="tipe" value="{{ $tabKey }}">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <strong class="text-primary small">
+                                                    <i class="bi bi-plus-circle-dotted me-1"></i>Formulir Tambah Butir Soal {{ $tabData['label'] }}
+                                                </strong>
+                                                <button type="button" class="btn-close btn-sm" data-bs-toggle="collapse" data-bs-target="#collapseAddSoal-{{ $p->id }}-{{ $tabKey }}"></button>
+                                            </div>
+
+                                            <div class="mb-2">
+                                                <label class="form-label small fw-bold text-secondary mb-1">Pertanyaan / Butir Soal <span class="text-danger">*</span></label>
+                                                <textarea name="pertanyaan" class="form-control form-control-sm rounded-2" rows="2" placeholder="Tuliskan pertanyaan soal pilihan ganda..." required></textarea>
+                                            </div>
+
+                                            <div class="row g-2 mb-2">
+                                                <div class="col-md-6">
+                                                    <label class="form-label small text-secondary mb-1">Pilihan A <span class="text-danger">*</span></label>
+                                                    <input type="text" name="pilihan_a" class="form-control form-control-sm" placeholder="Opsi A" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small text-secondary mb-1">Pilihan B <span class="text-danger">*</span></label>
+                                                    <input type="text" name="pilihan_b" class="form-control form-control-sm" placeholder="Opsi B" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small text-secondary mb-1">Pilihan C <span class="text-danger">*</span></label>
+                                                    <input type="text" name="pilihan_c" class="form-control form-control-sm" placeholder="Opsi C" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small text-secondary mb-1">Pilihan D <span class="text-danger">*</span></label>
+                                                    <input type="text" name="pilihan_d" class="form-control form-control-sm" placeholder="Opsi D" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-2 mb-3">
+                                                <div class="col-sm-6">
+                                                    <label class="form-label small fw-bold text-secondary mb-1">Kunci Jawaban Benar <span class="text-danger">*</span></label>
+                                                    <select name="kunci" class="form-select form-select-sm" required>
+                                                        <option value="A">A</option>
+                                                        <option value="B">B</option>
+                                                        <option value="C">C</option>
+                                                        <option value="D">D</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <label class="form-label small fw-bold text-secondary mb-1">Bobot Poin</label>
+                                                    <input type="number" name="bobot" class="form-control form-control-sm" value="10" min="1" max="100">
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <button type="button" class="btn btn-sm btn-light border" data-bs-toggle="collapse" data-bs-target="#collapseAddSoal-{{ $p->id }}-{{ $tabKey }}">Batal</button>
+                                                <button type="submit" class="btn btn-sm btn-primary px-3">
+                                                    <i class="bi bi-save me-1"></i> Simpan Soal Baru
+                                                </button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
 
-                                <!-- Contoh Soal 2 -->
-                                <div class="card border rounded-3 p-3 mb-2 bg-light shadow-none">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <span class="badge bg-primary rounded-pill">Soal #2 (Bobot: 10 Poin)</span>
-                                        <span class="badge bg-success-subtle text-success">Kunci Jawaban: C</span>
-                                    </div>
-                                    <p class="small fw-semibold text-dark mb-2">
-                                        Dalam sistem evaluasi pembelajaran Kirkpatrick, level berapakah yang mengukur perubahan perilaku kerja nyata peserta di tempat tugas?
-                                    </p>
-                                    <div class="small text-secondary ps-2">
-                                        <div>A. Level 1 - Reaction</div>
-                                        <div>B. Level 2 - Learning</div>
-                                        <div class="fw-bold text-success"><i class="bi bi-check-circle-fill me-1"></i>C. Level 3 - Behavior</div>
-                                        <div>D. Level 4 - Results</div>
-                                    </div>
-                                </div>
-                            </div>
+                                <!-- Daftar Kartu Soal -->
+                                @forelse($tabData['items'] as $itemIndex => $item)
+                                    <div class="card border rounded-3 p-3 mb-2 bg-light shadow-none">
+                                        <!-- Header Soal (Display Mode) -->
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                                <span class="badge {{ $tabData['badge_color'] }} rounded-pill">
+                                                    Soal #{{ $itemIndex + 1 }} (Bobot: {{ $item['bobot'] ?? 10 }} Poin)
+                                                </span>
+                                                <span class="badge bg-success-subtle text-success">
+                                                    Kunci Jawaban: {{ $item['kunci'] ?? 'A' }}
+                                                </span>
+                                            </div>
+                                            <!-- Tombol Aksi Edit & Hapus Soal -->
+                                            <div class="d-flex align-items-center gap-1">
+                                                <!-- Tombol Edit Soal Ini -->
+                                                <button type="button" 
+                                                        class="btn btn-sm text-primary p-0 px-1 border-0" 
+                                                        title="Ubah / Edit Butir Soal Ini" 
+                                                        data-bs-toggle="collapse" 
+                                                        data-bs-target="#collapseEditSoal-{{ $p->id }}-{{ $item['id'] }}">
+                                                    <i class="bi bi-pencil-square fs-6"></i>
+                                                </button>
 
-                            <!-- Tab Kuis Modul -->
-                            <div class="tab-pane fade" id="kuis-{{ $p->id }}" role="tabpanel">
-                                <div class="alert alert-info py-2 small mb-3">
-                                    <i class="bi bi-info-circle me-1"></i> Kuis formatif dirancang untuk menguji pemahaman peserta di setiap akhir sesi bab pembelajaran.
-                                </div>
-                                <div class="card border rounded-3 p-3 mb-2 bg-light shadow-none">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <span class="badge bg-warning text-dark rounded-pill">Kuis Modul #1 (Bobot: 10 Poin)</span>
-                                        <span class="badge bg-success-subtle text-success">Kunci: A</span>
-                                    </div>
-                                    <p class="small fw-semibold text-dark mb-2">
-                                        Landasan hukum pengawasan ketenagakerjaan di Indonesia termuat dalam regulasi:
-                                    </p>
-                                    <div class="small text-secondary ps-2">
-                                        <div class="fw-bold text-success"><i class="bi bi-check-circle-fill me-1"></i>A. Undang-Undang Nomor 3 Tahun 1951</div>
-                                        <div>B. Undang-Undang Nomor 1 Tahun 1970</div>
-                                        <div>C. Peraturan Pemerintah Nomor 35 Tahun 2021</div>
-                                        <div>D. Permenaker Nomor 5 Tahun 2021</div>
-                                    </div>
-                                </div>
-                            </div>
+                                                <!-- Tombol Hapus Soal Ini -->
+                                                <form action="{{ route('mooc.bank-soal.butir.delete', ['id' => $p->id, 'soalId' => $item['id']]) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus butir soal #{{ $itemIndex + 1 }} ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm text-danger p-0 px-1 border-0" title="Hapus Soal Ini">
+                                                        <i class="bi bi-trash3 fs-6"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
 
-                            <!-- Tab Post-Test -->
-                            <div class="tab-pane fade" id="posttest-{{ $p->id }}" role="tabpanel">
-                                <div class="alert alert-success py-2 small mb-3">
-                                    <i class="bi bi-check2-circle me-1"></i> Soal evaluasi akhir (Post-Test) untuk menentukan kelulusan dan penerbitan sertifikat digital.
-                                </div>
-                                <div class="card border rounded-3 p-3 mb-2 bg-light shadow-none">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <span class="badge bg-danger rounded-pill">Post-Test #1 (Bobot: 20 Poin)</span>
-                                        <span class="badge bg-success-subtle text-success">Kunci: D</span>
+                                        <!-- Teks Pertanyaan & Pilihan (Display Mode) -->
+                                        <p class="small fw-semibold text-dark mb-2">
+                                            {{ $item['pertanyaan'] }}
+                                        </p>
+                                        <div class="small text-secondary ps-2 mb-2">
+                                            @foreach(['A', 'B', 'C', 'D'] as $opt)
+                                                @php $isCorrect = (strtoupper($item['kunci'] ?? '') === $opt); @endphp
+                                                <div class="{{ $isCorrect ? 'fw-bold text-success' : '' }}">
+                                                    @if($isCorrect)
+                                                        <i class="bi bi-check-circle-fill me-1"></i>
+                                                    @endif
+                                                    {{ $opt }}. {{ $item['pilihan'][$opt] ?? '-' }}
+                                                </div>
+                                            @endforeach
+                                        </div>
+
+                                        <!-- Formulir Edit Soal Ini (Collapsible) -->
+                                        <div class="collapse mt-3 pt-3 border-top" id="collapseEditSoal-{{ $p->id }}-{{ $item['id'] }}">
+                                            <form action="{{ route('mooc.bank-soal.butir.update', ['id' => $p->id, 'soalId' => $item['id']]) }}" method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="tipe" value="{{ $item['tipe'] ?? $tabKey }}">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <strong class="text-dark small">
+                                                        <i class="bi bi-pencil me-1 text-primary"></i>Ubah Butir Soal #{{ $itemIndex + 1 }}
+                                                    </strong>
+                                                    <button type="button" class="btn-close btn-sm" data-bs-toggle="collapse" data-bs-target="#collapseEditSoal-{{ $p->id }}-{{ $item['id'] }}"></button>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <label class="form-label small fw-bold text-secondary mb-1">Pertanyaan Soal</label>
+                                                    <textarea name="pertanyaan" class="form-control form-control-sm rounded-2" rows="2" required>{{ $item['pertanyaan'] }}</textarea>
+                                                </div>
+
+                                                <div class="row g-2 mb-2">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small text-secondary mb-1">Pilihan A</label>
+                                                        <input type="text" name="pilihan_a" class="form-control form-control-sm" value="{{ $item['pilihan']['A'] ?? '' }}" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small text-secondary mb-1">Pilihan B</label>
+                                                        <input type="text" name="pilihan_b" class="form-control form-control-sm" value="{{ $item['pilihan']['B'] ?? '' }}" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small text-secondary mb-1">Pilihan C</label>
+                                                        <input type="text" name="pilihan_c" class="form-control form-control-sm" value="{{ $item['pilihan']['C'] ?? '' }}" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small text-secondary mb-1">Pilihan D</label>
+                                                        <input type="text" name="pilihan_d" class="form-control form-control-sm" value="{{ $item['pilihan']['D'] ?? '' }}" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-sm-6">
+                                                        <label class="form-label small fw-bold text-secondary mb-1">Kunci Jawaban Benar</label>
+                                                        <select name="kunci" class="form-select form-select-sm" required>
+                                                            <option value="A" {{ strtoupper($item['kunci'] ?? '') === 'A' ? 'selected' : '' }}>A</option>
+                                                            <option value="B" {{ strtoupper($item['kunci'] ?? '') === 'B' ? 'selected' : '' }}>B</option>
+                                                            <option value="C" {{ strtoupper($item['kunci'] ?? '') === 'C' ? 'selected' : '' }}>C</option>
+                                                            <option value="D" {{ strtoupper($item['kunci'] ?? '') === 'D' ? 'selected' : '' }}>D</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <label class="form-label small fw-bold text-secondary mb-1">Bobot Poin</label>
+                                                        <input type="number" name="bobot" class="form-control form-control-sm" value="{{ $item['bobot'] ?? 10 }}" min="1" max="100">
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex justify-content-end gap-2">
+                                                    <button type="button" class="btn btn-sm btn-light border" data-bs-toggle="collapse" data-bs-target="#collapseEditSoal-{{ $p->id }}-{{ $item['id'] }}">Batal</button>
+                                                    <button type="submit" class="btn btn-sm btn-primary px-3">
+                                                        <i class="bi bi-check2-circle me-1"></i> Simpan Perubahan Soal
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
-                                    <p class="small fw-semibold text-dark mb-2">
-                                        Indikator keberhasilan dari penyelenggaraan diklat aparatur yang berdampak tinggi adalah:
-                                    </p>
-                                    <div class="small text-secondary ps-2">
-                                        <div>A. Tingkat kehadiran peserta 100% tanpa evaluasi lanjut</div>
-                                        <div>B. Banyaknya materi yang disampaikan dalam slide presentasi</div>
-                                        <div>C. Jumlah anggaran yang terserap habis</div>
-                                        <div class="fw-bold text-success"><i class="bi bi-check-circle-fill me-1"></i>D. Peningkatan kinerja pelayanan publik dan capaian target strategis instansi</div>
+                                @empty
+                                    <div class="text-center py-4 text-muted bg-light rounded-3">
+                                        <i class="bi bi-journal-x fs-3 d-block mb-1 text-secondary opacity-50"></i>
+                                        <span class="small">Belum ada butir soal {{ $tabData['label'] }}.</span>
+                                        <div class="mt-2">
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="collapse" data-bs-target="#collapseAddSoal-{{ $p->id }}-{{ $tabKey }}">
+                                                <i class="bi bi-plus-circle me-1"></i> Tambah Soal Pertama
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+                                @endforelse
                             </div>
+                            @endforeach
                         </div>
                     </div>
                     <div class="modal-footer bg-light px-4 py-3 border-top d-flex justify-content-between">

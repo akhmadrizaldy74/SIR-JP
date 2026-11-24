@@ -162,10 +162,127 @@ class MoocController extends Controller
     public function saveButirSoal(Request $request, $id)
     {
         $pelatihan = Pelatihan::findOrFail($id);
-        \App\Models\LogAktivitas::catat('LMS MOOC', 'Kelola Butir Soal', 'Memperbarui butir pertanyaan untuk: ' . $pelatihan->nama_pelatihan);
+        \App\Models\LogAktivitas::catat('LMS MOOC', 'Kelola Butir Soal', 'Menyimpan butir pertanyaan untuk: ' . $pelatihan->nama_pelatihan);
 
         return redirect()->route('mooc.bank-soal')
-            ->with('success', 'Butir pertanyaan untuk paket soal "' . $pelatihan->nama_pelatihan . '" berhasil disimpan.');
+            ->with('success', 'Butir pertanyaan untuk paket soal "' . $pelatihan->nama_pelatihan . '" siap diujikan.');
+    }
+
+    /**
+     * Tambah Butir Soal Baru ke Paket Soal
+     */
+    public function addButirSoal(Request $request, $id)
+    {
+        $pelatihan = Pelatihan::findOrFail($id);
+
+        $validated = $request->validate([
+            'tipe' => 'required|string|in:pretest,kuis,posttest',
+            'pertanyaan' => 'required|string',
+            'pilihan_a' => 'required|string',
+            'pilihan_b' => 'required|string',
+            'pilihan_c' => 'required|string',
+            'pilihan_d' => 'required|string',
+            'kunci' => 'required|string|in:A,B,C,D',
+            'bobot' => 'nullable|integer|min:1',
+        ]);
+
+        $items = $pelatihan->getBankSoalItems();
+        $nextId = count($items) > 0 ? (max(array_column($items, 'id')) + 1) : 1;
+
+        $newItem = [
+            'id' => $nextId,
+            'tipe' => $validated['tipe'],
+            'pertanyaan' => $validated['pertanyaan'],
+            'pilihan' => [
+                'A' => $validated['pilihan_a'],
+                'B' => $validated['pilihan_b'],
+                'C' => $validated['pilihan_c'],
+                'D' => $validated['pilihan_d'],
+            ],
+            'kunci' => strtoupper($validated['kunci']),
+            'bobot' => (int) ($validated['bobot'] ?? 10),
+        ];
+
+        $items[] = $newItem;
+        $pelatihan->bank_soal_data = $items;
+        $pelatihan->save();
+
+        \App\Models\LogAktivitas::catat('LMS MOOC', 'Tambah Butir Soal', 'Menambahkan butir soal baru pada: ' . $pelatihan->nama_pelatihan);
+
+        return redirect()->route('mooc.bank-soal')
+            ->with('success', 'Butir soal baru berhasil ditambahkan ke paket "' . $pelatihan->nama_pelatihan . '".');
+    }
+
+    /**
+     * Ubah / Edit Butir Soal yang Sudah Ada
+     */
+    public function updateButirSoal(Request $request, $id, $soalId)
+    {
+        $pelatihan = Pelatihan::findOrFail($id);
+
+        $validated = $request->validate([
+            'tipe' => 'required|string|in:pretest,kuis,posttest',
+            'pertanyaan' => 'required|string',
+            'pilihan_a' => 'required|string',
+            'pilihan_b' => 'required|string',
+            'pilihan_c' => 'required|string',
+            'pilihan_d' => 'required|string',
+            'kunci' => 'required|string|in:A,B,C,D',
+            'bobot' => 'nullable|integer|min:1',
+        ]);
+
+        $items = $pelatihan->getBankSoalItems();
+        $found = false;
+
+        foreach ($items as &$item) {
+            if ($item['id'] == $soalId) {
+                $item['tipe'] = $validated['tipe'];
+                $item['pertanyaan'] = $validated['pertanyaan'];
+                $item['pilihan'] = [
+                    'A' => $validated['pilihan_a'],
+                    'B' => $validated['pilihan_b'],
+                    'C' => $validated['pilihan_c'],
+                    'D' => $validated['pilihan_d'],
+                ];
+                $item['kunci'] = strtoupper($validated['kunci']);
+                $item['bobot'] = (int) ($validated['bobot'] ?? 10);
+                $found = true;
+                break;
+            }
+        }
+
+        if ($found) {
+            $pelatihan->bank_soal_data = $items;
+            $pelatihan->save();
+            \App\Models\LogAktivitas::catat('LMS MOOC', 'Ubah Butir Soal', "Memperbarui butir soal ID {$soalId} pada: " . $pelatihan->nama_pelatihan);
+
+            return redirect()->route('mooc.bank-soal')
+                ->with('success', 'Butir soal berhasil diperbarui!');
+        }
+
+        return redirect()->route('mooc.bank-soal')
+            ->with('error', 'Butir soal tidak ditemukan.');
+    }
+
+    /**
+     * Hapus Butir Soal Tertentu
+     */
+    public function deleteButirSoal(Request $request, $id, $soalId)
+    {
+        $pelatihan = Pelatihan::findOrFail($id);
+        $items = $pelatihan->getBankSoalItems();
+
+        $filtered = array_values(array_filter($items, function ($item) use ($soalId) {
+            return $item['id'] != $soalId;
+        }));
+
+        $pelatihan->bank_soal_data = $filtered;
+        $pelatihan->save();
+
+        \App\Models\LogAktivitas::catat('LMS MOOC', 'Hapus Butir Soal', "Menghapus butir soal ID {$soalId} pada: " . $pelatihan->nama_pelatihan);
+
+        return redirect()->route('mooc.bank-soal')
+            ->with('success', 'Butir soal berhasil dihapus.');
     }
 
     /**

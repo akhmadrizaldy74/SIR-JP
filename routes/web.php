@@ -214,6 +214,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/bank-soal/{id}', [MoocController::class, 'updateBankSoal'])->name('bank-soal.update');
         Route::delete('/bank-soal/{id}', [MoocController::class, 'destroyBankSoal'])->name('bank-soal.destroy');
         Route::post('/bank-soal/{id}/butir', [MoocController::class, 'saveButirSoal'])->name('bank-soal.butir.save');
+        Route::post('/bank-soal/{id}/butir/add', [MoocController::class, 'addButirSoal'])->name('bank-soal.butir.add');
+        Route::put('/bank-soal/{id}/butir/{soalId}', [MoocController::class, 'updateButirSoal'])->name('bank-soal.butir.update');
+        Route::delete('/bank-soal/{id}/butir/{soalId}', [MoocController::class, 'deleteButirSoal'])->name('bank-soal.butir.delete');
         Route::get('/riwayat', [MoocController::class, 'riwayat'])->name('riwayat');
         Route::get('/komentar', [MoocController::class, 'komentar'])->name('komentar');
         Route::get('/nilai-ujian', [MoocController::class, 'nilaiUjian'])->name('nilai-ujian');
