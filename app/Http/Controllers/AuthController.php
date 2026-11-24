@@ -65,21 +65,8 @@ class AuthController extends Controller
             LogAktivitas::catat('Autentikasi', 'User Login Berhasil', 'Login menggunakan ' . $loginField . ': ' . $input);
 
             // Jika peran adalah Peserta, sambungkan ke sesi Peserta dan arahkan ke Dashboard Peserta
-            if ($user->role === 'peserta') {
-                $peserta = \App\Models\Peserta::where('nip', $user->nik)
-                    ->orWhere('email', $user->email)
-                    ->first();
-
-                if (!$peserta) {
-                    $peserta = \App\Models\Peserta::create([
-                        'nip' => $user->nik,
-                        'nama' => $user->name,
-                        'email' => $user->email,
-                        'jenis_kelamin' => 'Laki-laki',
-                        'instansi' => 'PPSDM Kemnaker',
-                    ]);
-                }
-
+            if ($user->role === 'peserta' || $user->isPeserta()) {
+                $peserta = $user->getOrCreatePesertaProfile();
                 session(['participant_id' => $peserta->id]);
 
                 return redirect()->route('portal.dashboard')
@@ -189,20 +176,7 @@ class AuthController extends Controller
 
         // Jika beralih ke mode Peserta
         if (in_array(strtolower($targetRole), ['peserta', 'peserta diklat'])) {
-            $peserta = \App\Models\Peserta::where('nip', $user->nik)
-                ->orWhere('email', $user->email)
-                ->first();
-
-            if (!$peserta) {
-                $peserta = \App\Models\Peserta::create([
-                    'nip' => $user->nik ?: 'NIK-' . substr(md5($user->email), 0, 10),
-                    'nama' => $user->name,
-                    'email' => $user->email,
-                    'jenis_kelamin' => 'Laki-laki',
-                    'instansi' => 'PPSDM Kemnaker',
-                ]);
-            }
-
+            $peserta = $user->getOrCreatePesertaProfile();
             session(['participant_id' => $peserta->id]);
 
             return redirect()->route('portal.dashboard')

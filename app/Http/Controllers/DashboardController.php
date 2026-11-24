@@ -36,16 +36,7 @@ class DashboardController extends Controller
             $activeRole = auth()->user()->getActiveRole();
             if (in_array(strtolower($activeRole), ['peserta', 'peserta diklat'])) {
                 $user = auth()->user();
-                $peserta = Peserta::where('nip', $user->nik)->orWhere('email', $user->email)->first();
-                if (!$peserta) {
-                    $peserta = Peserta::create([
-                        'nip' => $user->nik ?: 'NIK-' . substr(md5($user->email), 0, 10),
-                        'nama' => $user->name,
-                        'email' => $user->email,
-                        'jenis_kelamin' => 'Laki-laki',
-                        'instansi' => 'PPSDM Kemnaker',
-                    ]);
-                }
+                $peserta = $user->getOrCreatePesertaProfile();
                 session(['participant_id' => $peserta->id]);
                 return redirect()->route('portal.dashboard');
             }

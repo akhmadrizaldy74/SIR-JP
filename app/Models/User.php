@@ -198,4 +198,44 @@ class User extends Authenticatable
     {
         return $this->hasMany(LogAktivitas::class);
     }
+
+    /**
+     * Dapatkan atau buat profil Peserta yang tersinkronisasi aman dengan akun pengguna.
+     */
+    public function getOrCreatePesertaProfile(): Peserta
+    {
+        // 1. Cari Peserta yang sudah ada berdasarkan email atau NIK/NIP
+        $peserta = Peserta::where(function ($q) {
+            if (!empty($this->email)) {
+                $q->where('email', $this->email);
+            }
+            if (!empty($this->nik)) {
+                $q->orWhere('nip', $this->nik);
+            }
+        })->first();
+
+        if ($peserta) {
+            // Update data yang mungkin berubah
+            $peserta->update([
+                'nama' => $this->name,
+                'email' => $this->email ?: $peserta->email,
+                'nip' => $this->nik ?: $peserta->nip,
+            ]);
+            return $peserta;
+        }
+
+        // 2. Pastikan NIP unik jika NIK user kosong atau sudah digunakan data lain
+        $nip = $this->nik;
+        if (empty($nip) || Peserta::where('nip', $nip)->exists()) {
+            $nip = 'NIK-' . substr(md5(($this->email ?: $this->username) . time()), 0, 10);
+        }
+
+        return Peserta::create([
+            'nip' => $nip,
+            'nama' => $this->name,
+            'email' => $this->email,
+            'jenis_kelamin' => 'Laki-laki',
+            'instansi' => 'PPSDM Kemnaker',
+        ]);
+    }
 }

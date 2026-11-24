@@ -177,15 +177,7 @@ class UserController extends Controller
 
         // Jika peran peserta, buatkan profil peserta otomatis jika belum ada
         if ($user->role === 'peserta' || $user->isPeserta()) {
-            Peserta::firstOrCreate(
-                ['email' => $user->email],
-                [
-                    'nip' => $user->nik,
-                    'nama' => $user->name,
-                    'jenis_kelamin' => 'Laki-laki',
-                    'instansi' => 'PPSDM Kemnaker',
-                ]
-            );
+            $user->getOrCreatePesertaProfile();
         }
 
         LogAktivitas::catat('Manajemen Pengguna', 'Tambah Pengguna Baru', "Menambahkan akun baru: {$user->name} ({$user->nik}) dengan Role: {$user->role}");
@@ -254,15 +246,7 @@ class UserController extends Controller
 
         // Jika role diubah menjadi peserta, pastikan data Peserta terhubung
         if ($user->role === 'peserta' || $user->isPeserta()) {
-            Peserta::firstOrCreate(
-                ['email' => $user->email],
-                [
-                    'nip' => $user->nik ?: 'NIK-' . substr(md5($user->email), 0, 10),
-                    'nama' => $user->name,
-                    'jenis_kelamin' => 'Laki-laki',
-                    'instansi' => 'PPSDM Kemnaker',
-                ]
-            );
+            $user->getOrCreatePesertaProfile();
         }
 
         LogAktivitas::catat('Manajemen Pengguna', 'Ubah Pengguna/Role', "Memperbarui akun {$user->name} (Role: {$user->role})");
