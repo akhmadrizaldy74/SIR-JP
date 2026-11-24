@@ -98,7 +98,7 @@
                 <div class="text-muted small fw-medium mb-2">Total LMS</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="0">0</h3>
                         <div class="text-danger small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-down-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -113,7 +113,7 @@
                 <div class="text-muted small fw-medium mb-2">Status Proses</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="0">0</h3>
                         <div class="text-danger small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-down-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -128,7 +128,7 @@
                 <div class="text-muted small fw-medium mb-2">Status Disetujui</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="0">0</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -143,7 +143,7 @@
                 <div class="text-muted small fw-medium mb-2">Status Ditolak</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="0">0</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -158,7 +158,7 @@
                 <div class="text-muted small fw-medium mb-2">Status Revisi</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="0">0</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -173,7 +173,7 @@
                 <div class="text-muted small fw-medium mb-2">Status Perbaikan</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="0">0</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -195,7 +195,7 @@
                 <div class="text-muted small fw-medium mb-2">Pelatihan</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">{{ $kclcStats['total_pelatihan'] ?? 0 }}</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $kclcStats['total_pelatihan'] ?? 0 }}">{{ $kclcStats['total_pelatihan'] ?? 0 }}</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -210,7 +210,7 @@
                 <div class="text-muted small fw-medium mb-2">Materi</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="0">0</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -225,7 +225,7 @@
                 <div class="text-muted small fw-medium mb-2">Media Pembelajaran</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="0">0</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -240,7 +240,7 @@
                 <div class="text-muted small fw-medium mb-2">Bank Soal</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">0</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="0">0</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -335,7 +335,7 @@
                 <div class="text-muted small fw-medium mb-2">Total KMS</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">141</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="141">141</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -350,7 +350,7 @@
                 <div class="text-muted small fw-medium mb-2">Status Proses</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">10</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="10">10</h3>
                         <div class="text-danger small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-down-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -365,7 +365,7 @@
                 <div class="text-muted small fw-medium mb-2">Status Disetujui</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">90</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="90">90</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -380,7 +380,7 @@
                 <div class="text-muted small fw-medium mb-2">Status Ditolak</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">25</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="25">25</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -395,7 +395,7 @@
                 <div class="text-muted small fw-medium mb-2">Status Revisi</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">15</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="15">15</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -410,7 +410,7 @@
                 <div class="text-muted small fw-medium mb-2">Status Perbaikan</div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="fw-bold text-dark mb-0 lh-1">1</h3>
+                        <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="1">1</h3>
                         <div class="text-info small mt-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-short"></i></div>
                     </div>
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #E0F2FE; color: #0284C7;">
@@ -430,7 +430,7 @@
         <div class="col">
             <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 position-relative overflow-hidden">
                 <div class="text-muted small fw-semibold text-uppercase mb-2">TOTAL INSTRUKTUR</div>
-                <h3 class="fw-bold text-dark mb-0 lh-1">5</h3>
+                <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="{{ $stats['total_widyaiswara'] ?? 5 }}">{{ $stats['total_widyaiswara'] ?? 5 }}</h3>
                 <div class="position-absolute end-0 bottom-0 top-0 d-flex align-items-center pe-3 opacity-25">
                     <i class="bi bi-person-video3 fs-1 text-primary"></i>
                 </div>
@@ -440,7 +440,7 @@
         <div class="col">
             <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 position-relative overflow-hidden">
                 <div class="text-muted small fw-semibold text-uppercase mb-2">TOTAL MODUL</div>
-                <h3 class="fw-bold text-dark mb-0 lh-1">10</h3>
+                <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="10">10</h3>
                 <div class="position-absolute end-0 bottom-0 top-0 d-flex align-items-center pe-3 opacity-25">
                     <i class="bi bi-journal-bookmark-fill fs-1 text-primary"></i>
                 </div>
@@ -450,7 +450,7 @@
         <div class="col">
             <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 position-relative overflow-hidden">
                 <div class="text-muted small fw-semibold text-uppercase mb-2">TOTAL MATERI</div>
-                <h3 class="fw-bold text-dark mb-0 lh-1">188</h3>
+                <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="188">188</h3>
                 <div class="position-absolute end-0 bottom-0 top-0 d-flex align-items-center pe-3 opacity-25">
                     <i class="bi bi-file-earmark-text-fill fs-1 text-primary"></i>
                 </div>
@@ -460,7 +460,7 @@
         <div class="col">
             <div class="card p-3 border shadow-sm rounded-3 bg-white h-100 position-relative overflow-hidden">
                 <div class="text-muted small fw-semibold text-uppercase mb-2">TOTAL MEDIA PEMBELAJARAN</div>
-                <h3 class="fw-bold text-dark mb-0 lh-1">404</h3>
+                <h3 class="fw-bold text-dark mb-0 lh-1 counter-animate" data-target="404">404</h3>
                 <div class="position-absolute end-0 bottom-0 top-0 d-flex align-items-center pe-3 opacity-25">
                     <i class="bi bi-collection-play-fill fs-1 text-primary"></i>
                 </div>

@@ -63,25 +63,62 @@ function initAnimatedCounters() {
   const elements = document.querySelectorAll('.counter-animate');
   if (!elements.length) return;
 
+  // 1. Inisialisasi awal pada saat halaman dimuat (efek bergelombang cepat)
   elements.forEach((el, index) => {
-    // Delay sedikit per kartu agar ada efek bergelombang yang sangat jelas terlihat
     setTimeout(() => {
       animateRandomShuffle(el);
     }, index * 40);
   });
 
-  function animateRandomShuffle(el) {
+  // 2. IntersectionObserver: memicu ulang animasi saat kartu di-scroll masuk ke viewport
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          // Animasikan kartu ketika masuk layar (jika belum sedang mengacak)
+          if (!el._isShuffling) {
+            animateRandomShuffle(el);
+          }
+          obs.unobserve(el);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    elements.forEach(el => observer.observe(el));
+  }
+
+  // 3. Efek Interaktif: Saat mouse mengarahkan kursor (hover) ke kartu statistik, angka teracak kembali
+  document.querySelectorAll('.card, .stat-card').forEach(card => {
+    const counter = card.querySelector('.counter-animate');
+    if (counter && !card._hasCounterHover) {
+      card._hasCounterHover = true;
+      card.addEventListener('mouseenter', () => {
+        if (!counter._isShuffling) {
+          animateRandomShuffle(counter, true);
+        }
+      });
+    }
+  });
+
+  function animateRandomShuffle(el, isHover = false) {
+    if (el._isShuffling) return;
+    el._isShuffling = true;
+
     const raw = (el.getAttribute('data-target') || el.innerText || '').trim();
     const cleanNumber = raw.replace(/,/g, '');
     const target = parseFloat(cleanNumber);
-    if (isNaN(target)) return;
+    if (isNaN(target)) {
+      el._isShuffling = false;
+      return;
+    }
 
     const isThousand = raw.includes(',') || target >= 1000;
     const finalFormatted = isThousand ? Math.round(target).toLocaleString('en-US') : Math.round(target).toString();
     const targetDigits = finalFormatted.split('');
     const len = targetDigits.length;
 
-    const duration = 1600; // Durasi acak 1.6 detik agar sangat jelas terlihat mata
+    const duration = isHover ? 900 : 1400; // Durasi acak (hover lebih cepat 0.9s, initial 1.4s)
     const startTime = performance.now();
 
     function getRandomChar(expectedChar) {
@@ -95,11 +132,11 @@ function initAnimatedCounters() {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
-      // Angka acak berputar cepat: dari progress 0 sampai 0.5 semua digit acak
-      // Setelah progress > 0.5 digit mulai terkunci satu per satu dari kiri ke kanan
+      // Angka acak berputar cepat: dari progress 0 sampai 0.35 semua digit acak
+      // Setelah progress > 0.35 digit mulai terkunci satu per satu dari kiri ke kanan
       let lockedCount = 0;
-      if (progress > 0.4) {
-        lockedCount = Math.floor(((progress - 0.4) / 0.6) * len);
+      if (progress > 0.35) {
+        lockedCount = Math.floor(((progress - 0.35) / 0.65) * len);
       }
 
       let output = '';
@@ -117,12 +154,16 @@ function initAnimatedCounters() {
         requestAnimationFrame(frame);
       } else {
         el.innerText = finalFormatted;
+        el._isShuffling = false;
       }
     }
 
     requestAnimationFrame(frame);
   }
 }
+
+// Ekspos ke global window agar dapat dipanggil kembali kapan saja
+window.initAnimatedCounters = initAnimatedCounters;
 
 /**
  * SirAlert - Enterprise Popup Notification & Confirmation System
