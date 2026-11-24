@@ -86,12 +86,30 @@
 
 <!-- Filter Bar -->
 <div class="card border-0 shadow-sm rounded-3 p-3 mb-4 bg-white">
-    <form method="GET" action="{{ route('users.index') }}" class="row g-2 align-items-end">
+    <form id="userFilterForm" method="GET" action="{{ route('users.index') }}" class="row g-2 align-items-end">
         <div class="col-md-5">
-            <label class="form-label small fw-semibold text-secondary mb-1">CARI PENGGUNA</label>
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <label class="form-label small fw-semibold text-secondary mb-0">CARI PENGGUNA</label>
+                <span class="text-muted" style="font-size: 0.72rem;">
+                    <i class="bi bi-lightning-charge-fill text-warning me-0.5"></i>Pencarian otomatis saat mengetik
+                </span>
+            </div>
             <div class="input-group input-group-sm">
                 <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-secondary"></i></span>
-                <input type="text" name="search" value="{{ $search }}" class="form-control border-start-0" placeholder="Ketik nama, NIK, username, atau email...">
+                <input type="text" 
+                       name="search" 
+                       id="searchUserInput"
+                       value="{{ $search }}" 
+                       class="form-control border-start-0 @if(!empty($search)) border-end-0 @endif" 
+                       placeholder="Ketik nama, NIK, username, atau email..."
+                       autocomplete="off">
+                @if(!empty($search))
+                    <a href="{{ route('users.index', array_filter(['role' => $role, 'status' => $status])) }}" 
+                       class="input-group-text bg-light text-secondary border-start-0 text-decoration-none" 
+                       title="Hapus pencarian">
+                        <i class="bi bi-x-circle-fill text-muted"></i>
+                    </a>
+                @endif
             </div>
         </div>
         <div class="col-md-3">
@@ -113,8 +131,8 @@
             </select>
         </div>
         <div class="col-md-2 d-flex gap-1">
-            <button type="submit" class="btn btn-sm btn-primary flex-grow-1">Filter</button>
-            <a href="{{ route('users.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+            <button type="submit" class="btn btn-sm btn-primary flex-grow-1" title="Cari data">Filter</button>
+            <a href="{{ route('users.index') }}" class="btn btn-sm btn-outline-secondary" title="Reset filter">Reset</a>
         </div>
     </form>
 </div>
@@ -135,9 +153,9 @@
                     <th class="text-center" style="width: 120px;">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="usersTableBody">
                 @forelse($users as $index => $u)
-                    <tr>
+                    <tr class="user-row">
                         <td class="text-secondary small">{{ $users->firstItem() + $index }}</td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
@@ -373,4 +391,47 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchUserInput');
+    const filterForm = document.getElementById('userFilterForm');
+    const tableBody = document.getElementById('usersTableBody');
+    let debounceTimer = null;
+
+    if (searchInput && filterForm) {
+        // Pertahankan kursor di akhir kata jika halaman dimuat ulang dengan kata kunci pencarian
+        if (searchInput.value.trim().length > 0) {
+            searchInput.focus();
+            const len = searchInput.value.length;
+            searchInput.setSelectionRange(len, len);
+        }
+
+        searchInput.addEventListener('input', function () {
+            const query = this.value.toLowerCase().trim();
+
+            // 1. Respon Instan (0 ms): Langsung filter baris yang tampil di layar secara real-time
+            if (tableBody) {
+                const rows = tableBody.querySelectorAll('tr.user-row');
+                rows.forEach(function (row) {
+                    const text = row.textContent.toLowerCase();
+                    if (text.includes(query)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            // 2. Debounce Auto-Submit (450 ms): Otomatis cari ke seluruh database tanpa perlu klik tombol Filter
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function () {
+                filterForm.submit();
+            }, 450);
+        });
+    }
+});
+</script>
+@endpush
 @endsection
