@@ -99,145 +99,207 @@
 @endsection
 
 @section('content')
+@include('partials.alerts')
+
 <div class="row g-3">
     <!-- ============================================================== -->
     <!-- KOLOM KIRI (7-8 COLS): PELATIHAN, FILTER, & SESI PERTEMUAN     -->
     <!-- ============================================================== -->
     <div class="col-lg-8">
-        <!-- 1. Card Banner Info Pelatihan Sesuai Gambar KCLC -->
-        <div class="kclc-card p-3 mb-3">
-            <h6 class="fw-bold text-dark mb-1" style="font-size: 1.05rem;">
-                Nama Pelatihan : {{ $pelatihan->nama_pelatihan ?? ($angkatan->nomor_angkatan ?? 'Pengantar Kerja Ahli Muda A.1') }}
-            </h6>
-            <div class="text-muted small">
-                Diselenggarakan Tanggal 
-                <strong>{{ $angkatan?->tanggal_mulai ? $angkatan->tanggal_mulai->translatedFormat('d F Y') : '23 November 2026' }}</strong> s/d 
-                <strong>{{ $angkatan?->tanggal_selesai ? $angkatan->tanggal_selesai->translatedFormat('d F Y') : '4 Desember 2026' }}</strong>
-            </div>
-        </div>
-
-        <!-- 2. Card Filter Jadwal Sesuai Gambar KCLC -->
-        <div class="kclc-card p-3 mb-3">
-            <form action="{{ route('portal.dashboard') }}" method="GET" class="d-flex align-items-center gap-2 flex-wrap">
-                <span class="fw-bold text-dark me-2 small">Filter Jadwal</span>
-                
-                <input type="date" 
-                       name="filter_tanggal" 
-                       class="form-control form-control-sm text-muted" 
-                       style="width: 150px;" 
-                       value="{{ request('filter_tanggal') }}">
-
-                <select name="filter_mapel" class="form-select form-select-sm" style="width: 170px;">
-                    <option value="">-- Pilih --</option>
-                    @foreach($mataPelatihans as $mp)
-                        <option value="{{ $mp->id }}" {{ request('filter_mapel') == $mp->id ? 'selected' : '' }}>
-                            {{ $mp->nama_mata_pelatihan }}
-                        </option>
-                    @endforeach
-                </select>
-
-                <button type="submit" class="btn btn-primary btn-sm px-3 fw-semibold">
-                    Cari
-                </button>
-                <a href="{{ route('portal.dashboard') }}" class="btn btn-outline-warning btn-sm px-3 fw-semibold text-dark">
-                    Reset
-                </a>
-            </form>
-        </div>
-
-        <!-- 3. Header Pelatihan Sesuai Gambar KCLC -->
-        <div class="kclc-card p-3 mb-3">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-2 d-flex align-items-center justify-content-center text-white flex-shrink-0" 
-                     style="width: 52px; height: 52px; background-color: #1E3A8A;">
-                    <i class="bi bi-book fs-3"></i>
+        @if(!$angkatan)
+            <!-- Tampilan Jika Peserta Belum Memilih / Terdaftar di Angkatan Pelatihan -->
+            <div class="kclc-card p-4 mb-4 border-0 shadow-sm rounded-4">
+                <div class="text-center py-2 mb-3">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: #E0F2FE; color: #0284C7;">
+                        <i class="bi bi-mortarboard fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">Anda Belum Terdaftar dalam Pelatihan Aktif</h5>
+                    <p class="text-muted small mb-0" style="max-width: 580px; margin: 0 auto;">
+                        Akun peserta Anda belum terhubung dengan kelas atau angkatan pelatihan. Silakan pilih pelatihan yang sedang dibuka di bawah ini atau tunggu penetapan kelas oleh Penyelenggara Diklat.
+                    </p>
                 </div>
-                <div>
-                    <h5 class="fw-bold text-dark mb-0" style="font-size: 1.15rem;">
-                        {{ $pelatihan->nama_pelatihan ?? ($angkatan->nomor_angkatan ?? 'Pengantar Kerja Ahli Muda A.1') }}
-                    </h5>
-                    <div class="text-muted small mt-1">
-                        <i class="bi bi-compass text-secondary me-1"></i> Pelatihan
+
+                <div class="card border rounded-3 p-3 bg-light shadow-none mx-auto" style="max-width: 620px;">
+                    <form action="{{ route('portal.pilih-pelatihan') }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary mb-1">
+                                PILIH PELATIHAN &amp; ANGKATAN <span class="text-danger">*</span>
+                            </label>
+                            <select name="angkatan_id" class="form-select form-select-sm rounded-2" required>
+                                <option value="">-- Pilih Pelatihan yang Anda Ikuti --</option>
+                                @foreach($availableAngkatans as $avAngkatan)
+                                    <option value="{{ $avAngkatan->id }}">
+                                        {{ $avAngkatan->pelatihan->nama_pelatihan ?? 'Pelatihan' }} &bull; {{ $avAngkatan->nomor_angkatan }}
+                                        ({{ $avAngkatan->tanggal_mulai ? $avAngkatan->tanggal_mulai->translatedFormat('d M Y') : 'Mulai Segera' }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <span class="small text-muted"><i class="bi bi-shield-check me-1 text-success"></i>Terhubung dengan database SIR-JP</span>
+                            <button type="submit" class="btn btn-primary btn-sm px-4 fw-semibold rounded-2" style="background-color: #183B65; border-color: #183B65;">
+                                <i class="bi bi-check2-circle me-1"></i> Masuk ke Pelatihan Ini
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @else
+            <!-- 1. Card Banner Info Pelatihan Nyata Sesuai Gambar KCLC -->
+            <div class="kclc-card p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 1.05rem;">
+                            Nama Pelatihan : {{ $pelatihan->nama_pelatihan ?? $angkatan->nomor_angkatan }}
+                        </h6>
+                        <div class="text-muted small">
+                            Diselenggarakan Tanggal 
+                            <strong>{{ $angkatan->tanggal_mulai ? $angkatan->tanggal_mulai->translatedFormat('d F Y') : '-' }}</strong> s/d 
+                            <strong>{{ $angkatan->tanggal_selesai ? $angkatan->tanggal_selesai->translatedFormat('d F Y') : '-' }}</strong>
+                            &bull; Angkatan: <span class="badge bg-primary-subtle text-primary">{{ $angkatan->nomor_angkatan }}</span>
+                        </div>
+                    </div>
+                    <form action="{{ route('portal.ganti-pelatihan') }}" method="POST" class="m-0" onsubmit="return confirm('Apakah Anda ingin memilih ulang pelatihan?')">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-secondary btn-sm rounded-2 py-1 px-2" title="Ganti Pelatihan" style="font-size: 0.78rem;">
+                            <i class="bi bi-arrow-left-right me-1"></i> Ganti Pelatihan
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 2. Card Filter Jadwal Sesuai Gambar KCLC -->
+            <div class="kclc-card p-3 mb-3">
+                <form action="{{ route('portal.dashboard') }}" method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="fw-bold text-dark me-2 small">Filter Jadwal</span>
+                    
+                    <input type="date" 
+                           name="filter_tanggal" 
+                           class="form-control form-control-sm text-muted" 
+                           style="width: 150px;" 
+                           value="{{ request('filter_tanggal') }}">
+
+                    <select name="filter_mapel" class="form-select form-select-sm" style="width: 170px;">
+                        <option value="">-- Pilih --</option>
+                        @foreach($mataPelatihans as $mp)
+                            <option value="{{ $mp->id }}" {{ request('filter_mapel') == $mp->id ? 'selected' : '' }}>
+                                {{ $mp->nama_mata_pelatihan }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <button type="submit" class="btn btn-primary btn-sm px-3 fw-semibold">
+                        Cari
+                    </button>
+                    <a href="{{ route('portal.dashboard') }}" class="btn btn-outline-warning btn-sm px-3 fw-semibold text-dark">
+                        Reset
+                    </a>
+                </form>
+            </div>
+
+            <!-- 3. Header Pelatihan Sesuai Gambar KCLC -->
+            <div class="kclc-card p-3 mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-2 d-flex align-items-center justify-content-center text-white flex-shrink-0" 
+                         style="width: 52px; height: 52px; background-color: #1E3A8A;">
+                        <i class="bi bi-book fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0" style="font-size: 1.15rem;">
+                            {{ $pelatihan->nama_pelatihan ?? $angkatan->nomor_angkatan }}
+                        </h5>
+                        <div class="text-muted small mt-1">
+                            <i class="bi bi-compass text-secondary me-1"></i> {{ $pelatihan->kategori ?? 'Pelatihan Diklat' }} &bull; {{ $angkatan->nomor_angkatan }}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 4. Daftar Pertemuan / Sesi Presensi Sesuai Gambar KCLC -->
-        <div class="mb-4">
-            @forelse($sessionsList as $idx => $sess)
-                @php
-                    $presensiUser = $presensisToday->get($sess->id);
-                    $pengajarNama = $sess->jadwal->penugasanPengajar->pengajar_nama 
-                        ?? ($sess->jadwal->widyaiswara->nama 
-                        ?? ($sess->jadwal->pengajar ?? 'Alfiah Pira Mundiarsih, S.Sos., M.A.'));
-                    $ruanganNama = $sess->kelasMapel->ruangan->nama_ruangan 
-                        ?? ($sess->jadwal->ruangan ?? 'Zoom Meeting');
-                @endphp
+            <!-- 4. Daftar Pertemuan / Sesi Presensi Sesuai Gambar KCLC -->
+            <div class="mb-4">
+                @forelse($sessionsList as $idx => $sess)
+                    @php
+                        $presensiUser = $presensisToday->get($sess->id);
+                        $pengajarNama = $sess->jadwal->penugasanPengajar->pengajar_nama 
+                            ?? ($sess->jadwal->widyaiswara->nama 
+                            ?? ($sess->jadwal->pengajar ?? 'Alfiah Pira Mundiarsih, S.Sos., M.A.'));
+                        $ruanganNama = $sess->kelasMapel->ruangan->nama_ruangan 
+                            ?? ($sess->jadwal->ruangan ?? 'Zoom Meeting');
+                        $isSessOpen = $sess->isBuka();
+                    @endphp
 
-                <div class="session-item-card">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                        <!-- Left Details -->
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="rounded-2 d-flex align-items-center justify-content-center text-white flex-shrink-0 shadow-sm" 
-                                 style="width: 44px; height: 44px; background-color: #0284C7;">
-                                <i class="bi bi-calendar-event fs-4"></i>
+                    <div class="session-item-card">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                            <!-- Left Details -->
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-2 d-flex align-items-center justify-content-center text-white flex-shrink-0 shadow-sm" 
+                                     style="width: 44px; height: 44px; background-color: #0284C7;">
+                                    <i class="bi bi-calendar-event fs-4"></i>
+                                </div>
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <h6 class="fw-bold text-dark mb-0">Pertemuan {{ $idx + 1 }}</h6>
+                                        <span class="badge" style="background-color: #E0E7FF; color: #4338CA; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;">
+                                            {{ $sess->jadwal->jp ?? 1 }} JP
+                                        </span>
+                                    </div>
+                                    <div class="text-muted small mb-1">
+                                        <i class="bi bi-calendar3 text-secondary me-1"></i> {{ $sess->tanggal ? $sess->tanggal->translatedFormat('l, Y-m-d') : '-' }} &bull; 
+                                        <i class="bi bi-clock text-secondary me-1"></i> {{ substr($sess->jam_mulai, 0, 5) }} - {{ substr($sess->jam_selesai, 0, 5) }} WIB
+                                    </div>
+                                    <div class="small text-muted d-flex align-items-center gap-2 flex-wrap">
+                                        <span>
+                                            <i class="bi bi-person text-secondary me-1"></i> {{ $pengajarNama }}
+                                        </span>
+                                        <span class="badge bg-secondary-subtle text-secondary small py-0 px-2" style="font-size: 0.68rem;">widyaiswara</span>
+                                    </div>
+                                    <div class="small text-primary mt-1">
+                                        <i class="bi bi-camera-video me-1"></i> {{ $ruanganNama }}
+                                        <i class="bi bi-copy text-muted ms-1 cursor-pointer" title="Salin Info Pertemuan" onclick="navigator.clipboard.writeText('Pertemuan {{ $idx + 1 }}: {{ $ruanganNama }}'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Tersalin!', showConfirmButton: false, timer: 1200});"></i>
+                                    </div>
+                                </div>
                             </div>
+
+                            <!-- Right Action: Tombol Presensi -->
                             <div>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <h6 class="fw-bold text-dark mb-0">Pertemuan {{ $idx + 1 }}</h6>
-                                    <span class="badge" style="background-color: #E0E7FF; color: #4338CA; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;">
-                                        {{ $sess->jadwal->jp ?? 1 }} JP
-                                    </span>
-                                </div>
-                                <div class="text-muted small mb-1">
-                                    <i class="bi bi-calendar3 text-secondary me-1"></i> {{ $sess->tanggal->translatedFormat('l, Y-m-d') }} &bull; 
-                                    <i class="bi bi-clock text-secondary me-1"></i> {{ substr($sess->jam_mulai, 0, 5) }} - {{ substr($sess->jam_selesai, 0, 5) }} WIB
-                                </div>
-                                <div class="small text-muted d-flex align-items-center gap-2 flex-wrap">
-                                    <span>
-                                        <i class="bi bi-person text-secondary me-1"></i> {{ $pengajarNama }}
-                                    </span>
-                                    <span class="badge bg-secondary-subtle text-secondary small py-0 px-2" style="font-size: 0.68rem;">widyaiswara</span>
-                                </div>
-                                <div class="small text-primary mt-1">
-                                    <i class="bi bi-camera-video me-1"></i> {{ $ruanganNama }}
-                                    <i class="bi bi-copy text-muted ms-1 cursor-pointer" title="Salin Info Pertemuan" onclick="navigator.clipboard.writeText('Pertemuan {{ $idx + 1 }}: {{ $ruanganNama }}'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Tersalin!', showConfirmButton: false, timer: 1200});"></i>
-                                </div>
+                                @if($presensiUser)
+                                    <div class="d-flex align-items-center gap-1">
+                                        <button type="button" class="btn btn-success btn-sm px-3 py-2 rounded-2 fw-semibold shadow-sm d-flex align-items-center gap-1" disabled>
+                                            <i class="bi bi-check2-circle fs-6"></i>
+                                            <span>{{ $presensiUser->status_kehadiran }} ({{ $presensiUser->waktu_check_in ? $presensiUser->waktu_check_in->format('H:i') : 'OK' }})</span>
+                                        </button>
+                                        @if($presensiUser->bukti_file)
+                                            <a href="{{ asset('storage/' . $presensiUser->bukti_file) }}" target="_blank" class="btn btn-outline-secondary btn-sm px-2 py-2 rounded-2" title="Lihat Bukti Foto/PDF">
+                                                <i class="bi bi-paperclip"></i>
+                                            </a>
+                                        @endif
+                                    </div>
+                                @elseif($isSessOpen)
+                                    <button type="button" class="btn btn-primary btn-sm px-3 py-2 rounded-2 fw-semibold shadow-sm d-flex align-items-center gap-2" 
+                                            data-bs-toggle="modal" data-bs-target="#modalPresensi{{ $sess->id }}">
+                                        <i class="bi bi-person-check fs-6"></i>
+                                        <span>Presensi</span>
+                                    </button>
+                                @elseif($sess->tanggal && $sess->tanggal->isFuture())
+                                    <button type="button" class="btn btn-secondary btn-sm px-3 py-2 rounded-2 fw-semibold opacity-75" disabled title="Jadwal pertemuan belum dimulai">
+                                        <i class="bi bi-hourglass-split me-1"></i> Belum Dimulai
+                                    </button>
+                                @elseif($sess->status !== 'Aktif' || ($sess->tanggal && $sess->tanggal->isPast() && !$sess->tanggal->isToday()))
+                                    <button type="button" class="btn btn-secondary btn-sm px-3 py-2 rounded-2 fw-semibold opacity-75" disabled title="Sesi presensi ditutup atau jadwal telah lewat">
+                                        <i class="bi bi-lock me-1"></i> Ditutup
+                                    </button>
+                                @else
+                                    <button type="button" class="btn btn-secondary btn-sm px-3 py-2 rounded-2 fw-semibold opacity-75" disabled title="Presensi belum dibuka oleh pengajar">
+                                        <i class="bi bi-clock me-1"></i> Presensi Belum Dibuka
+                                    </button>
+                                @endif
                             </div>
                         </div>
-
-                        <!-- Right Action: Tombol Presensi Sesuai Gambar -->
-                        <div>
-                            @if($presensiUser)
-                                <div class="d-flex align-items-center gap-1">
-                                    <button type="button" class="btn btn-success btn-sm px-3 py-2 rounded-2 fw-semibold shadow-sm d-flex align-items-center gap-1" disabled>
-                                        <i class="bi bi-check2-circle fs-6"></i>
-                                        <span>{{ $presensiUser->status_kehadiran }} ({{ $presensiUser->waktu_check_in ? $presensiUser->waktu_check_in->format('H:i') : 'OK' }})</span>
-                                    </button>
-                                    @if($presensiUser->bukti_file)
-                                        <a href="{{ asset('storage/' . $presensiUser->bukti_file) }}" target="_blank" class="btn btn-outline-secondary btn-sm px-2 py-2 rounded-2" title="Lihat Bukti Foto/PDF">
-                                            <i class="bi bi-paperclip"></i>
-                                        </a>
-                                    @endif
-                                </div>
-                            @elseif($sess->status === 'Aktif')
-                                <button type="button" class="btn btn-primary btn-sm px-3 py-2 rounded-2 fw-semibold shadow-sm d-flex align-items-center gap-2" 
-                                        data-bs-toggle="modal" data-bs-target="#modalPresensi{{ $sess->id }}">
-                                    <i class="bi bi-person-check fs-6"></i>
-                                    <span>Presensi</span>
-                                </button>
-                            @else
-                                <button type="button" class="btn btn-secondary btn-sm px-3 py-2 rounded-2 fw-semibold" disabled title="Sesi belum dibuka oleh panitia">
-                                    <i class="bi bi-clock"></i> Presensi
-                                </button>
-                            @endif
-                        </div>
                     </div>
-                </div>
 
-                <!-- Modal Presensi Langsung Sesuai Template User (Pilihan Hadir, Keterangan, Bukti Foto/PDF) -->
-                @if(!$presensiUser && $sess->status === 'Aktif')
+                    <!-- Modal Presensi Langsung Sesuai Template User (Pilihan Hadir, Keterangan, Bukti Foto/PDF) -->
+                    @if(!$presensiUser && $isSessOpen)
                 <div class="modal fade" id="modalPresensi{{ $sess->id }}" tabindex="-1" aria-labelledby="modalPresensiLabel{{ $sess->id }}" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered modal-lg">
                         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
@@ -363,6 +425,7 @@
                 </div>
             @endforelse
         </div>
+        @endif
     </div>
 
     <!-- ============================================================== -->

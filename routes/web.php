@@ -58,6 +58,8 @@ Route::post('/presensi/logout', [ParticipantAuthController::class, 'logout'])->n
 
 Route::middleware(\App\Http\Middleware\EnsureParticipantAuth::class)->prefix('presensi')->name('portal.')->group(function () {
     Route::get('/', [ParticipantPortalController::class, 'dashboard'])->name('dashboard');
+    Route::post('/pilih-pelatihan', [ParticipantPortalController::class, 'selectAngkatan'])->name('pilih-pelatihan');
+    Route::post('/ganti-pelatihan', [ParticipantPortalController::class, 'resetAngkatan'])->name('ganti-pelatihan');
     Route::get('/scan', [ParticipantPortalController::class, 'scan'])->name('scan');
     Route::post('/scan', [ParticipantPortalController::class, 'submitScan'])->name('scan.post');
     Route::get('/riwayat', [ParticipantPortalController::class, 'riwayat'])->name('riwayat');

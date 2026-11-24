@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Services\AttendanceService;
 use App\Models\Peserta;
+use App\Models\Angkatan;
 use App\Models\AttendanceSession;
 use App\Models\Presensi;
 use App\Models\AttendanceRequest;
+use App\Models\LogAktivitas;
 use Illuminate\Http\Request;
 
 class ParticipantPortalController extends Controller
@@ -30,46 +32,45 @@ class ParticipantPortalController extends Controller
         $pelatihan = $peserta->angkatan->pelatihan ?? null;
         $angkatan = $peserta->angkatan ?? null;
 
-        // Ambil sesi pembelajaran yang relevan untuk peserta
-        $query = AttendanceSession::with([
-            'jadwal.mataPelatihan', 
-            'jadwal.penugasanPengajar.widyaiswara', 
-            'jadwal.penugasanPengajar.narasumber',
-            'kelasMapel.ruangan'
-        ])
-        ->where(function ($q) use ($peserta) {
-            if ($peserta->kelas_mapel_id) {
-                $q->where('kelas_mapel_id', $peserta->kelas_mapel_id);
-            }
-            if ($peserta->angkatan_id) {
-                $q->orWhereHas('kelasMapel', fn($k) => $k->where('angkatan_id', $peserta->angkatan_id))
-                  ->orWhereHas('jadwal.mataPelatihan', fn($m) => $m->where('angkatan_id', $peserta->angkatan_id));
-            }
-        });
-
-        // Filter jadwal jika ada
-        if ($request->filled('filter_tanggal')) {
-            $query->whereDate('tanggal', $request->filter_tanggal);
-        }
-        if ($request->filled('filter_mapel')) {
-            $query->whereHas('jadwal', fn($j) => $j->where('mata_pelatihan_id', $request->filter_mapel));
+        // Ambil daftar angkatan yang sedang berjalan / dibuka jika peserta belum memilih pelatihan
+        $availableAngkatans = collect();
+        if (!$angkatan) {
+            $availableAngkatans = Angkatan::with('pelatihan')
+                ->whereIn('status', ['Berjalan', 'Direncanakan'])
+                ->orderBy('id', 'desc')
+                ->take(30)
+                ->get();
         }
 
-        $sessionsList = $query->orderBy('tanggal', 'asc')->orderBy('jam_mulai', 'asc')->get();
-
-        // Fallback jika belum ada sesi terdaftar untuk kelas peserta
-        if ($sessionsList->isEmpty()) {
-            $sessionsList = AttendanceSession::with([
+        // Ambil sesi pembelajaran yang relevan HANYA jika peserta sudah memiliki kelas / angkatan
+        if ($peserta->angkatan_id || $peserta->kelas_mapel_id) {
+            $query = AttendanceSession::with([
                 'jadwal.mataPelatihan', 
                 'jadwal.penugasanPengajar.widyaiswara', 
                 'jadwal.penugasanPengajar.narasumber',
                 'kelasMapel.ruangan'
             ])
-            ->where('status', 'Aktif')
-            ->orderBy('tanggal', 'asc')
-            ->orderBy('jam_mulai', 'asc')
-            ->take(5)
-            ->get();
+            ->where(function ($q) use ($peserta) {
+                if ($peserta->kelas_mapel_id) {
+                    $q->where('kelas_mapel_id', $peserta->kelas_mapel_id);
+                }
+                if ($peserta->angkatan_id) {
+                    $q->orWhereHas('kelasMapel', fn($k) => $k->where('angkatan_id', $peserta->angkatan_id))
+                      ->orWhereHas('jadwal.mataPelatihan', fn($m) => $m->where('angkatan_id', $peserta->angkatan_id));
+                }
+            });
+
+            // Filter jadwal jika ada
+            if ($request->filled('filter_tanggal')) {
+                $query->whereDate('tanggal', $request->filter_tanggal);
+            }
+            if ($request->filled('filter_mapel')) {
+                $query->whereHas('jadwal', fn($j) => $j->where('mata_pelatihan_id', $request->filter_mapel));
+            }
+
+            $sessionsList = $query->orderBy('tanggal', 'asc')->orderBy('jam_mulai', 'asc')->get();
+        } else {
+            $sessionsList = collect();
         }
 
         // Ambil presensi peserta untuk sesi-sesi ini
@@ -113,6 +114,7 @@ class ParticipantPortalController extends Controller
             'peserta',
             'pelatihan',
             'angkatan',
+            'availableAngkatans',
             'sessionsList',
             'sessionsToday',
             'presensisToday',
@@ -126,6 +128,54 @@ class ParticipantPortalController extends Controller
             'recentPresensis',
             'mataPelatihans'
         ));
+    }
+
+    /**
+     * Peserta memilih angkatan pelatihan aktif secara mandiri
+     */
+    public function selectAngkatan(Request $request)
+    {
+        $request->validate([
+            'angkatan_id' => 'required|exists:angkatans,id',
+        ], [
+            'angkatan_id.required' => 'Pilih salah satu pelatihan / angkatan.',
+            'angkatan_id.exists' => 'Angkatan pelatihan tidak ditemukan.',
+        ]);
+
+        $peserta = $this->getAuthenticatedPeserta();
+        $angkatan = Angkatan::with('pelatihan')->findOrFail($request->angkatan_id);
+
+        $peserta->update([
+            'angkatan_id' => $angkatan->id,
+            'kelas_mapel_id' => $angkatan->kelasMapels()->first()?->id ?? $peserta->kelas_mapel_id,
+        ]);
+
+        LogAktivitas::catat('Portal Peserta', 'Pilih Pelatihan', "Peserta {$peserta->nama} mendaftar ke angkatan: {$angkatan->nomor_angkatan}");
+
+        return redirect()->route('portal.dashboard')
+            ->with('success', 'Berhasil memilih pelatihan ' . ($angkatan->pelatihan->nama_pelatihan ?? $angkatan->nomor_angkatan) . '. Selamat mengikuti pembelajaran!');
+    }
+
+    /**
+     * Reset / Ganti pelatihan jika belum ada data presensi tercatat
+     */
+    public function resetAngkatan(Request $request)
+    {
+        $peserta = $this->getAuthenticatedPeserta();
+
+        $hasPresensi = Presensi::where('peserta_id', $peserta->id)->exists();
+        if ($hasPresensi) {
+            return redirect()->route('portal.dashboard')
+                ->with('error', 'Anda telah memiliki catatan riwayat presensi di pelatihan ini. Pergantian kelas harus melalui konfirmasi Panitia/Admin.');
+        }
+
+        $peserta->update([
+            'angkatan_id' => null,
+            'kelas_mapel_id' => null,
+        ]);
+
+        return redirect()->route('portal.dashboard')
+            ->with('info', 'Pilihan pelatihan Anda telah direset. Silakan pilih pelatihan yang ingin diikuti.');
     }
 
     public function scan(Request $request)

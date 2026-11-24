@@ -289,14 +289,30 @@ class AttendanceService
         ?string $keterangan = null,
         $uploadedFile = null
     ): array {
-        if ($session->status !== 'Aktif') {
+        if (!$session->isBuka()) {
             return [
                 'success' => false,
-                'message' => 'Sesi presensi ini belum dibuka atau sudah ditutup oleh panitia.',
+                'message' => 'Sesi presensi ini belum dibuka oleh pengajar atau sudah ditutup.',
             ];
         }
 
-        // Cek keterkaitan peserta dengan sesi ini jika dibatasi kelas
+        // Pastikan peserta sudah terdaftar di pelatihan / angkatan
+        if (!$peserta->angkatan_id && !$peserta->kelas_mapel_id) {
+            return [
+                'success' => false,
+                'message' => 'Anda belum terdaftar dalam pelatihan ini. Silakan pilih pelatihan terlebih dahulu.',
+            ];
+        }
+
+        // Cek keterkaitan peserta dengan sesi ini jika dibatasi kelas atau angkatan
+        $sessionAngkatanId = $session->kelasMapel->angkatan_id ?? ($session->jadwal->mataPelatihan->angkatan_id ?? null);
+        if ($sessionAngkatanId && $peserta->angkatan_id && $sessionAngkatanId != $peserta->angkatan_id) {
+            return [
+                'success' => false,
+                'message' => 'Anda tidak terdaftar dalam kelas atau angkatan pada sesi pembelajaran ini.',
+            ];
+        }
+
         if ($session->kelas_mapel_id && $peserta->kelas_mapel_id && $session->kelas_mapel_id != $peserta->kelas_mapel_id) {
             if ($session->kelasMapel && $session->kelasMapel->angkatan_id != $peserta->angkatan_id) {
                 return [

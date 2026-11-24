@@ -87,8 +87,12 @@ class AttendanceSession extends Model
             return false;
         }
 
+        if (!$this->waktu_buka_presensi) {
+            return false;
+        }
+
         $now = now();
-        if ($this->waktu_buka_presensi && $now->lt($this->waktu_buka_presensi)) {
+        if ($now->lt($this->waktu_buka_presensi)) {
             return false;
         }
 
