@@ -1,11 +1,11 @@
 @extends('layouts.auth')
 
-@section('title', 'Registrasi Akun Penyelenggara - SIR-JP')
+@section('title', 'Buat Akun Baru - KEMNAKER CORPU')
 
 @section('content')
 <div class="auth-greeting-title">DAFTAR</div>
 <p class="auth-greeting-subtitle">
-    Daftarkan akun penyelenggara baru menggunakan NIK resmi Anda.
+    Daftarkan akun baru Anda menggunakan NIK resmi untuk mengakses platform KEMNAKER CORPU.
 </p>
 
 @include('partials.alerts')
@@ -100,7 +100,7 @@
 
     <!-- Submit Button -->
     <button type="submit" class="btn btn-auth-next w-100 mb-3">
-        <span>DAFTAR SEKARANG</span>
+        <span>BUAT AKUN BARU</span>
         <i class="bi bi-arrow-right"></i>
     </button>
 </form>
@@ -109,7 +109,7 @@
     <div class="small text-muted">
         Sudah memiliki akun?
         <a href="{{ route('login') }}" class="fw-bold text-primary text-decoration-none ms-1">
-            Masuk ke Akun Penyelenggara &rarr;
+            Masuk ke Akun Anda &rarr;
         </a>
     </div>
 </div>

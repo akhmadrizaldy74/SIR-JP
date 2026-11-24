@@ -1,11 +1,11 @@
 @extends('layouts.auth')
 
-@section('title', 'Masuk ke Sistem - Penyelenggara')
+@section('title', 'Masuk ke Sistem - KEMNAKER CORPU')
 
 @section('content')
 <div class="auth-greeting-title">HELLO!</div>
 <p class="auth-greeting-subtitle">
-    Silakan masuk ke akun penyelenggara Anda untuk mengelola pelatihan, jadwal, dan rekapitulasi JP.
+    Silakan masuk ke akun Anda untuk mengelola pelatihan, jadwal, dan layanan KCLC.
 </p>
 
 @include('partials.alerts')
@@ -86,8 +86,8 @@
     </div>
     <div class="small text-muted">
         Belum memiliki akun?
-        <a href="{{ route('register') }}" class="fw-semibold text-secondary text-decoration-none ms-1">
-            Daftar Penyelenggara Baru
+        <a href="{{ route('register') }}" class="fw-bold text-primary text-decoration-none ms-1">
+            Buat Akun Baru &rarr;
         </a>
     </div>
 </div>
