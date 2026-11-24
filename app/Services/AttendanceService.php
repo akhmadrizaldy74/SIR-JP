@@ -202,15 +202,27 @@ class AttendanceService
             ];
         }
 
-        // Validasi keterkaitan peserta dengan sesi ini (kelas atau angkatan)
-        if ($session->kelas_mapel_id && $peserta->kelas_mapel_id && $session->kelas_mapel_id != $peserta->kelas_mapel_id) {
-            // Cek apakah satu angkatan
-            if ($session->kelasMapel && $session->kelasMapel->angkatan_id != $peserta->angkatan_id) {
-                return [
-                    'success' => false,
-                    'message' => 'Anda tidak terdaftar dalam kelas atau angkatan pada sesi pembelajaran ini.',
-                ];
+        // Validasi keterkaitan peserta dengan sesi ini (melalui angkatan atau kelas mapel)
+        $isRelatedAngkatan = false;
+        if ($peserta->angkatan_id) {
+            if ($session->kelasMapel && $session->kelasMapel->angkatan_id == $peserta->angkatan_id) {
+                $isRelatedAngkatan = true;
             }
+            if ($session->jadwal && $session->jadwal->mataPelatihan && $session->jadwal->mataPelatihan->angkatan_id == $peserta->angkatan_id) {
+                $isRelatedAngkatan = true;
+            }
+        }
+
+        $isRelatedKelas = false;
+        if ($peserta->kelas_mapel_id && $session->kelas_mapel_id && $peserta->kelas_mapel_id == $session->kelas_mapel_id) {
+            $isRelatedKelas = true;
+        }
+
+        if (!$isRelatedAngkatan && !$isRelatedKelas) {
+            return [
+                'success' => false,
+                'message' => 'Anda tidak terdaftar dalam kelas atau angkatan pada sesi pembelajaran ini.',
+            ];
         }
 
         // Cek apakah peserta sudah pernah presensi pada sesi ini
@@ -304,22 +316,27 @@ class AttendanceService
             ];
         }
 
-        // Cek keterkaitan peserta dengan sesi ini jika dibatasi kelas atau angkatan
-        $sessionAngkatanId = $session->kelasMapel->angkatan_id ?? ($session->jadwal->mataPelatihan->angkatan_id ?? null);
-        if ($sessionAngkatanId && $peserta->angkatan_id && $sessionAngkatanId != $peserta->angkatan_id) {
+        // Cek keterkaitan peserta dengan sesi ini (melalui angkatan atau kelas mapel)
+        $isRelatedAngkatan = false;
+        if ($peserta->angkatan_id) {
+            if ($session->kelasMapel && $session->kelasMapel->angkatan_id == $peserta->angkatan_id) {
+                $isRelatedAngkatan = true;
+            }
+            if ($session->jadwal && $session->jadwal->mataPelatihan && $session->jadwal->mataPelatihan->angkatan_id == $peserta->angkatan_id) {
+                $isRelatedAngkatan = true;
+            }
+        }
+
+        $isRelatedKelas = false;
+        if ($peserta->kelas_mapel_id && $session->kelas_mapel_id && $peserta->kelas_mapel_id == $session->kelas_mapel_id) {
+            $isRelatedKelas = true;
+        }
+
+        if (!$isRelatedAngkatan && !$isRelatedKelas) {
             return [
                 'success' => false,
                 'message' => 'Anda tidak terdaftar dalam kelas atau angkatan pada sesi pembelajaran ini.',
             ];
-        }
-
-        if ($session->kelas_mapel_id && $peserta->kelas_mapel_id && $session->kelas_mapel_id != $peserta->kelas_mapel_id) {
-            if ($session->kelasMapel && $session->kelasMapel->angkatan_id != $peserta->angkatan_id) {
-                return [
-                    'success' => false,
-                    'message' => 'Anda tidak terdaftar dalam kelas atau angkatan pada sesi pembelajaran ini.',
-                ];
-            }
         }
 
         // Cek apakah peserta sudah pernah presensi pada sesi ini
