@@ -30,8 +30,8 @@ class ParticipantTrainingSelectionTest extends TestCase
             ->get(route('portal.dashboard'));
 
         $response->assertStatus(200);
-        $response->assertSee('Anda Belum Terdaftar dalam Pelatihan Aktif');
-        $response->assertSee('Pilih Pelatihan yang Anda Ikuti');
+        $response->assertSee('Menunggu Penetapan Angkatan');
+        $response->assertSee('Memiliki Kode Token / Akses Pelatihan?');
         $response->assertDontSee('Pengantar Kerja Ahli Muda A.1');
     }
 
@@ -99,6 +99,24 @@ class ParticipantTrainingSelectionTest extends TestCase
         $dashResponse->assertStatus(200);
         $dashResponse->assertSee('Pelatihan Khusus ' . $unique);
         $dashResponse->assertSee('Angkatan SEL ' . $unique);
-        $dashResponse->assertDontSee('Anda Belum Terdaftar dalam Pelatihan Aktif');
+        $dashResponse->assertDontSee('Menunggu Penetapan Angkatan');
+    }
+
+    public function test_invalid_token_is_rejected_with_error_alert()
+    {
+        $user = User::factory()->create([
+            'role' => 'peserta',
+            'roles' => ['Peserta'],
+        ]);
+        $peserta = $user->getOrCreatePesertaProfile();
+
+        $postResponse = $this->actingAs($user)
+            ->withSession(['participant_id' => $peserta->id])
+            ->post(route('portal.pilih-pelatihan'), [
+                'kode_token' => 'TOKEN_PALSU_TIDAK_ADA',
+            ]);
+
+        $postResponse->assertRedirect(route('portal.dashboard'));
+        $postResponse->assertSessionHas('error');
     }
 }

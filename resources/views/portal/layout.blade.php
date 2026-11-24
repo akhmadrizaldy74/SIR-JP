@@ -190,27 +190,8 @@
                     </div>
                 </div>
 
-                <!-- Alert Notifikasi -->
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm border-0" role="alert">
-                        <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                @if(session('warning'))
-                    <div class="alert alert-warning alert-dismissible fade show rounded-3 shadow-sm border-0" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('warning') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm border-0" role="alert">
-                        <i class="bi bi-x-circle-fill me-2"></i> {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
+                <!-- Alert Notifikasi SweetAlert2 (SirAlert) Sesuai Standar Aplikasi SIR-JP -->
+                @include('partials.alerts')
 
                 @yield('content')
             </main>

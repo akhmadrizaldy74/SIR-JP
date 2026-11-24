@@ -133,27 +133,50 @@ class ParticipantPortalController extends Controller
     /**
      * Peserta memilih angkatan pelatihan aktif secara mandiri
      */
+    /**
+     * Peserta bergabung ke angkatan pelatihan melalui Token / Kode Akses dari panitia
+     * atau penetapan ID angkatan yang valid.
+     */
     public function selectAngkatan(Request $request)
     {
-        $request->validate([
-            'angkatan_id' => 'required|exists:angkatans,id',
-        ], [
-            'angkatan_id.required' => 'Pilih salah satu pelatihan / angkatan.',
-            'angkatan_id.exists' => 'Angkatan pelatihan tidak ditemukan.',
-        ]);
+        $token = trim($request->input('kode_token') ?? '');
+        $angkatanId = $request->input('angkatan_id');
+
+        $angkatan = null;
+
+        if ($token) {
+            $angkatan = Angkatan::with('pelatihan')
+                ->where(function ($q) use ($token) {
+                    $q->where('nomor_angkatan', $token)
+                      ->orWhere('id', $token)
+                      ->orWhereHas('pelatihan', fn($p) => $p->where('kode_pelatihan', $token)->orWhere('nama_pelatihan', 'like', "%{$token}%"));
+                })
+                ->whereIn('status', ['Berjalan', 'Direncanakan'])
+                ->first();
+
+            if (!$angkatan) {
+                return redirect()->route('portal.dashboard')
+                    ->with('error', 'Kode Token / Pelatihan "' . htmlspecialchars($token) . '" tidak valid atau tidak aktif. Silakan hubungi panitia penyelenggara diklat.');
+            }
+        } elseif ($angkatanId) {
+            $angkatan = Angkatan::with('pelatihan')->find($angkatanId);
+        }
+
+        if (!$angkatan) {
+            return redirect()->route('portal.dashboard')
+                ->with('error', 'Silakan masukkan Kode Token Pelatihan resmi yang diberikan oleh panitia diklat.');
+        }
 
         $peserta = $this->getAuthenticatedPeserta();
-        $angkatan = Angkatan::with('pelatihan')->findOrFail($request->angkatan_id);
-
         $peserta->update([
             'angkatan_id' => $angkatan->id,
             'kelas_mapel_id' => $angkatan->kelasMapels()->first()?->id ?? $peserta->kelas_mapel_id,
         ]);
 
-        LogAktivitas::catat('Portal Peserta', 'Pilih Pelatihan', "Peserta {$peserta->nama} mendaftar ke angkatan: {$angkatan->nomor_angkatan}");
+        LogAktivitas::catat('Portal Peserta', 'Pilih Pelatihan', "Peserta {$peserta->nama} bergabung ke angkatan: {$angkatan->nomor_angkatan}");
 
         return redirect()->route('portal.dashboard')
-            ->with('success', 'Berhasil memilih pelatihan ' . ($angkatan->pelatihan->nama_pelatihan ?? $angkatan->nomor_angkatan) . '. Selamat mengikuti pembelajaran!');
+            ->with('success', 'Selamat! Anda telah resmi terdaftar di kelas: ' . ($angkatan->pelatihan->nama_pelatihan ?? $angkatan->nomor_angkatan));
     }
 
     /**

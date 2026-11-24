@@ -99,7 +99,6 @@
 @endsection
 
 @section('content')
-@include('partials.alerts')
 
 <div class="row g-3">
     <!-- ============================================================== -->
@@ -107,40 +106,84 @@
     <!-- ============================================================== -->
     <div class="col-lg-8">
         @if(!$angkatan)
-            <!-- Tampilan Jika Peserta Belum Memilih / Terdaftar di Angkatan Pelatihan -->
+            <!-- Tampilan Jika Peserta Belum Ditempatkan / Belum Terdaftar di Angkatan Pelatihan -->
             <div class="kclc-card p-4 mb-4 border-0 shadow-sm rounded-4">
                 <div class="text-center py-2 mb-3">
-                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: #E0F2FE; color: #0284C7;">
-                        <i class="bi bi-mortarboard fs-2"></i>
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: #FEF3C7; color: #D97706;">
+                        <i class="bi bi-clock-history fs-2"></i>
                     </div>
-                    <h5 class="fw-bold text-dark mb-1">Anda Belum Terdaftar dalam Pelatihan Aktif</h5>
-                    <p class="text-muted small mb-0" style="max-width: 580px; margin: 0 auto;">
-                        Akun peserta Anda belum terhubung dengan kelas atau angkatan pelatihan. Silakan pilih pelatihan yang sedang dibuka di bawah ini atau tunggu penetapan kelas oleh Penyelenggara Diklat.
+                    <div class="mb-2">
+                        <span class="badge bg-warning-subtle text-warning border px-3 py-1 rounded-pill fw-bold" style="font-size: 0.8rem;">
+                            <i class="bi bi-hourglass-split me-1"></i> STATUS: MENUNGGU PENUGASAN KELAS
+                        </span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-2">Akun Peserta Terdaftar - Menunggu Penetapan Angkatan</h5>
+                    <p class="text-muted small mb-0" style="max-width: 600px; margin: 0 auto; line-height: 1.6;">
+                        Selamat datang, <strong>{{ $peserta->nama }}</strong>! Akun peserta Anda telah aktif di sistem SIR-JP. Anda belum ditempatkan dalam kelas atau angkatan pelatihan aktif oleh Penyelenggara Diklat.
                     </p>
                 </div>
 
-                <div class="card border rounded-3 p-3 bg-light shadow-none mx-auto" style="max-width: 620px;">
+                <!-- Kartu Verifikasi Data Peserta -->
+                <div class="card border rounded-3 p-3 bg-light shadow-none mx-auto mb-4" style="max-width: 620px;">
+                    <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
+                        <span class="small fw-bold text-secondary text-uppercase" style="letter-spacing: 0.5px;">
+                            <i class="bi bi-person-badge me-1"></i> Identitas Peserta Diklat
+                        </span>
+                        <span class="badge bg-success-subtle text-success small">Akun Siap Digunakan</span>
+                    </div>
+                    <div class="row g-2 small text-dark">
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block" style="font-size: 0.75rem;">NAMA LENGKAP:</span>
+                            <span class="fw-semibold">{{ $peserta->nama }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block" style="font-size: 0.75rem;">NIK / NIP:</span>
+                            <span class="fw-semibold">{{ $peserta->nip }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block" style="font-size: 0.75rem;">INSTANSI ASAL:</span>
+                            <span>{{ $peserta->instansi ?? 'PPSDM Ketenagakerjaan' }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block" style="font-size: 0.75rem;">PENETAPAN KELAS:</span>
+                            <span class="text-warning fw-semibold"><i class="bi bi-clock me-1"></i>Menunggu Input Panitia</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Opsi Gabung via Kode Token / PIN Pelatihan Resmi dari Panitia -->
+                <div class="card border rounded-3 p-3 bg-white shadow-sm mx-auto" style="max-width: 620px;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 28px; height: 28px; background: #E0F2FE;">
+                            <i class="bi bi-key-fill small"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-0 small">Memiliki Kode Token / Akses Pelatihan?</h6>
+                    </div>
+                    <p class="text-muted small mb-3" style="font-size: 0.78rem;">
+                        Jika panitia penyelenggara telah mencantumkan Kode Pelatihan / Token Registrasi pada Surat Pemanggilan Resmi Anda, masukkan kode tersebut di bawah ini untuk bergabung langsung ke kelas Anda:
+                    </p>
+
                     <form action="{{ route('portal.pilih-pelatihan') }}" method="POST">
                         @csrf
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-secondary mb-1">
-                                PILIH PELATIHAN &amp; ANGKATAN <span class="text-danger">*</span>
-                            </label>
-                            <select name="angkatan_id" class="form-select form-select-sm rounded-2" required>
-                                <option value="">-- Pilih Pelatihan yang Anda Ikuti --</option>
-                                @foreach($availableAngkatans as $avAngkatan)
-                                    <option value="{{ $avAngkatan->id }}">
-                                        {{ $avAngkatan->pelatihan->nama_pelatihan ?? 'Pelatihan' }} &bull; {{ $avAngkatan->nomor_angkatan }}
-                                        ({{ $avAngkatan->tanggal_mulai ? $avAngkatan->tanggal_mulai->translatedFormat('d M Y') : 'Mulai Segera' }})
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <span class="small text-muted"><i class="bi bi-shield-check me-1 text-success"></i>Terhubung dengan database SIR-JP</span>
-                            <button type="submit" class="btn btn-primary btn-sm px-4 fw-semibold rounded-2" style="background-color: #183B65; border-color: #183B65;">
-                                <i class="bi bi-check2-circle me-1"></i> Masuk ke Pelatihan Ini
+                        <div class="input-group mb-2">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-ticket-perforated"></i></span>
+                            <input type="text" 
+                                   name="kode_token" 
+                                   class="form-control form-control-sm border-start-0" 
+                                   placeholder="Contoh: PKP-2026 atau MOOC-12345" 
+                                   autocomplete="off" 
+                                   required>
+                            <button type="submit" class="btn btn-primary btn-sm px-3 fw-semibold" style="background-color: #183B65; border-color: #183B65;">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> Gabung ke Kelas
                             </button>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <span class="text-muted small" style="font-size: 0.72rem;">
+                                <i class="bi bi-shield-lock text-success me-1"></i>Hanya kode resmi yang dapat divalidasi.
+                            </span>
+                            <span class="text-muted small" style="font-size: 0.72rem;">
+                                Tidak punya token? Hubungi Panitia Diklat.
+                            </span>
                         </div>
                     </form>
                 </div>
@@ -160,7 +203,7 @@
                             &bull; Angkatan: <span class="badge bg-primary-subtle text-primary">{{ $angkatan->nomor_angkatan }}</span>
                         </div>
                     </div>
-                    <form action="{{ route('portal.ganti-pelatihan') }}" method="POST" class="m-0" onsubmit="return confirm('Apakah Anda ingin memilih ulang pelatihan?')">
+                    <form action="{{ route('portal.ganti-pelatihan') }}" method="POST" class="m-0" data-confirm="Apakah Anda yakin ingin membatalkan pendaftaran kelas ini dan keluar dari pelatihan?">
                         @csrf
                         <button type="submit" class="btn btn-outline-secondary btn-sm rounded-2 py-1 px-2" title="Ganti Pelatihan" style="font-size: 0.78rem;">
                             <i class="bi bi-arrow-left-right me-1"></i> Ganti Pelatihan
