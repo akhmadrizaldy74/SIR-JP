@@ -97,4 +97,25 @@ class MoocBankSoalTest extends TestCase
             'id' => $pelatihan->id,
         ]);
     }
+
+    public function test_admin_can_filter_and_sort_bank_soal(): void
+    {
+        $uniqueKeyword = 'KhususFilterXYZ' . rand(100, 999);
+        Pelatihan::create([
+            'nama_pelatihan' => 'Pelatihan ' . $uniqueKeyword,
+            'kode_pelatihan' => 'KEY-' . uniqid(),
+            'status' => 'Berjalan',
+            'tanggal_mulai' => now()->toDateString(),
+            'tanggal_selesai' => now()->addDays(30)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('mooc.bank-soal', [
+            'search' => $uniqueKeyword,
+            'status' => 'aktif',
+            'sort' => 'name_asc',
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertSee($uniqueKeyword);
+    }
 }

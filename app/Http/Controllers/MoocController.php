@@ -23,8 +23,44 @@ class MoocController extends Controller
      */
     public function bankSoal(Request $request)
     {
-        $pelatihans = Pelatihan::orderBy('id', 'asc')->get();
-        return view('mooc.bank-soal', compact('pelatihans'));
+        $search = $request->get('search');
+        $status = $request->get('status');
+        $sort = $request->get('sort', 'latest');
+
+        $query = Pelatihan::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_pelatihan', 'like', "%{$search}%")
+                  ->orWhere('kategori', 'like', "%{$search}%")
+                  ->orWhere('kode_pelatihan', 'like', "%{$search}%")
+                  ->orWhere('keterangan', 'like', "%{$search}%");
+            });
+        }
+
+        if ($status) {
+            if (strcasecmp($status, 'aktif') === 0) {
+                $query->whereIn('status', ['Berjalan', 'Direncanakan']);
+            } elseif (strcasecmp($status, 'nonaktif') === 0) {
+                $query->whereIn('status', ['Selesai', 'Dibatalkan']);
+            } else {
+                $query->where('status', $status);
+            }
+        }
+
+        if ($sort === 'name_asc') {
+            $query->orderBy('nama_pelatihan', 'asc');
+        } elseif ($sort === 'name_desc') {
+            $query->orderBy('nama_pelatihan', 'desc');
+        } elseif ($sort === 'oldest') {
+            $query->orderBy('id', 'asc');
+        } else {
+            $query->orderBy('id', 'desc');
+        }
+
+        $pelatihans = $query->paginate(9)->withQueryString();
+
+        return view('mooc.bank-soal', compact('pelatihans', 'search', 'status', 'sort'));
     }
 
     /**

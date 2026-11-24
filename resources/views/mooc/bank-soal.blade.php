@@ -25,9 +25,61 @@
         </div>
     </div>
 
-    <div class="row row-cols-1 row-cols-md-3 g-3">
+    <!-- Toolbar Filter, Search, & Sortir -->
+    <div class="card border rounded-3 p-3 bg-light mb-4 shadow-none">
+        <form action="{{ route('mooc.bank-soal') }}" method="GET" class="row g-2 align-items-center">
+            <!-- Search Input -->
+            <div class="col-md-5">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0 text-muted">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" 
+                           name="search" 
+                           id="bankSoalSearch"
+                           class="form-control form-control-sm border-start-0" 
+                           placeholder="Ketik nama pelatihan, kategori, butir soal..." 
+                           value="{{ $search ?? '' }}"
+                           autocomplete="off">
+                </div>
+            </div>
+
+            <!-- Filter Status -->
+            <div class="col-md-3">
+                <select name="status" id="bankSoalStatus" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">Semua Status</option>
+                    <option value="aktif" {{ ($status ?? '') === 'aktif' ? 'selected' : '' }}>Status: Aktif</option>
+                    <option value="nonaktif" {{ ($status ?? '') === 'nonaktif' ? 'selected' : '' }}>Status: Nonaktif / Selesai</option>
+                </select>
+            </div>
+
+            <!-- Sort By -->
+            <div class="col-md-3">
+                <select name="sort" id="bankSoalSort" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="latest" {{ ($sort ?? '') === 'latest' ? 'selected' : '' }}>Urutkan: Terbaru</option>
+                    <option value="oldest" {{ ($sort ?? '') === 'oldest' ? 'selected' : '' }}>Urutkan: Terlama</option>
+                    <option value="name_asc" {{ ($sort ?? '') === 'name_asc' ? 'selected' : '' }}>Nama: A - Z</option>
+                    <option value="name_desc" {{ ($sort ?? '') === 'name_desc' ? 'selected' : '' }}>Nama: Z - A</option>
+                </select>
+            </div>
+
+            <!-- Actions (Filter & Reset) -->
+            <div class="col-md-1 d-flex gap-1">
+                <button type="submit" class="btn btn-sm btn-primary w-100" title="Terapkan Filter">
+                    Filter
+                </button>
+                @if(!empty($search) || !empty($status) || (($sort ?? 'latest') !== 'latest'))
+                    <a href="{{ route('mooc.bank-soal') }}" class="btn btn-sm btn-outline-secondary" title="Reset Pencarian &amp; Filter">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-3" id="bankSoalGrid">
         @forelse($pelatihans as $p)
-        <div class="col">
+        <div class="col bank-soal-card-col">
             <div class="card border rounded-3 p-3 h-100 shadow-sm">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="badge bg-light text-primary border">Paket Soal</span>
@@ -287,10 +339,21 @@
         <div class="col-12 text-center py-5 text-muted">
             <i class="bi bi-folder-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
             <div class="fw-semibold">Belum Ada Paket Bank Soal</div>
-            <p class="small mb-3">Klik tombol "Tambah Bank Soal" di atas untuk membuat paket soal baru.</p>
+            <p class="small mb-3">Klik tombol "Tambah Bank Soal" di atas untuk membuat paket soal baru atau reset kata kunci pencarian Anda.</p>
         </div>
         @endforelse
     </div>
+
+    @if($pelatihans->hasPages())
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mt-4 pt-3 border-top">
+        <span class="text-muted small">
+            Menampilkan {{ $pelatihans->firstItem() }} - {{ $pelatihans->lastItem() }} dari total {{ $pelatihans->total() }} paket bank soal
+        </span>
+        <div>
+            {{ $pelatihans->links() }}
+        </div>
+    </div>
+    @endif
 </div>
 
 <!-- Modal Tambah Paket Bank Soal Baru -->
@@ -358,4 +421,35 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('bankSoalSearch');
+    if (!searchInput) return;
+
+    let debounceTimer;
+    searchInput.addEventListener('input', function () {
+        const query = this.value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.bank-soal-card-col');
+
+        cards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            if (query === '' || text.includes(query)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            if (searchInput.form) {
+                searchInput.form.submit();
+            }
+        }, 750);
+    });
+});
+</script>
+@endpush
 @endsection
