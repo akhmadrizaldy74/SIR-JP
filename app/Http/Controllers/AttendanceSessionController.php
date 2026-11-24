@@ -68,14 +68,22 @@ class AttendanceSessionController extends Controller
         $jadwalId = $request->get('jadwal_id');
         $selectedJadwal = $jadwalId ? Jadwal::with(['mataPelatihan.angkatan.pelatihan', 'penugasanPengajar.widyaiswara'])->find($jadwalId) : null;
 
-        $jadwals = Jadwal::with(['mataPelatihan.angkatan.pelatihan', 'penugasanPengajar.widyaiswara'])
-            ->where('status', 'Terjadwal')
-            ->orderBy('tanggal', 'desc')
-            ->get();
+        $query = Jadwal::with(['mataPelatihan.angkatan.pelatihan', 'penugasanPengajar.widyaiswara', 'penugasanPengajar.narasumber'])
+            ->where('status', 'Terjadwal');
 
-        $kelasMapels = KelasMapel::with(['pelatihan', 'angkatan'])->orderBy('nama_kelas')->get();
+        $user = auth()->user();
+        if ($user && $user->isPengajar()) {
+            $userJadwals = (clone $query)->whereHas('penugasanPengajar', function($p) use ($user) {
+                $p->whereHas('widyaiswara', fn($w) => $w->where('nip', $user->nik)->orWhere('nama_lengkap', 'like', "%{$user->name}%"))
+                  ->orWhereHas('narasumber', fn($n) => $n->where('nik', $user->nik)->orWhere('nama_lengkap', 'like', "%{$user->name}%"));
+            })->orderBy('tanggal', 'desc')->get();
 
-        return view('presensi.sessions.create', compact('jadwals', 'selectedJadwal', 'kelasMapels'));
+            $jadwals = $userJadwals->count() > 0 ? $userJadwals : $query->orderBy('tanggal', 'desc')->take(30)->get();
+        } else {
+            $jadwals = $query->orderBy('tanggal', 'desc')->take(30)->get();
+        }
+
+        return view('presensi.sessions.create', compact('jadwals', 'selectedJadwal'));
     }
 
     public function store(Request $request)

@@ -29,6 +29,7 @@ class JadwalController extends Controller
             'mataPelatihan.angkatan.pelatihan',
             'penugasanPengajar.widyaiswara',
             'penugasanPengajar.narasumber',
+            'attendanceSessions',
             'realisasi'
         ]);
 

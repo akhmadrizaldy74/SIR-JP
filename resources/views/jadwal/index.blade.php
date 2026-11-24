@@ -206,6 +206,20 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm" role="group">
+                                    <!-- Tombol Absensi Pertemuan -->
+                                    @php
+                                        $attSession = $jdw->attendanceSessions->first();
+                                    @endphp
+                                    @if($attSession)
+                                        <a href="{{ route('attendance-sessions.show', $attSession->id) }}" class="btn btn-sm btn-primary" title="Buka Presensi Kelas Pertemuan Ini">
+                                            <i class="bi bi-person-check-fill"></i> Absensi
+                                        </a>
+                                    @else
+                                        <a href="{{ route('attendance-sessions.create', ['jadwal_id' => $jdw->id]) }}" class="btn btn-sm btn-outline-primary" title="Buka Sesi Absensi Baru">
+                                            <i class="bi bi-calendar-check"></i> Absensi
+                                        </a>
+                                    @endif
+
                                     <!-- Tombol Realisasi -->
                                     <a href="{{ route('realisasi.create', ['jadwal_id' => $jdw->id]) }}" class="btn btn-sm btn-success" title="Konfirmasi Realisasi Kegiatan">
                                         <i class="bi bi-check2-circle"></i> Realisasi

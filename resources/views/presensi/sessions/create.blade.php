@@ -20,46 +20,38 @@
                 <!-- Pilih Jadwal Pembelajaran -->
                 <div class="mb-3">
                     <label for="jadwal_id" class="form-label fw-semibold small text-secondary">
-                        JADWAL PEMBELAJARAN <span class="text-danger">*</span>
+                        PILIH JADWAL PEMBELAJARAN / PERTEMUAN <span class="text-danger">*</span>
                     </label>
                     <select name="jadwal_id" id="jadwal_id" class="form-select @error('jadwal_id') is-invalid @enderror" required>
-                        <option value="">-- Pilih Jadwal Pembelajaran --</option>
-                        @foreach($jadwals as $j)
-                            @php
-                                $wi = $j->penugasanPengajar->widyaiswara->nama_lengkap ?? ($j->penugasanPengajar->narasumber->nama_lengkap ?? '-');
-                                $mp = $j->mataPelatihan->nama_mata_pelatihan ?? '-';
-                                $pel = $j->mataPelatihan->angkatan->pelatihan->nama_pelatihan ?? '-';
-                                $tgl = $j->tanggal->format('d/m/Y');
-                            @endphp
-                            <option value="{{ $j->id }}" 
-                                    data-tanggal="{{ $j->tanggal->format('Y-m-d') }}"
-                                    data-mulai="{{ $j->jam_mulai }}"
-                                    data-selesai="{{ $j->jam_selesai }}"
-                                    data-judul="Presensi {{ $mp }} - {{ $tgl }}"
-                                    {{ (old('jadwal_id', $selectedJadwal->id ?? null) == $j->id) ? 'selected' : '' }}>
-                                {{ $tgl }} &bull; {{ $mp }} ({{ substr($j->jam_mulai, 0, 5) }}-{{ substr($j->jam_selesai, 0, 5) }}) - Pengajar: {{ $wi }}
-                            </option>
+                        <option value="">-- Pilih Jadwal Pertemuan Kelas --</option>
+                        @php
+                            $groupedJadwals = $jadwals->groupBy(function($j) {
+                                $pel = $j->mataPelatihan->angkatan->pelatihan->nama_pelatihan ?? 'Pelatihan Diklat';
+                                $ang = $j->mataPelatihan->angkatan->nomor_angkatan ?? '';
+                                return $pel . ($ang ? ' (' . $ang . ')' : '');
+                            });
+                        @endphp
+                        @foreach($groupedJadwals as $groupName => $jList)
+                            <optgroup label="{{ $groupName }}">
+                                @foreach($jList as $j)
+                                    @php
+                                        $wi = $j->penugasanPengajar->widyaiswara->nama_lengkap ?? ($j->penugasanPengajar->narasumber->nama_lengkap ?? ($j->pengajar ?? '-'));
+                                        $mp = $j->mataPelatihan->nama_mata_pelatihan ?? '-';
+                                        $tgl = $j->tanggal->format('d/m/Y');
+                                    @endphp
+                                    <option value="{{ $j->id }}" 
+                                            data-tanggal="{{ $j->tanggal->format('Y-m-d') }}"
+                                            data-mulai="{{ $j->jam_mulai }}"
+                                            data-selesai="{{ $j->jam_selesai }}"
+                                            data-judul="Pertemuan {{ $j->sesi_ke ?? 1 }}: {{ $mp }} - {{ $tgl }}"
+                                            {{ (old('jadwal_id', $selectedJadwal->id ?? null) == $j->id) ? 'selected' : '' }}>
+                                        Pertemuan {{ $j->sesi_ke ?? 1 }}: {{ $mp }} ({{ substr($j->jam_mulai, 0, 5) }}-{{ substr($j->jam_selesai, 0, 5) }} WIB) &bull; Pengajar: {{ $wi }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
                         @endforeach
                     </select>
                     @error('jadwal_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Kelas Mapel Terkait (Opsional) -->
-                <div class="mb-3">
-                    <label for="kelas_mapel_id" class="form-label fw-semibold small text-secondary">
-                        KELAS MAPEL KCLC (OPSIONAL)
-                    </label>
-                    <select name="kelas_mapel_id" id="kelas_mapel_id" class="form-select @error('kelas_mapel_id') is-invalid @enderror">
-                        <option value="">-- Otomatis mengikuti kelas angkatan --</option>
-                        @foreach($kelasMapels as $km)
-                            <option value="{{ $km->id }}" {{ old('kelas_mapel_id') == $km->id ? 'selected' : '' }}>
-                                {{ $km->nama_kelas }} (Angkatan: {{ $km->angkatan->nomor_angkatan ?? '-' }})
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('kelas_mapel_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
