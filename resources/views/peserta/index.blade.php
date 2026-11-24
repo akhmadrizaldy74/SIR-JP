@@ -52,6 +52,7 @@
                     <th>Email</th>
                     <th>Jenis Kelamin</th>
                     <th>Instansi</th>
+                    <th>Pelatihan / Angkatan</th>
                     <th>Jabatan</th>
                     <th>Golongan</th>
                     <th style="width: 100px;" class="text-center">Tools</th>
@@ -66,6 +67,17 @@
                         <td>{{ $p->email ?? '-' }}</td>
                         <td>{{ $p->jenis_kelamin }}</td>
                         <td>{{ $p->instansi ?? '-' }}</td>
+                        <td>
+                            @if($p->angkatan)
+                                <span class="badge bg-primary-subtle text-primary border" title="{{ $p->angkatan->pelatihan->nama_pelatihan ?? '' }}">
+                                    <i class="bi bi-mortarboard me-1"></i>{{ $p->angkatan->pelatihan->nama_pelatihan ?? $p->angkatan->nomor_angkatan }}
+                                </span>
+                            @else
+                                <span class="badge bg-warning-subtle text-warning border">
+                                    <i class="bi bi-hourglass-split me-1"></i>Belum Ada Kelas
+                                </span>
+                            @endif
+                        </td>
                         <td>{{ $p->jabatan ?? '-' }}</td>
                         <td class="text-center">
                             <span class="badge bg-light text-dark border">{{ $p->golongan ?? '-' }}</span>
@@ -88,7 +100,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="text-center py-4 text-muted">
+                        <td colspan="10" class="text-center py-4 text-muted">
                             <i class="bi bi-inbox fs-3 d-block mb-2"></i> Belum ada data peserta diklat.
                         </td>
                     </tr>

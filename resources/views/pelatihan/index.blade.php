@@ -97,8 +97,14 @@
                                             <div class="fw-bold text-dark" style="font-size: 0.95rem;">
                                                 {{ $pel->nama_pelatihan }}
                                             </div>
-                                            <div class="text-muted small">
-                                                {{ $pel->kategori ?? 'Pelatihan Fungsional' }}
+                                            <div class="d-flex align-items-center gap-2 flex-wrap mt-1">
+                                                <span class="text-muted small">{{ $pel->kategori ?? 'Pelatihan Fungsional' }}</span>
+                                                <span class="badge bg-light text-primary border" style="font-size: 0.72rem;" title="Kode Token Registrasi Kelas Peserta">
+                                                    <i class="bi bi-key-fill text-warning me-1"></i>Token: <strong>{{ $pel->kode_pelatihan }}</strong>
+                                                </span>
+                                                <button type="button" class="btn btn-sm btn-link p-0 text-muted" title="Salin Kode Token" onclick="navigator.clipboard.writeText('{{ $pel->kode_pelatihan }}'); if(window.SirAlert){ SirAlert.success('Kode Token Pelatihan {{ $pel->kode_pelatihan }} berhasil disalin!', 'Tersalin !'); } else { alert('Tersalin!'); }">
+                                                    <i class="bi bi-copy" style="font-size: 0.8rem;"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
