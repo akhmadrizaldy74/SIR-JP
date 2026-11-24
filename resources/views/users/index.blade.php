@@ -91,7 +91,6 @@
             <div class="d-flex align-items-center justify-content-between mb-1">
                 <label class="form-label small fw-semibold text-secondary mb-0">CARI PENGGUNA</label>
                 <span class="text-muted" style="font-size: 0.72rem;">
-                    <i class="bi bi-lightning-charge-fill text-warning me-0.5"></i>Pencarian otomatis saat mengetik
                 </span>
             </div>
             <div class="input-group input-group-sm">

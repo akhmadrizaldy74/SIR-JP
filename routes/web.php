@@ -210,6 +210,10 @@ Route::middleware('auth')->group(function () {
     Route::prefix('mooc')->name('mooc.')->group(function () {
         Route::get('/pelatihan', [MoocController::class, 'pelatihan'])->name('pelatihan');
         Route::get('/bank-soal', [MoocController::class, 'bankSoal'])->name('bank-soal');
+        Route::post('/bank-soal', [MoocController::class, 'storeBankSoal'])->name('bank-soal.store');
+        Route::put('/bank-soal/{id}', [MoocController::class, 'updateBankSoal'])->name('bank-soal.update');
+        Route::delete('/bank-soal/{id}', [MoocController::class, 'destroyBankSoal'])->name('bank-soal.destroy');
+        Route::post('/bank-soal/{id}/butir', [MoocController::class, 'saveButirSoal'])->name('bank-soal.butir.save');
         Route::get('/riwayat', [MoocController::class, 'riwayat'])->name('riwayat');
         Route::get('/komentar', [MoocController::class, 'komentar'])->name('komentar');
         Route::get('/nilai-ujian', [MoocController::class, 'nilaiUjian'])->name('nilai-ujian');
