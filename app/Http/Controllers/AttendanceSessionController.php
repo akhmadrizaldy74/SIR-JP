@@ -108,10 +108,12 @@ class AttendanceSessionController extends Controller
 
         $jadwal = Jadwal::with('mataPelatihan')->findOrFail($validated['jadwal_id']);
 
-        // Jika kelas_mapel_id tidak dipilih, cari kelas mapel terkait
-        $kelasMapelId = $validated['kelas_mapel_id'];
+        // Jika kelas_mapel_id tidak dipilih/dikirim, cari kelas mapel terkait secara otomatis
+        $kelasMapelId = $request->input('kelas_mapel_id');
         if (!$kelasMapelId && $jadwal->mataPelatihan) {
-            $km = KelasMapel::where('mata_pelatihan_id', $jadwal->mata_pelatihan_id)->first();
+            $km = KelasMapel::where('mata_pelatihan_id', $jadwal->mata_pelatihan_id)
+                ->orWhere('angkatan_id', $jadwal->mataPelatihan->angkatan_id)
+                ->first();
             if ($km) {
                 $kelasMapelId = $km->id;
             }
