@@ -78,12 +78,6 @@
 
 <!-- Navigation Switcher -->
 <div class="text-center pt-2 border-top">
-    <div class="small text-muted mb-2">
-        Login sebagai Peserta Pelatihan?
-        <a href="{{ route('portal.login') }}" class="fw-bold text-primary text-decoration-none ms-1">
-            Portal Presensi Peserta &rarr;
-        </a>
-    </div>
     <div class="small text-muted">
         Belum memiliki akun?
         <a href="{{ route('register') }}" class="fw-bold text-primary text-decoration-none ms-1">
