@@ -380,7 +380,7 @@
                     <a class="nav-link-custom d-flex justify-content-between align-items-center {{ $isPresensiActive ? 'active' : '' }}" 
                        data-bs-toggle="collapse" href="#menuPresensi" role="button" aria-expanded="{{ $isPresensiActive ? 'true' : 'false' }}">
                         <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-qr-code-scan"></i>
+                            <i class="bi bi-clipboard-check"></i>
                             <span class="nav-text">Presensi Diklat</span>
                         </div>
                         <i class="bi bi-chevron-down small transition-icon"></i>

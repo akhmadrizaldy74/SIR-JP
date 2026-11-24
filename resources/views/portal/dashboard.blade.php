@@ -462,7 +462,7 @@
 
                                 <!-- Modal Footer Sederhana & Elegan -->
                                 <div class="modal-footer border-0 px-4 pb-4 pt-0 d-flex justify-content-between align-items-center">
-                                    <span class="text-muted small"><span class="text-danger">*</span> Presensi mandiri tanpa perlu scan QR</span>
+                                    <span class="text-muted small"><span class="text-danger">*</span> Waktu kehadiran otomatis tercatat secara real-time (WIB)</span>
                                     <div class="d-flex gap-2">
                                         <button type="button" class="btn btn-light px-3 fw-medium" data-bs-dismiss="modal">Batal</button>
                                         <button type="submit" class="btn text-white fw-bold px-4 rounded-2 shadow-sm" style="background-color: #1B4965;">

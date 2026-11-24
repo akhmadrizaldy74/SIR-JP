@@ -26,11 +26,6 @@
                     Kelas: <strong>{{ $attendanceSession->kelasMapel->nama_kelas ?? '-' }}</strong>
                 </small>
             </div>
-            <div>
-                <a href="{{ route('attendance-sessions.qr_display', $attendanceSession->id) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                    <i class="bi bi-qr-code"></i> Layar QR
-                </a>
-            </div>
         </div>
     </div>
 </div>

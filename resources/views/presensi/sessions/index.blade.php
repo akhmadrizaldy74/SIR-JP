@@ -106,11 +106,6 @@
                         <a href="{{ route('attendance-manual.index', $sess->id) }}" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Kelola Presensi Manual">
                             <i class="bi bi-pencil-square"></i>
                         </a>
-                        @if($sess->status === 'Aktif')
-                            <a href="{{ route('attendance-sessions.qr_display', $sess->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Layar QR Proyektor (Opsional untuk kelas tatap muka)">
-                                <i class="bi bi-qr-code"></i>
-                            </a>
-                        @endif
                     </div>
 
                     <div>

@@ -26,9 +26,6 @@
                         <i class="bi bi-stop-circle me-1"></i> Tutup Sesi
                     </button>
                 </form>
-                <a href="{{ route('attendance-sessions.qr_display', $attendanceSession->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Layar QR Proyektor (Opsional untuk kelas tatap muka)">
-                    <i class="bi bi-qr-code"></i>
-                </a>
             @endif
 
             <a href="{{ route('realisasi.create', ['jadwal_id' => $attendanceSession->jadwal_id]) }}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold">

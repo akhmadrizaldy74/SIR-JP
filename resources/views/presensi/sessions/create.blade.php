@@ -168,7 +168,7 @@
                         </label>
                         <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
                             <option value="Draft" {{ old('status') === 'Draft' ? 'selected' : '' }}>Simpan sebagai Draft (Belum dibuka)</option>
-                            <option value="Aktif" {{ old('status', 'Aktif') === 'Aktif' ? 'selected' : '' }}>Langsung Aktifkan (Siap Presensi & QR)</option>
+                            <option value="Aktif" {{ old('status', 'Aktif') === 'Aktif' ? 'selected' : '' }}>Langsung Aktifkan (Buka Presensi Kelas Langsung)</option>
                         </select>
                         @error('status')
                             <div class="invalid-feedback">{{ $message }}</div>
