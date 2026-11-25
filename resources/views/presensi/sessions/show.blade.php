@@ -158,6 +158,9 @@
                     </button>
                 </form>
             @endif
+            <button type="button" onclick="window.location.reload();" class="btn btn-sm btn-outline-secondary rounded-pill px-3" title="Segarkan Data Kehadiran">
+                <i class="bi bi-arrow-clockwise me-1"></i> Segarkan
+            </button>
             <a href="{{ route('attendance-manual.index', $attendanceSession->id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                 <i class="bi bi-pencil-square me-1"></i> Kelola Presensi Detail
             </a>
@@ -321,4 +324,16 @@
         </div>
     </div>
 </div>
+@if($attendanceSession->status === 'Aktif')
+<script>
+    // Auto-refresh daftar kehadiran peserta setiap 10 detik saat sesi aktif
+    setInterval(() => {
+        // Jangan reload jika user sedang membuka modal
+        const activeModal = document.querySelector('.modal.show');
+        if (!activeModal) {
+            window.location.reload();
+        }
+    }, 10000);
+</script>
+@endif
 @endsection

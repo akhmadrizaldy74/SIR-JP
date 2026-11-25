@@ -49,17 +49,30 @@ class ParticipantPortalController extends Controller
                 'jadwal.mataPelatihan', 
                 'jadwal.penugasanPengajar.widyaiswara', 
                 'jadwal.penugasanPengajar.narasumber',
-                'kelasMapel.ruangan'
-            ])
-            ->where(function ($q) use ($peserta) {
-                if ($peserta->kelas_mapel_id) {
+                'kelasMapel.ruangan',
+                'creator',
+            ]);
+
+            // Jika peserta memiliki kelas spesifik, hanya ambil sesi kelas tersebut atau sesi pleno angkatan
+            if ($peserta->kelas_mapel_id) {
+                $query->where(function ($q) use ($peserta) {
                     $q->where('kelas_mapel_id', $peserta->kelas_mapel_id);
-                }
-                if ($peserta->angkatan_id) {
-                    $q->orWhereHas('kelasMapel', fn($k) => $k->where('angkatan_id', $peserta->angkatan_id))
+                    if ($peserta->angkatan_id) {
+                        $q->orWhere(function ($sub) use ($peserta) {
+                            $sub->whereNull('kelas_mapel_id')
+                                ->where(function($s2) use ($peserta) {
+                                    $s2->whereHas('kelasMapel', fn($k) => $k->where('angkatan_id', $peserta->angkatan_id))
+                                       ->orWhereHas('jadwal.mataPelatihan', fn($m) => $m->where('angkatan_id', $peserta->angkatan_id));
+                                });
+                        });
+                    }
+                });
+            } else {
+                $query->where(function ($q) use ($peserta) {
+                    $q->whereHas('kelasMapel', fn($k) => $k->where('angkatan_id', $peserta->angkatan_id))
                       ->orWhereHas('jadwal.mataPelatihan', fn($m) => $m->where('angkatan_id', $peserta->angkatan_id));
-                }
-            });
+                });
+            }
 
             // Filter jadwal jika ada
             if ($request->filled('filter_tanggal')) {

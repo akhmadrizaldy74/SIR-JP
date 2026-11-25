@@ -235,8 +235,12 @@
                     <button type="submit" class="btn btn-primary btn-sm px-3 fw-semibold">
                         Cari
                     </button>
+                    <a href="{{ route('portal.dashboard', ['filter_tanggal' => now()->toDateString()]) }}" 
+                       class="btn btn-sm {{ request('filter_tanggal') == now()->toDateString() ? 'btn-primary' : 'btn-outline-primary' }} px-3 fw-semibold">
+                        <i class="bi bi-calendar-check me-1"></i> Hari Ini
+                    </a>
                     <a href="{{ route('portal.dashboard') }}" class="btn btn-outline-warning btn-sm px-3 fw-semibold text-dark">
-                        Reset
+                        Semua
                     </a>
                 </form>
             </div>
@@ -266,7 +270,11 @@
                         $presensiUser = $presensisToday->get($sess->id);
                         $pengajarNama = $sess->jadwal->penugasanPengajar->pengajar_nama 
                             ?? ($sess->jadwal->widyaiswara->nama 
-                            ?? ($sess->jadwal->pengajar ?? 'Alfiah Pira Mundiarsih, S.Sos., M.A.'));
+                            ?? ($sess->creator->name 
+                            ?? ($sess->jadwal->pengajar ?? 'Pengajar')));
+                        $pengajarPeran = $sess->jadwal->penugasanPengajar->peran 
+                            ?? ($sess->jadwal->penugasanPengajar->jenis_pengajar 
+                            ?? 'Pengajar');
                         $ruanganNama = $sess->kelasMapel->ruangan->nama_ruangan 
                             ?? ($sess->jadwal->ruangan ?? 'Ruang Kelas');
                         $zoomMeetingUrl = $sess->link_meeting 
@@ -297,7 +305,7 @@
                                         <span>
                                             <i class="bi bi-person text-secondary me-1"></i> {{ $pengajarNama }}
                                         </span>
-                                        <span class="badge bg-secondary-subtle text-secondary small py-0 px-2" style="font-size: 0.68rem;">widyaiswara</span>
+                                        <span class="badge bg-secondary-subtle text-secondary small py-0 px-2" style="font-size: 0.68rem;">{{ strtolower($pengajarPeran) }}</span>
                                     </div>
                                     
                                     @if($zoomMeetingUrl)
@@ -673,7 +681,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Presensi Gagal',
-                        text: body.message || 'Token QR tidak valid atau kedaluwarsa.',
+                        text: body.message || 'Token presensi tidak valid atau kedaluwarsa.',
                         confirmButtonText: 'Coba Lagi'
                     });
                 }

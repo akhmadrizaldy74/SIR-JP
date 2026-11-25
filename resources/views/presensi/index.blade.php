@@ -269,11 +269,6 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        @if($rs->status === 'Aktif')
-                                            <a href="{{ route('attendance-sessions.qr_display', $rs->id) }}" target="_blank" class="btn btn-outline-primary" title="Layar Proyektor QR">
-                                                <i class="bi bi-qr-code"></i>
-                                            </a>
-                                        @endif
                                         <a href="{{ route('attendance-sessions.show', $rs->id) }}" class="btn btn-outline-secondary" title="Detail Presensi">
                                             <i class="bi bi-eye"></i>
                                         </a>

@@ -22,6 +22,12 @@
                     <label for="jadwal_id" class="form-label fw-semibold small text-secondary">
                         PILIH JADWAL PEMBELAJARAN / PERTEMUAN <span class="text-danger">*</span>
                     </label>
+                    @if($jadwals->isEmpty())
+                        <div class="alert alert-warning py-2 px-3 small d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <span>Tidak ditemukan jadwal penugasan mengajar aktif yang terdaftar atas nama Anda. Jadwal presensi hanya dapat dibuka sesuai nama pengajar yang ditugaskan.</span>
+                        </div>
+                    @endif
                     <select name="jadwal_id" id="jadwal_id" class="form-select @error('jadwal_id') is-invalid @enderror" required>
                         <option value="">-- Pilih Jadwal Pertemuan Kelas --</option>
                         @php

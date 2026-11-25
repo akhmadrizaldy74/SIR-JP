@@ -200,13 +200,28 @@ class NotificationService
         } catch (\Throwable $e) {
         }
 
-        // B. Jadwal sesi mengajar terdekat
+        // B. Jadwal sesi mengajar terdekat (khusus jadwal yang diampu oleh pengajar ini)
         try {
-            $jadwalMendatang = Jadwal::with(['mataPelatihan'])
-                ->whereDate('tanggal', '>=', now()->toDateString())
-                ->orderBy('tanggal')
-                ->take(3)
-                ->get();
+            $jadwalQuery = Jadwal::with(['mataPelatihan'])
+                ->whereDate('tanggal', '>=', now()->toDateString());
+
+            $jadwalQuery->whereHas('penugasanPengajar', function ($p) use ($user) {
+                $p->whereHas('widyaiswara', function ($w) use ($user) {
+                    $w->where(function($sub) use ($user) {
+                        if (!empty($user->nik)) $sub->orWhere('nik', $user->nik)->orWhere('nip', $user->nik);
+                        if (!empty($user->email)) $sub->orWhere('email', $user->email);
+                        if (!empty($user->name)) $sub->orWhere('nama_lengkap', 'like', "%{$user->name}%");
+                    });
+                })->orWhereHas('narasumber', function ($n) use ($user) {
+                    $n->where(function($sub) use ($user) {
+                        if (!empty($user->nik)) $sub->orWhere('nik', $user->nik);
+                        if (!empty($user->email)) $sub->orWhere('email', $user->email);
+                        if (!empty($user->name)) $sub->orWhere('nama_lengkap', 'like', "%{$user->name}%");
+                    });
+                });
+            });
+
+            $jadwalMendatang = $jadwalQuery->orderBy('tanggal')->take(3)->get();
 
             foreach ($jadwalMendatang as $jdw) {
                 $mapel = $jdw->mataPelatihan->nama_mata_pelatihan ?? 'Mata Pelatihan';
@@ -263,7 +278,7 @@ class NotificationService
                     'url' => route('portal.dashboard'),
                     'time_formatted' => $this->formatDiffForHumans($as->waktu_buka_presensi ?? $as->created_at),
                     'created_at' => $as->waktu_buka_presensi ?? $as->created_at,
-                    'icon' => $hasZoom ? 'bi-camera-video-fill' : 'bi-qr-code-scan',
+                    'icon' => $hasZoom ? 'bi-camera-video-fill' : 'bi-person-check',
                     'bg_color' => '#DCFCE7',
                     'text_color' => '#15803D',
                     'badge' => $hasZoom ? 'Zoom & Presensi' : 'Presensi Dibuka',

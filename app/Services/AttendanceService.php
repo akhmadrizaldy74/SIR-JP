@@ -316,6 +316,14 @@ class AttendanceService
             ];
         }
 
+        // Jika sesi presensi dikhususkan untuk kelas tertentu, pastikan peserta terdaftar di kelas tersebut
+        if ($session->kelas_mapel_id && $peserta->kelas_mapel_id && $session->kelas_mapel_id != $peserta->kelas_mapel_id) {
+            return [
+                'success' => false,
+                'message' => 'Sesi presensi ini dikhususkan untuk kelas lain. Anda tidak terdaftar dalam kelas ini.',
+            ];
+        }
+
         // Cek keterkaitan peserta dengan sesi ini (melalui angkatan atau kelas mapel)
         $isRelatedAngkatan = false;
         if ($peserta->angkatan_id) {
@@ -613,17 +621,23 @@ class AttendanceService
      */
     public function getSessionStatistics(AttendanceSession $session): array
     {
-        // Ambil seluruh peserta yang terdaftar pada kelas mapel / angkatan
+        // Ambil seluruh peserta yang terdaftar pada kelas mapel / angkatan sesi ini
         $queryPeserta = Peserta::query();
         if ($session->kelas_mapel_id) {
-            $queryPeserta->where(function ($q) use ($session) {
+            $angkatanId = $session->kelasMapel ? $session->kelasMapel->angkatan_id : null;
+            $queryPeserta->where(function ($q) use ($session, $angkatanId) {
                 $q->where('kelas_mapel_id', $session->kelas_mapel_id);
-                if ($session->kelasMapel && $session->kelasMapel->angkatan_id) {
-                    $q->orWhere('angkatan_id', $session->kelasMapel->angkatan_id);
+                if ($angkatanId) {
+                    $q->orWhere(function($sub) use ($angkatanId) {
+                        $sub->where('angkatan_id', $angkatanId)->whereNull('kelas_mapel_id');
+                    });
                 }
             });
         } elseif ($session->jadwal && $session->jadwal->mataPelatihan && $session->jadwal->mataPelatihan->angkatan_id) {
             $queryPeserta->where('angkatan_id', $session->jadwal->mataPelatihan->angkatan_id);
+        } else {
+            // Jika tidak ada kelas atau angkatan terikat, jangan memuat peserta dari kelas/pelatihan lain
+            $queryPeserta->whereRaw('1 = 0');
         }
 
         $allPesertas = $queryPeserta->orderBy('nama')->get();

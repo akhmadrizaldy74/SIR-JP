@@ -9,6 +9,7 @@ use App\Models\KelasMapel;
 use App\Models\Pelatihan;
 use App\Models\Angkatan;
 use App\Models\LogAktivitas;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -34,7 +35,14 @@ class AttendanceSessionController extends Controller
             'jadwal.penugasanPengajar.narasumber',
             'kelasMapel.ruangan',
             'presensis',
+            'creator',
         ]);
+
+        // Filter otomatis untuk Pengajar: hanya tampilkan sesi yang diampu atau dibuat oleh pengajar tersebut
+        $user = auth()->user();
+        if ($user && $user->isPengajar() && !$user->isAdministrator() && !$user->isPenyelenggara()) {
+            $this->applyPengajarScope($query, $user);
+        }
 
         if ($status) {
             $query->where('status', $status);
@@ -66,24 +74,83 @@ class AttendanceSessionController extends Controller
     public function create(Request $request)
     {
         $jadwalId = $request->get('jadwal_id');
-        $selectedJadwal = $jadwalId ? Jadwal::with(['mataPelatihan.angkatan.pelatihan', 'penugasanPengajar.widyaiswara'])->find($jadwalId) : null;
+        $selectedJadwal = $jadwalId ? Jadwal::with(['mataPelatihan.angkatan.pelatihan', 'penugasanPengajar.widyaiswara', 'penugasanPengajar.narasumber'])->find($jadwalId) : null;
 
         $query = Jadwal::with(['mataPelatihan.angkatan.pelatihan', 'penugasanPengajar.widyaiswara', 'penugasanPengajar.narasumber'])
             ->where('status', 'Terjadwal');
 
         $user = auth()->user();
-        if ($user && $user->isPengajar()) {
-            $userJadwals = (clone $query)->whereHas('penugasanPengajar', function($p) use ($user) {
-                $p->whereHas('widyaiswara', fn($w) => $w->where('nip', $user->nik)->orWhere('nama_lengkap', 'like', "%{$user->name}%"))
-                  ->orWhereHas('narasumber', fn($n) => $n->where('nik', $user->nik)->orWhere('nama_lengkap', 'like', "%{$user->name}%"));
-            })->orderBy('tanggal', 'desc')->get();
-
-            $jadwals = $userJadwals->count() > 0 ? $userJadwals : $query->orderBy('tanggal', 'desc')->take(30)->get();
+        if ($user && $user->isPengajar() && !$user->isAdministrator() && !$user->isPenyelenggara()) {
+            $query->whereHas('penugasanPengajar', function($p) use ($user) {
+                $p->whereHas('widyaiswara', function ($w) use ($user) {
+                    $w->where(function($sub) use ($user) {
+                        if (!empty($user->nik)) {
+                            $sub->orWhere('nik', $user->nik)->orWhere('nip', $user->nik);
+                        }
+                        if (!empty($user->email)) {
+                            $sub->orWhere('email', $user->email);
+                        }
+                        if (!empty($user->name)) {
+                            $sub->orWhere('nama_lengkap', 'like', "%{$user->name}%");
+                        }
+                    });
+                })->orWhereHas('narasumber', function ($n) use ($user) {
+                    $n->where(function($sub) use ($user) {
+                        if (!empty($user->nik)) {
+                            $sub->orWhere('nik', $user->nik);
+                        }
+                        if (!empty($user->email)) {
+                            $sub->orWhere('email', $user->email);
+                        }
+                        if (!empty($user->name)) {
+                            $sub->orWhere('nama_lengkap', 'like', "%{$user->name}%");
+                        }
+                    });
+                });
+            });
+            $jadwals = $query->orderBy('tanggal', 'desc')->get();
         } else {
             $jadwals = $query->orderBy('tanggal', 'desc')->take(30)->get();
         }
 
         return view('presensi.sessions.create', compact('jadwals', 'selectedJadwal'));
+    }
+
+    /**
+     * Terapkan scope query agar pengajar hanya melihat sesi presensi yang diampu / dibuat oleh dirinya
+     */
+    protected function applyPengajarScope($query, User $user)
+    {
+        $query->where(function ($q) use ($user) {
+            $q->where('created_by', $user->id)
+              ->orWhereHas('jadwal.penugasanPengajar', function ($p) use ($user) {
+                  $p->whereHas('widyaiswara', function ($w) use ($user) {
+                      $w->where(function($sub) use ($user) {
+                          if (!empty($user->nik)) {
+                              $sub->orWhere('nik', $user->nik)->orWhere('nip', $user->nik);
+                          }
+                          if (!empty($user->email)) {
+                              $sub->orWhere('email', $user->email);
+                          }
+                          if (!empty($user->name)) {
+                              $sub->orWhere('nama_lengkap', 'like', "%{$user->name}%");
+                          }
+                      });
+                  })->orWhereHas('narasumber', function ($n) use ($user) {
+                      $n->where(function($sub) use ($user) {
+                          if (!empty($user->nik)) {
+                              $sub->orWhere('nik', $user->nik);
+                          }
+                          if (!empty($user->email)) {
+                              $sub->orWhere('email', $user->email);
+                          }
+                          if (!empty($user->name)) {
+                              $sub->orWhere('nama_lengkap', 'like', "%{$user->name}%");
+                          }
+                      });
+                  });
+              });
+        });
     }
 
     public function store(Request $request)
@@ -172,7 +239,7 @@ class AttendanceSessionController extends Controller
 
         LogAktivitas::catat('Presensi', 'Aktivasi Sesi Presensi', 'Mengaktifkan sesi presensi ID #' . $attendanceSession->id);
 
-        return back()->with('success', 'Sesi presensi sekarang AKTIF! QR Code dinamis siap ditampilkan.');
+        return back()->with('success', 'Sesi presensi sekarang AKTIF! Peserta dapat melakukan presensi.');
     }
 
     public function close(AttendanceSession $attendanceSession)
@@ -182,19 +249,19 @@ class AttendanceSessionController extends Controller
             'waktu_tutup_presensi' => now(),
         ]);
 
-        // Nonaktifkan semua token QR sesi ini
+        // Nonaktifkan semua token sesi ini
         $attendanceSession->qrTokens()->update(['is_active' => false]);
 
         LogAktivitas::catat('Presensi', 'Tutup Sesi Presensi', 'Menutup sesi presensi ID #' . $attendanceSession->id);
 
-        return back()->with('success', 'Sesi presensi telah DITUTUP. Presensi QR tidak lagi diterima.');
+        return back()->with('success', 'Sesi presensi telah DITUTUP. Presensi peserta untuk sesi ini telah diakhiri.');
     }
 
     public function qrDisplay(AttendanceSession $attendanceSession)
     {
         if ($attendanceSession->status !== 'Aktif') {
             return redirect()->route('attendance-sessions.show', $attendanceSession->id)
-                ->with('warning', 'Sesi presensi belum aktif. Aktifkan sesi terlebih dahulu untuk memproyeksikan QR Code.');
+                ->with('warning', 'Sesi presensi belum aktif. Aktifkan sesi terlebih dahulu.');
         }
 
         $tokenData = $this->attendanceService->generateQrToken($attendanceSession, 45);

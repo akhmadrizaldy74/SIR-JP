@@ -293,4 +293,89 @@ class DirectAttendanceAndModuleAccessTest extends TestCase
             'status_kehadiran' => 'Hadir',
         ]);
     }
+
+    public function test_pengajar_only_sees_their_own_sessions_and_peserta_only_sees_their_own_class()
+    {
+        // Buat Pengajar A dan Pengajar B
+        $unique = rand(1000, 9999);
+        $pengajarA = User::create([
+            'name' => 'Pengajar Alfa ' . $unique,
+            'email' => 'pengajar.alfa.' . $unique . '@kemnaker.go.id',
+            'username' => 'pengajar_alfa_' . $unique,
+            'password' => bcrypt('password'),
+            'role' => 'pengajar',
+            'roles' => ['Pengajar'],
+        ]);
+
+        $pengajarB = User::create([
+            'name' => 'Pengajar Beta ' . $unique,
+            'email' => 'pengajar.beta.' . $unique . '@kemnaker.go.id',
+            'username' => 'pengajar_beta_' . $unique,
+            'password' => bcrypt('password'),
+            'role' => 'pengajar',
+            'roles' => ['Pengajar'],
+        ]);
+
+        // Buat sesi milik Pengajar A
+        $sessionA = AttendanceSession::create([
+            'jadwal_id' => $this->session->jadwal_id,
+            'kelas_mapel_id' => $this->session->kelas_mapel_id,
+            'judul_sesi' => 'Sesi Khusus Alfa ' . $unique,
+            'tanggal' => now()->toDateString(),
+            'jam_mulai' => '08:00',
+            'jam_selesai' => '10:00',
+            'status' => 'Aktif',
+            'waktu_buka_presensi' => now(),
+            'created_by' => $pengajarA->id,
+        ]);
+
+        // Buat sesi milik Pengajar B
+        $sessionB = AttendanceSession::create([
+            'jadwal_id' => $this->session->jadwal_id,
+            'kelas_mapel_id' => $this->session->kelas_mapel_id,
+            'judul_sesi' => 'Sesi Khusus Beta ' . $unique,
+            'tanggal' => now()->toDateString(),
+            'jam_mulai' => '10:00',
+            'jam_selesai' => '12:00',
+            'status' => 'Aktif',
+            'waktu_buka_presensi' => now(),
+            'created_by' => $pengajarB->id,
+        ]);
+
+        // 1. Pengajar A HANYA melihat sesi miliknya di daftar sesi presensi
+        $respA = $this->actingAs($pengajarA)->get(route('attendance-sessions.index'));
+        $respA->assertOk();
+        $respA->assertSee('Sesi Khusus Alfa ' . $unique);
+        $respA->assertDontSee('Sesi Khusus Beta ' . $unique);
+
+        // 2. Pengajar B HANYA melihat sesi miliknya di daftar sesi presensi
+        $respB = $this->actingAs($pengajarB)->get(route('attendance-sessions.index'));
+        $respB->assertOk();
+        $respB->assertSee('Sesi Khusus Beta ' . $unique);
+        $respB->assertDontSee('Sesi Khusus Alfa ' . $unique);
+
+        // 3. Peserta di Kelas Lain tidak dapat presensi di sesi khusus kelas ini
+        $angkatan = $this->session->kelasMapel->angkatan;
+        $kelasB = \App\Models\KelasMapel::create([
+            'pelatihan_id' => $angkatan->pelatihan_id,
+            'angkatan_id' => $angkatan->id,
+            'mata_pelatihan_id' => $this->session->jadwal->mata_pelatihan_id,
+            'nama_kelas' => 'Kelas Beta ' . $unique,
+        ]);
+
+        $pesertaKelasB = Peserta::create([
+            'nip' => '199' . time() . rand(100, 999),
+            'nama' => 'Siswa Kelas Beta ' . $unique,
+            'email' => 'beta.' . $unique . '@kemnaker.go.id',
+            'jenis_kelamin' => 'Perempuan',
+            'angkatan_id' => $angkatan->id,
+            'kelas_mapel_id' => $kelasB->id,
+        ]);
+
+        // Peserta Kelas B mencoba absen di sesi kelas A
+        $service = app(\App\Services\AttendanceService::class);
+        $res = $service->submitDirectAttendance($pesertaKelasB, $sessionA, 'Hadir');
+        $this->assertFalse($res['success']);
+        $this->assertStringContainsString('dikhususkan untuk kelas lain', $res['message']);
+    }
 }

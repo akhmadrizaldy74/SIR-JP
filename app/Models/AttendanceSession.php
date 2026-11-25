@@ -101,6 +101,11 @@ class AttendanceSession extends Model
             return false;
         }
 
+        // Sesi yang dijadwalkan pada hari yang telah lewat (kemarin atau sebelumnya) otomatis ditutup
+        if ($this->tanggal && $this->tanggal->copy()->endOfDay()->lt($now)) {
+            return false;
+        }
+
         return true;
     }
 }

@@ -36,18 +36,61 @@ class AttendanceReportController extends Controller
         $angkatans = Angkatan::with('pelatihan')->orderBy('nomor_angkatan')->get();
         $kelasMapels = KelasMapel::orderBy('nama_kelas')->get();
 
-        // 5 sesi terkini
-        $recentSessions = AttendanceSession::with(['jadwal.mataPelatihan', 'kelasMapel.ruangan', 'presensis'])
-            ->latest('tanggal')
-            ->latest('jam_mulai')
-            ->take(5)
-            ->get();
+        $user = auth()->user();
+        $isPengajarOnly = $user && $user->isPengajar() && !$user->isAdministrator() && !$user->isPenyelenggara();
 
-        // 10 aktivitas presensi terakhir
-        $recentLogs = Presensi::with(['peserta', 'session.jadwal.mataPelatihan'])
-            ->latest('waktu_check_in')
-            ->take(10)
-            ->get();
+        // 5 sesi terkini (disaring khusus sesi pengajar jika role pengajar)
+        $recentSessionsQuery = AttendanceSession::with(['jadwal.mataPelatihan', 'kelasMapel.ruangan', 'presensis'])
+            ->latest('tanggal')
+            ->latest('jam_mulai');
+
+        if ($isPengajarOnly) {
+            $recentSessionsQuery->where(function ($q) use ($user) {
+                $q->where('created_by', $user->id)
+                  ->orWhereHas('jadwal.penugasanPengajar', function ($p) use ($user) {
+                      $p->whereHas('widyaiswara', function ($w) use ($user) {
+                          $w->where(function($sub) use ($user) {
+                              if (!empty($user->nik)) $sub->orWhere('nik', $user->nik)->orWhere('nip', $user->nik);
+                              if (!empty($user->email)) $sub->orWhere('email', $user->email);
+                              if (!empty($user->name)) $sub->orWhere('nama_lengkap', 'like', "%{$user->name}%");
+                          });
+                      })->orWhereHas('narasumber', function ($n) use ($user) {
+                          $n->where(function($sub) use ($user) {
+                              if (!empty($user->nik)) $sub->orWhere('nik', $user->nik);
+                              if (!empty($user->email)) $sub->orWhere('email', $user->email);
+                              if (!empty($user->name)) $sub->orWhere('nama_lengkap', 'like', "%{$user->name}%");
+                          });
+                      });
+                  });
+            });
+        }
+        $recentSessions = $recentSessionsQuery->take(5)->get();
+
+        // 10 aktivitas presensi terakhir (disaring sesuai sesi pengajar)
+        $recentLogsQuery = Presensi::with(['peserta', 'session.jadwal.mataPelatihan'])
+            ->latest('waktu_check_in');
+
+        if ($isPengajarOnly) {
+            $recentLogsQuery->whereHas('session', function($qs) use ($user) {
+                $qs->where('created_by', $user->id)
+                   ->orWhereHas('jadwal.penugasanPengajar', function ($p) use ($user) {
+                       $p->whereHas('widyaiswara', function ($w) use ($user) {
+                           $w->where(function($sub) use ($user) {
+                               if (!empty($user->nik)) $sub->orWhere('nik', $user->nik)->orWhere('nip', $user->nik);
+                               if (!empty($user->email)) $sub->orWhere('email', $user->email);
+                               if (!empty($user->name)) $sub->orWhere('nama_lengkap', 'like', "%{$user->name}%");
+                           });
+                       })->orWhereHas('narasumber', function ($n) use ($user) {
+                           $n->where(function($sub) use ($user) {
+                               if (!empty($user->nik)) $sub->orWhere('nik', $user->nik);
+                               if (!empty($user->email)) $sub->orWhere('email', $user->email);
+                               if (!empty($user->name)) $sub->orWhere('nama_lengkap', 'like', "%{$user->name}%");
+                           });
+                       });
+                   });
+            });
+        }
+        $recentLogs = $recentLogsQuery->take(10)->get();
 
         return view('presensi.index', compact('stats', 'pelatihans', 'angkatans', 'kelasMapels', 'pelatihanId', 'angkatanId', 'kelasMapelId', 'recentSessions', 'recentLogs'));
     }

@@ -71,6 +71,11 @@ class User extends Authenticatable
         return strcasecmp($this->getActiveRole(), 'Administrator') === 0;
     }
 
+    public function hasRole(string $role): bool
+    {
+        return in_array(strtolower($role), array_map('strtolower', $this->getAvailableRoles()));
+    }
+
     public function isPengajar(): bool
     {
         if ($this->isGuest()) {
