@@ -30,14 +30,14 @@ Namun demikian, audit menemukan **14 temuan keamanan** yang perlu ditingkatkan, 
 
 ### 🔴 TINGKAT RISIKO: KRITIS (CRITICAL)
 
-#### SEC-01: Ketiadaan Rate Limiting (Throttle) pada Endpoint Login
-* **File Terkait:** `routes/web.php` (baris 33), `app/Http/Controllers/AuthController.php` (baris 21-72)
+#### SEC-01: Kebijakan Rate Limiting Login Perlu Ditinjau
+* **File Terkait:** `routes/web.php` (route login dan portal peserta)
 * **Kategori:** B. Autentikasi
 * **Penjelasan Singkat:**  
-  Endpoint `POST /login` tidak memiliki pembatasan laju percobaan (rate limiting). Penyerang dapat melakukan serangan *brute force* atau *credential stuffing* terhadap NIK, email, atau password tanpa adanya pemblokiran sementara (lockout) atau penundaan waktu respons.
+  Endpoint `POST /login` dan login portal peserta saat ini menggunakan middleware `throttle:15,1`. Karena sudah ada pembatasan laju, temuan sebelumnya yang menyatakan throttle tidak ada sudah tidak berlaku. Kebijakan ini tetap perlu ditinjau untuk memastikan batasnya sesuai risiko dan mempertimbangkan pembatasan berbasis kombinasi IP dan identitas login.
 * **Rencana Perbaikan:**  
-  1. Pasang middleware `throttle:5,1` pada route `login.post` di `routes/web.php`.
-  2. Tambahkan implementasi `Illuminate\Support\Facades\RateLimiter` di dalam `AuthController::login()` dengan identifikasi unik berbasis IP dan string login, memberikan status HTTP 429 serta pesan waktu tunggu yang jelas jika batas percobaan terlampaui.
+  1. Evaluasi apakah batas `15` percobaan per menit sudah sesuai kebijakan autentikasi.
+  2. Jika diperlukan, tambahkan pembatasan per identitas login selain throttle berbasis route.
 
 ---
 

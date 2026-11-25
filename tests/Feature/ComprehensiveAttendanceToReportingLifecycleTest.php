@@ -150,7 +150,7 @@ class ComprehensiveAttendanceToReportingLifecycleTest extends TestCase
             'jadwal_id' => $jadwal->id,
             'kelas_mapel_id' => $kelasMapel->id,
             'judul_sesi' => 'Sesi 1 - Praktik Pemeriksaan K3 ' . $unique,
-            'tanggal' => '2026-11-18',
+            'tanggal' => now()->toDateString(),
             'jam_mulai' => '08:00:00',
             'jam_selesai' => '13:30:00',
             'toleransi_terlambat_menit' => 30,
@@ -301,7 +301,7 @@ class ComprehensiveAttendanceToReportingLifecycleTest extends TestCase
 
         $realisasiRes = $this->actingAs($this->admin)->post(route('realisasi.store'), [
             'jadwal_id' => $jadwal->id,
-            'tanggal_realisasi' => '2026-11-18',
+            'tanggal_realisasi' => now()->toDateString(),
             'jam_mulai_aktual' => '08:00',
             'jam_selesai_aktual' => '13:30',
             'status' => 'Terlaksana',
@@ -330,7 +330,7 @@ class ComprehensiveAttendanceToReportingLifecycleTest extends TestCase
         // TAHAP 9: Verifikasi Rekapitulasi SIR-JP & Zero Duplikasi JP
         // =========================================================================
         $rekapDetailRes = $this->actingAs($this->admin)->get(
-            route('rekapitulasi.detail', ['id' => $wi->id, 'bulan' => 11, 'tahun' => 2026])
+            route('rekapitulasi.detail', ['id' => $wi->id, 'bulan' => now()->month, 'tahun' => now()->year])
         );
         $rekapDetailRes->assertStatus(200);
         $rekapDetailRes->assertSee($wi->nama_lengkap);
@@ -341,19 +341,19 @@ class ComprehensiveAttendanceToReportingLifecycleTest extends TestCase
         // =========================================================================
         // Ekspor Excel Individu WI
         $excelIndividuRes = $this->actingAs($this->admin)->get(
-            route('laporan.export.excel_individu', ['id' => $wi->id, 'bulan' => 11, 'tahun' => 2026])
+            route('laporan.export.excel_individu', ['id' => $wi->id, 'bulan' => now()->month, 'tahun' => now()->year])
         );
         $excelIndividuRes->assertStatus(200);
 
         // Ekspor PDF Individu WI
         $pdfIndividuRes = $this->actingAs($this->admin)->get(
-            route('laporan.export.pdf_individu', ['id' => $wi->id, 'bulan' => 11, 'tahun' => 2026])
+            route('laporan.export.pdf_individu', ['id' => $wi->id, 'bulan' => now()->month, 'tahun' => now()->year])
         );
         $pdfIndividuRes->assertStatus(200);
 
         // Ekspor PDF Rekap Semua WI
         $pdfSemuaRes = $this->actingAs($this->admin)->get(
-            route('laporan.export.pdf_semua', ['bulan' => 11, 'tahun' => 2026])
+            route('laporan.export.pdf_semua', ['bulan' => now()->month, 'tahun' => now()->year])
         );
         $pdfSemuaRes->assertStatus(200);
 

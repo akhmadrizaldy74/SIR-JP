@@ -29,6 +29,8 @@ class ParticipantPortalController extends Controller
 
     public function dashboard(Request $request)
     {
+        $this->attendanceService->autoCloseExpiredSessions();
+
         $peserta = $this->getAuthenticatedPeserta();
         $pelatihan = $peserta->angkatan->pelatihan ?? null;
         $angkatan = $peserta->angkatan ?? null;

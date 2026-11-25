@@ -378,4 +378,127 @@ class DirectAttendanceAndModuleAccessTest extends TestCase
         $this->assertFalse($res['success']);
         $this->assertStringContainsString('dikhususkan untuk kelas lain', $res['message']);
     }
+
+    public function test_closing_session_triggers_auto_alpa_and_syncs_realisasi_jp()
+    {
+        $unique = rand(1000, 9999);
+        $wi = \App\Models\Widyaiswara::create([
+            'nik' => '317201' . rand(1000000000, 9999999999),
+            'nip' => '19800101' . $unique . '1001',
+            'nama_lengkap' => 'Widyaiswara Sync ' . $unique,
+            'jabatan' => 'Widyaiswara Ahli Madya',
+            'instansi' => 'PPSDMK',
+            'status' => 'Aktif',
+        ]);
+
+        $penugasan = \App\Models\PenugasanPengajar::create([
+            'mata_pelatihan_id' => $this->session->jadwal->mata_pelatihan_id,
+            'jenis_pengajar' => 'Widyaiswara',
+            'widyaiswara_id' => $wi->id,
+            'peran' => 'Pengajar Utama',
+        ]);
+
+        $this->session->jadwal->update(['penugasan_pengajar_id' => $penugasan->id]);
+
+        // Tutup sesi tanpa peserta melakukan presensi -> harus otomatis Alpa & RealisasiJadwal tercipta
+        $response = $this->actingAs($this->admin)
+            ->post(route('attendance-sessions.close', $this->session->id));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->session->refresh();
+        $this->assertEquals('Selesai', $this->session->status);
+
+        $this->assertDatabaseHas('presensis', [
+            'attendance_session_id' => $this->session->id,
+            'peserta_id' => $this->peserta->id,
+            'status_kehadiran' => 'Alpa',
+            'metode_presensi' => 'Sistem',
+        ]);
+
+        $this->assertDatabaseHas('realisasi_jadwals', [
+            'jadwal_id' => $this->session->jadwal_id,
+            'status' => 'Terlaksana',
+        ]);
+
+        $realisasi = \App\Models\RealisasiJadwal::where('jadwal_id', $this->session->jadwal_id)->first();
+        $this->assertDatabaseHas('realisasi_pengajars', [
+            'realisasi_jadwal_id' => $realisasi->id,
+            'widyaiswara_id' => $wi->id,
+            'status_kehadiran' => 'Hadir',
+        ]);
+    }
+
+    public function test_expired_past_session_is_auto_closed_by_command()
+    {
+        $pastJadwal = Jadwal::create([
+            'mata_pelatihan_id' => $this->session->jadwal->mata_pelatihan_id,
+            'tanggal' => now()->subDays(2)->toDateString(),
+            'jam_mulai' => '08:00:00',
+            'jam_selesai' => '10:00:00',
+            'jp_rencana' => 2,
+            'status' => 'Terjadwal',
+        ]);
+
+        $pastSession = AttendanceSession::create([
+            'jadwal_id' => $pastJadwal->id,
+            'kelas_mapel_id' => $this->session->kelas_mapel_id,
+            'judul_sesi' => 'Sesi Lupa Tutup Kemarin',
+            'tanggal' => now()->subDays(2)->toDateString(),
+            'jam_mulai' => '08:00:00',
+            'jam_selesai' => '10:00:00',
+            'status' => 'Aktif',
+            'waktu_buka_presensi' => now()->subDays(2),
+            'created_by' => $this->admin->id,
+        ]);
+
+        $this->artisan('attendance:auto-close')->assertExitCode(0);
+
+        $pastSession->refresh();
+        $this->assertEquals('Selesai', $pastSession->status);
+        $this->assertDatabaseHas('presensis', [
+            'attendance_session_id' => $pastSession->id,
+            'peserta_id' => $this->peserta->id,
+            'status_kehadiran' => 'Alpa',
+        ]);
+    }
+
+    public function test_pengajar_can_approve_and_reject_direct_sakit_izin_proof()
+    {
+        $fakePdf = UploadedFile::fake()->create('surat_sakit.pdf', 200, 'application/pdf');
+        $this->withSession(['participant_id' => $this->peserta->id])
+            ->post(route('portal.presensi.direct.post', $this->session->id), [
+                'status_kehadiran' => 'Sakit',
+                'keterangan' => 'Demam tinggi.',
+                'bukti_file' => $fakePdf,
+            ]);
+
+        $presensi = Presensi::where('attendance_session_id', $this->session->id)
+            ->where('peserta_id', $this->peserta->id)
+            ->first();
+
+        $this->assertEquals('Menunggu Verifikasi', $presensi->status_verifikasi);
+
+        // 1. Admin/Pengajar menolak bukti -> status kehadiran berubah menjadi Alpa
+        $respReject = $this->actingAs($this->admin)
+            ->post(route('attendance-sessions.verify_presensi', [$this->session->id, $presensi->id]), [
+                'keputusan' => 'Ditolak',
+                'catatan_verifikasi' => 'Dokumen buram tidak terbaca',
+            ]);
+        $respReject->assertRedirect();
+
+        $presensi->refresh();
+        $this->assertEquals('Ditolak', $presensi->status_verifikasi);
+        $this->assertEquals('Alpa', $presensi->status_kehadiran);
+    }
+
+    public function test_bap_pdf_export_returns_valid_pdf_response()
+    {
+        $response = $this->actingAs($this->admin)
+            ->get(route('attendance-sessions.bap_pdf', $this->session->id));
+
+        $response->assertOk();
+        $this->assertStringContainsString('application/pdf', $response->headers->get('content-type'));
+    }
 }

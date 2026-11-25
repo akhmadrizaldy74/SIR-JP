@@ -23,12 +23,17 @@ class Presensi extends Model
         'waktu_check_in',
         'keterangan',
         'bukti_file',
+        'status_verifikasi',
+        'catatan_verifikasi',
+        'diverifikasi_oleh',
+        'diverifikasi_pada',
         'diinput_oleh',
     ];
 
     protected $casts = [
         'tanggal' => 'date',
         'waktu_check_in' => 'datetime',
+        'diverifikasi_pada' => 'datetime',
     ];
 
     public function session()
@@ -54,6 +59,11 @@ class Presensi extends Model
     public function operator()
     {
         return $this->belongsTo(User::class, 'diinput_oleh');
+    }
+
+    public function verifikator()
+    {
+        return $this->belongsTo(User::class, 'diverifikasi_oleh');
     }
 
     public function logs()

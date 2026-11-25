@@ -28,8 +28,17 @@
                 </form>
             @endif
 
-            <a href="{{ route('realisasi.create', ['jadwal_id' => $attendanceSession->jadwal_id]) }}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold">
-                <i class="bi bi-check2-circle me-1"></i> Absen Pengajar (Klaim JP)
+            @if($attendanceSession->jadwal && $attendanceSession->jadwal->realisasi)
+                <a href="{{ route('realisasi.show', $attendanceSession->jadwal->realisasi->id) }}" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold" title="Jadwal sudah terealisasi ke Rekap JP">
+                    <i class="bi bi-check-circle-fill me-1"></i> Terealisasi ({{ $attendanceSession->jadwal->realisasi->jp_aktual }} JP)
+                </a>
+            @else
+                <a href="{{ route('realisasi.create', ['jadwal_id' => $attendanceSession->jadwal_id]) }}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-check2-circle me-1"></i> Absen Pengajar (Klaim JP)
+                </a>
+            @endif
+            <a href="{{ route('attendance-sessions.bap_pdf', $attendanceSession->id) }}" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-semibold" title="Cetak Berita Acara Pembelajaran & Daftar Hadir PDF">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Cetak BAP (PDF)
             </a>
             <a href="{{ route('class-documentations.index', ['attendance_session_id' => $attendanceSession->id]) }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                 <i class="bi bi-camera me-1"></i> Foto Kegiatan ({{ $attendanceSession->documentations->count() }})
@@ -138,6 +147,16 @@
 </div>
 
 <!-- Daftar Peserta & Live Status Kehadiran -->
+@if(($stats['pending_direct_verifications'] ?? 0) > 0)
+    <div class="alert alert-warning border-0 shadow-sm rounded-3 d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Terdapat <strong>{{ $stats['pending_direct_verifications'] }} pengajuan Sakit / Izin / Dispensasi</strong> pada sesi ini yang menunggu verifikasi bukti dari Anda.
+        </div>
+        <span class="badge bg-warning text-dark">Periksa kolom Keterangan</span>
+    </div>
+@endif
+
 <div class="card bg-white border-0 shadow-sm rounded-3 p-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
@@ -214,6 +233,38 @@
                         </td>
                         <td class="small text-muted">
                             <div>{{ $rec->keterangan ?? '-' }}</div>
+                            @if($rec && in_array($rec->status_kehadiran, ['Sakit', 'Izin', 'Dispensasi']) || ($rec && $rec->status_verifikasi === 'Ditolak'))
+                                <div class="mt-1 d-flex align-items-center gap-1 flex-wrap">
+                                    @if($rec->status_verifikasi === 'Menunggu Verifikasi')
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                            <i class="bi bi-hourglass-split me-1"></i> Menunggu Verifikasi
+                                        </span>
+                                        <form action="{{ route('attendance-sessions.verify_presensi', [$attendanceSession->id, $rec->id]) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <input type="hidden" name="keputusan" value="Disetujui">
+                                            <button type="submit" class="btn btn-xs btn-success py-0 px-2 rounded-pill" style="font-size: 0.7rem;" title="Setujui Pengajuan">
+                                                <i class="bi bi-check-lg"></i> Setujui
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('attendance-sessions.verify_presensi', [$attendanceSession->id, $rec->id]) }}" method="POST" class="d-inline" onsubmit="const reason = prompt('Alasan penolakan (peserta akan ditandai Alpa):', 'Bukti tidak valid'); if(reason === null) return false; this.querySelector('input[name=catatan_verifikasi]').value = reason;">
+                                            @csrf
+                                            <input type="hidden" name="keputusan" value="Ditolak">
+                                            <input type="hidden" name="catatan_verifikasi" value="">
+                                            <button type="submit" class="btn btn-xs btn-outline-danger py-0 px-2 rounded-pill" style="font-size: 0.7rem;" title="Tolak Pengajuan (Ubah ke Alpa)">
+                                                <i class="bi bi-x-lg"></i> Tolak
+                                            </button>
+                                        </form>
+                                    @elseif($rec->status_verifikasi === 'Ditolak')
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                            <i class="bi bi-x-circle me-1"></i> Ditolak
+                                        </span>
+                                    @elseif($rec->diverifikasi_oleh)
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            <i class="bi bi-patch-check me-1"></i> Terverifikasi
+                                        </span>
+                                    @endif
+                                </div>
+                            @endif
                             @if($rec && $rec->bukti_file)
                                 <div class="mt-1">
                                     <a href="{{ route('portal.presensi.bukti', $rec->id) }}" target="_blank" class="badge bg-primary text-white text-decoration-none shadow-sm">

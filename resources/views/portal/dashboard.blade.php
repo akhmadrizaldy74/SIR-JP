@@ -331,15 +331,29 @@
                             <!-- Right Action: Tombol Presensi -->
                             <div>
                                 @if($presensiUser)
-                                    <div class="d-flex align-items-center gap-1">
-                                        <button type="button" class="btn btn-success btn-sm px-3 py-2 rounded-2 fw-semibold shadow-sm d-flex align-items-center gap-1" disabled>
-                                            <i class="bi bi-check2-circle fs-6"></i>
-                                            <span>{{ $presensiUser->status_kehadiran }} ({{ $presensiUser->waktu_check_in ? $presensiUser->waktu_check_in->format('H:i') : 'OK' }})</span>
-                                        </button>
-                                        @if($presensiUser->bukti_file)
-                                            <a href="{{ route('portal.presensi.bukti', $presensiUser->id) }}" target="_blank" class="btn btn-outline-secondary btn-sm px-2 py-2 rounded-2" title="Lihat Bukti Foto/PDF">
-                                                <i class="bi bi-paperclip"></i>
-                                            </a>
+                                    <div class="d-flex flex-column align-items-end gap-1">
+                                        <div class="d-flex align-items-center gap-1">
+                                            @php
+                                                $btnColor = $presensiUser->status_kehadiran === 'Alpa' ? 'btn-danger' : ($presensiUser->status_verifikasi === 'Menunggu Verifikasi' ? 'btn-warning text-dark' : 'btn-success');
+                                            @endphp
+                                            <button type="button" class="btn {{ $btnColor }} btn-sm px-3 py-2 rounded-2 fw-semibold shadow-sm d-flex align-items-center gap-1" disabled>
+                                                <i class="bi {{ $presensiUser->status_kehadiran === 'Alpa' ? 'bi-x-circle' : ($presensiUser->status_verifikasi === 'Menunggu Verifikasi' ? 'bi-hourglass-split' : 'bi-check2-circle') }} fs-6"></i>
+                                                <span>{{ $presensiUser->status_kehadiran }} ({{ $presensiUser->waktu_check_in ? $presensiUser->waktu_check_in->format('H:i') : 'OK' }})</span>
+                                            </button>
+                                            @if($presensiUser->bukti_file)
+                                                <a href="{{ route('portal.presensi.bukti', $presensiUser->id) }}" target="_blank" class="btn btn-outline-secondary btn-sm px-2 py-2 rounded-2" title="Lihat Bukti Foto/PDF">
+                                                    <i class="bi bi-paperclip"></i>
+                                                </a>
+                                            @endif
+                                        </div>
+                                        @if($presensiUser->status_verifikasi === 'Menunggu Verifikasi')
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 0.7rem;">
+                                                Menunggu Verifikasi Pengajar
+                                            </span>
+                                        @elseif($presensiUser->status_verifikasi === 'Ditolak')
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size: 0.7rem;">
+                                                Pengajuan Ditolak{{ $presensiUser->catatan_verifikasi ? ': ' . $presensiUser->catatan_verifikasi : '' }}
+                                            </span>
                                         @endif
                                     </div>
                                 @elseif($isSessOpen)

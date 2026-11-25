@@ -80,11 +80,15 @@ class AttendanceRequestController extends Controller
 
     public function downloadEvidence(AttendanceEvidence $evidence)
     {
-        if (!Storage::disk('local')->exists($evidence->path_file)) {
+        $disk = Storage::disk('local')->exists($evidence->path_file)
+            ? 'local'
+            : (Storage::disk('public')->exists($evidence->path_file) ? 'public' : null);
+
+        if (!$disk) {
             abort(404, 'Berkas bukti tidak ditemukan pada server.');
         }
 
-        return Storage::disk('local')->response(
+        return Storage::disk($disk)->response(
             $evidence->path_file,
             $evidence->nama_file_asli,
             ['Content-Type' => $evidence->mime_type]

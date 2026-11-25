@@ -45,8 +45,8 @@ flowchart TD
 
     subgraph Auto_Sync ["Otomatis Terhubung Ke"]
         T2 -->|"Auto-Sync Penugasan"| S1["Penugasan Pengajar<br/>(Basis Data SIR-JP)"]
-        T3 -->|"Tombol Sinkron Jadwal"| S2["Jadwal Belajar SIR-JP<br/>(Status: Terjadwal)"]
-        T3 -->|"Buka Sesi Kelas"| S3["Sesi Presensi Aktif<br/>(Kode Token QR Dinamis)"]
+        T3 -->|"Sinkron Jadwal (terkait ke kelas, tidak membuat duplikat)"| S2["Jadwal Belajar SIR-JP<br/>(Status: Terjadwal)"]
+        S2 -->|"Admin membuat sesi dari jadwal"| S3["Sesi Presensi<br/>(Dapat diaktifkan dengan Token QR Dinamis)"]
         T4 -->|"Generate Access Code"| S4["Kredensial Portal Peserta<br/>(Kode Peserta & PIN)"]
     end
 

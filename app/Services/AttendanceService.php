@@ -12,6 +12,8 @@ use App\Models\Presensi;
 use App\Models\Peserta;
 use App\Models\KelasMapel;
 use App\Models\Jadwal;
+use App\Models\RealisasiJadwal;
+use App\Models\RealisasiPengajar;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -383,7 +385,10 @@ class AttendanceService
             $buktiPath = $uploadedFile->storeAs('presensi_evidence/' . $session->id, $fileName, 'public');
         }
 
-        return DB::transaction(function () use ($session, $peserta, $status, $keterangan, $buktiPath, $now) {
+        $requiresApproval = in_array($status, ['Sakit', 'Izin', 'Dispensasi']);
+        $statusVerifikasi = $requiresApproval ? 'Menunggu Verifikasi' : 'Disetujui';
+
+        return DB::transaction(function () use ($session, $peserta, $status, $statusVerifikasi, $requiresApproval, $keterangan, $buktiPath, $uploadedFile, $now) {
             $presensi = Presensi::create([
                 'attendance_session_id' => $session->id,
                 'peserta_id' => $peserta->id,
@@ -396,7 +401,30 @@ class AttendanceService
                 'waktu_check_in' => $now,
                 'keterangan' => $keterangan ?: 'Presensi mandiri peserta via form KCLC',
                 'bukti_file' => $buktiPath,
+                'status_verifikasi' => $statusVerifikasi,
             ]);
+
+            // Sinkronkan dengan antrean verifikasi pengajuan izin/sakit/dispensasi
+            if ($requiresApproval) {
+                $attRequest = AttendanceRequest::create([
+                    'peserta_id' => $peserta->id,
+                    'attendance_session_id' => $session->id,
+                    'jenis_pengajuan' => $status,
+                    'alasan' => $keterangan ?: 'Pengajuan ' . $status . ' melalui presensi mandiri.',
+                    'status' => 'Pending',
+                ]);
+
+                if ($buktiPath && $uploadedFile) {
+                    AttendanceEvidence::create([
+                        'attendance_request_id' => $attRequest->id,
+                        'nama_file_asli' => $uploadedFile->getClientOriginalName(),
+                        'path_file' => $buktiPath,
+                        'mime_type' => $uploadedFile->getClientMimeType() ?: 'application/octet-stream',
+                        'file_size' => $uploadedFile->getSize() ?: 0,
+                        'keterangan' => 'Lampiran presensi mandiri ' . $status,
+                    ]);
+                }
+            }
 
             // Audit Log
             AttendanceLog::create([
@@ -406,16 +434,20 @@ class AttendanceService
                 'user_id' => null,
                 'status_sebelum' => null,
                 'status_sesudah' => $status,
-                'alasan_perubahan' => 'Presensi mandiri peserta via form portal',
+                'alasan_perubahan' => 'Presensi mandiri peserta via form portal' . ($requiresApproval ? ' (Menunggu verifikasi)' : ''),
                 'metode_input' => 'Mandiri',
                 'ip_address' => request()->ip(),
             ]);
+
+            $pesan = 'Presensi berhasil dicatat! Status: ' . $status
+                . ($requiresApproval ? ' — Menunggu verifikasi pengajar/admin' : '')
+                . ' (Waktu: ' . $now->format('H:i:s') . ' WIB)';
 
             return [
                 'success' => true,
                 'presensi' => $presensi,
                 'status' => $status,
-                'message' => 'Presensi berhasil dicatat! Status: ' . $status . ' (Waktu: ' . $now->format('H:i:s') . ' WIB)',
+                'message' => $pesan,
             ];
         });
     }
@@ -442,6 +474,9 @@ class AttendanceService
                 $presensi->update([
                     'status_kehadiran' => $status,
                     'keterangan' => $keterangan ?: $presensi->keterangan,
+                    'status_verifikasi' => 'Disetujui',
+                    'diverifikasi_oleh' => $userId,
+                    'diverifikasi_pada' => now(),
                     'diinput_oleh' => $userId,
                 ]);
             } else {
@@ -456,6 +491,9 @@ class AttendanceService
                     'waktu_presensi' => now()->format('H:i:s'),
                     'waktu_check_in' => now(),
                     'keterangan' => $keterangan,
+                    'status_verifikasi' => 'Disetujui',
+                    'diverifikasi_oleh' => $userId,
+                    'diverifikasi_pada' => now(),
                     'diinput_oleh' => $userId,
                 ]);
             }
@@ -580,6 +618,10 @@ class AttendanceService
                 if ($presensi) {
                     $presensi->update([
                         'status_kehadiran' => $statusPresensi,
+                        'status_verifikasi' => 'Disetujui',
+                        'catatan_verifikasi' => $catatanAdmin,
+                        'diverifikasi_oleh' => $verifierId,
+                        'diverifikasi_pada' => $now,
                         'keterangan' => 'Pengajuan ' . $statusPresensi . ' disetujui admin. Alasan: ' . $request->alasan,
                         'diinput_oleh' => $verifierId,
                     ]);
@@ -595,6 +637,10 @@ class AttendanceService
                         'waktu_presensi' => $now->format('H:i:s'),
                         'waktu_check_in' => $now,
                         'keterangan' => 'Pengajuan ' . $statusPresensi . ' disetujui admin. Alasan: ' . $request->alasan,
+                        'status_verifikasi' => 'Disetujui',
+                        'catatan_verifikasi' => $catatanAdmin,
+                        'diverifikasi_oleh' => $verifierId,
+                        'diverifikasi_pada' => $now,
                         'diinput_oleh' => $verifierId,
                     ]);
                 }
@@ -610,6 +656,35 @@ class AttendanceService
                     'metode_input' => 'Sistem',
                     'ip_address' => request()->ip(),
                 ]);
+            } elseif ($decision === 'Rejected') {
+                $presensi = Presensi::where('attendance_session_id', $request->attendance_session_id)
+                    ->where('peserta_id', $request->peserta_id)
+                    ->where('status_verifikasi', 'Menunggu Verifikasi')
+                    ->first();
+
+                if ($presensi) {
+                    $statusSebelum = $presensi->status_kehadiran;
+                    $presensi->update([
+                        'status_kehadiran' => 'Alpa',
+                        'status_verifikasi' => 'Ditolak',
+                        'catatan_verifikasi' => $catatanAdmin,
+                        'diverifikasi_oleh' => $verifierId,
+                        'diverifikasi_pada' => $now,
+                        'keterangan' => trim(($presensi->keterangan ? $presensi->keterangan . ' | ' : '') . 'Pengajuan ditolak: ' . ($catatanAdmin ?: '-')),
+                    ]);
+
+                    AttendanceLog::create([
+                        'presensi_id' => $presensi->id,
+                        'attendance_session_id' => $request->attendance_session_id,
+                        'peserta_id' => $request->peserta_id,
+                        'user_id' => $verifierId,
+                        'status_sebelum' => $statusSebelum,
+                        'status_sesudah' => 'Alpa',
+                        'alasan_perubahan' => 'Penolakan pengajuan ' . $statusSebelum . ' oleh admin: ' . ($catatanAdmin ?: '-'),
+                        'metode_input' => 'Sistem',
+                        'ip_address' => request()->ip(),
+                    ]);
+                }
             }
 
             return true;
@@ -617,18 +692,70 @@ class AttendanceService
     }
 
     /**
-     * Hitung statistik kehadiran untuk satu sesi tertentu.
+     * Verifikasi langsung presensi Sakit / Izin / Dispensasi dari halaman detail sesi.
      */
-    public function getSessionStatistics(AttendanceSession $session): array
+    public function verifyDirectPresensi(
+        Presensi $presensi,
+        string $decision, // 'Disetujui' atau 'Ditolak'
+        ?string $catatan,
+        int $verifierId
+    ): Presensi {
+        return DB::transaction(function () use ($presensi, $decision, $catatan, $verifierId) {
+            $now = now();
+            $statusSebelum = $presensi->status_kehadiran;
+            $isApproved = $decision === 'Disetujui';
+            $statusSesudah = $isApproved ? $statusSebelum : 'Alpa';
+
+            $presensi->update([
+                'status_verifikasi' => $decision,
+                'status_kehadiran' => $statusSesudah,
+                'catatan_verifikasi' => $catatan,
+                'diverifikasi_oleh' => $verifierId,
+                'diverifikasi_pada' => $now,
+                'keterangan' => $isApproved
+                    ? $presensi->keterangan
+                    : trim(($presensi->keterangan ? $presensi->keterangan . ' | ' : '') . 'Ditolak verifikator: ' . ($catatan ?: 'Bukti tidak memenuhi syarat')),
+            ]);
+
+            // Sinkronkan AttendanceRequest terkait apabila ada yang masih Pending
+            AttendanceRequest::where('attendance_session_id', $presensi->attendance_session_id)
+                ->where('peserta_id', $presensi->peserta_id)
+                ->where('status', 'Pending')
+                ->update([
+                    'status' => $isApproved ? 'Approved' : 'Rejected',
+                    'catatan_admin' => $catatan,
+                    'diverifikasi_oleh' => $verifierId,
+                    'diverifikasi_pada' => $now,
+                ]);
+
+            AttendanceLog::create([
+                'presensi_id' => $presensi->id,
+                'attendance_session_id' => $presensi->attendance_session_id,
+                'peserta_id' => $presensi->peserta_id,
+                'user_id' => $verifierId,
+                'status_sebelum' => $statusSebelum,
+                'status_sesudah' => $statusSesudah,
+                'alasan_perubahan' => "Verifikasi bukti {$statusSebelum}: {$decision}" . ($catatan ? " ({$catatan})" : ''),
+                'metode_input' => 'Manual',
+                'ip_address' => request()->ip(),
+            ]);
+
+            return $presensi->fresh();
+        });
+    }
+
+    /**
+     * Ambil seluruh peserta yang terdaftar pada kelas mapel / angkatan sesi ini.
+     */
+    public function getEnrolledPesertas(AttendanceSession $session)
     {
-        // Ambil seluruh peserta yang terdaftar pada kelas mapel / angkatan sesi ini
         $queryPeserta = Peserta::query();
         if ($session->kelas_mapel_id) {
             $angkatanId = $session->kelasMapel ? $session->kelasMapel->angkatan_id : null;
             $queryPeserta->where(function ($q) use ($session, $angkatanId) {
                 $q->where('kelas_mapel_id', $session->kelas_mapel_id);
                 if ($angkatanId) {
-                    $q->orWhere(function($sub) use ($angkatanId) {
+                    $q->orWhere(function ($sub) use ($angkatanId) {
                         $sub->where('angkatan_id', $angkatanId)->whereNull('kelas_mapel_id');
                     });
                 }
@@ -640,7 +767,155 @@ class AttendanceService
             $queryPeserta->whereRaw('1 = 0');
         }
 
-        $allPesertas = $queryPeserta->orderBy('nama')->get();
+        return $queryPeserta->orderBy('nama')->get();
+    }
+
+    /**
+     * Tutup sesi presensi secara terstruktur:
+     * 1. Ubah status sesi menjadi Selesai & nonaktifkan token.
+     * 2. Auto-Alpa bagi peserta terdaftar yang tidak melakukan presensi.
+     * 3. Auto-Sync ke RealisasiJadwal & RealisasiPengajar agar JP masuk ke Rekapitulasi JP.
+     */
+    public function closeSession(AttendanceSession $session, ?int $actorUserId = null, bool $autoSyncRealisasi = true): array
+    {
+        return DB::transaction(function () use ($session, $actorUserId, $autoSyncRealisasi) {
+            $now = now();
+            $session->update([
+                'status' => 'Selesai',
+                'waktu_tutup_presensi' => $session->waktu_tutup_presensi && $session->waktu_tutup_presensi->lte($now)
+                    ? $session->waktu_tutup_presensi
+                    : $now,
+            ]);
+
+            $session->qrTokens()->update(['is_active' => false]);
+
+            // 1. Auto-Alpa untuk peserta kelas yang belum memiliki record presensi pada sesi ini
+            $pesertas = $this->getEnrolledPesertas($session);
+            $existingPesertaIds = Presensi::where('attendance_session_id', $session->id)
+                ->pluck('peserta_id')
+                ->flip();
+
+            $alpaCount = 0;
+            foreach ($pesertas as $pst) {
+                if (isset($existingPesertaIds[$pst->id])) {
+                    continue;
+                }
+
+                $presensi = Presensi::create([
+                    'attendance_session_id' => $session->id,
+                    'peserta_id' => $pst->id,
+                    'jadwal_id' => $session->jadwal_id,
+                    'kelas_mapel_id' => $session->kelas_mapel_id,
+                    'tanggal' => $session->tanggal,
+                    'status_kehadiran' => 'Alpa',
+                    'metode_presensi' => 'Sistem',
+                    'waktu_presensi' => null,
+                    'waktu_check_in' => null,
+                    'keterangan' => 'Otomatis ditandai Alpa saat sesi presensi ditutup',
+                    'status_verifikasi' => 'Disetujui',
+                    'diinput_oleh' => $actorUserId,
+                ]);
+
+                AttendanceLog::create([
+                    'presensi_id' => $presensi->id,
+                    'attendance_session_id' => $session->id,
+                    'peserta_id' => $pst->id,
+                    'user_id' => $actorUserId,
+                    'status_sebelum' => null,
+                    'status_sesudah' => 'Alpa',
+                    'alasan_perubahan' => 'Penandaan Alpa otomatis saat penutupan sesi presensi',
+                    'metode_input' => 'Sistem',
+                    'ip_address' => request()?->ip(),
+                ]);
+
+                $alpaCount++;
+            }
+
+            // 2. Auto-Sync ke RealisasiJadwal & RealisasiPengajar
+            $realisasiSynced = false;
+            if ($autoSyncRealisasi && $session->jadwal_id) {
+                $jadwal = Jadwal::with(['penugasanPengajar', 'mataPelatihan.penugasans'])->find($session->jadwal_id);
+                $alreadyRealized = RealisasiJadwal::withTrashed()->where('jadwal_id', $session->jadwal_id)->exists();
+
+                if ($jadwal && !$alreadyRealized) {
+                    $jp = (float) ($jadwal->jp_rencana ?: 1.00);
+
+                    $realisasi = RealisasiJadwal::create([
+                        'jadwal_id' => $jadwal->id,
+                        'tanggal_realisasi' => $session->tanggal ? $session->tanggal->toDateString() : $now->toDateString(),
+                        'jam_mulai_aktual' => $session->jam_mulai ?: $jadwal->jam_mulai,
+                        'jam_selesai_aktual' => $session->jam_selesai ?: $jadwal->jam_selesai,
+                        'jp_aktual' => $jp,
+                        'jp_dibayarkan' => $jp,
+                        'status' => 'Terlaksana',
+                        'catatan' => 'Terealisasi otomatis saat penutupan Sesi Presensi: ' . $session->judul_sesi,
+                        'diverifikasi_oleh' => $actorUserId,
+                        'diverifikasi_pada' => $now,
+                    ]);
+
+                    $jadwal->update(['status' => 'Terlaksana']);
+
+                    $penugasan = $jadwal->penugasanPengajar
+                        ?? $jadwal->mataPelatihan?->penugasans?->first();
+
+                    if ($penugasan && in_array($penugasan->jenis_pengajar, ['Widyaiswara', 'Narasumber'])) {
+                        RealisasiPengajar::create([
+                            'realisasi_jadwal_id' => $realisasi->id,
+                            'penugasan_pengajar_id' => $penugasan->id,
+                            'jenis_pengajar' => $penugasan->jenis_pengajar,
+                            'widyaiswara_id' => $penugasan->jenis_pengajar === 'Widyaiswara' ? $penugasan->widyaiswara_id : null,
+                            'narasumber_id' => $penugasan->jenis_pengajar === 'Narasumber' ? $penugasan->narasumber_id : null,
+                            'jp_aktual' => $jp,
+                            'jp_dibayarkan' => $jp,
+                            'status_kehadiran' => 'Hadir',
+                            'keterangan' => 'Sinkronisasi otomatis dari sesi presensi',
+                        ]);
+                    }
+
+                    $realisasiSynced = true;
+                }
+            }
+
+            return [
+                'alpa_count' => $alpaCount,
+                'realisasi_synced' => $realisasiSynced,
+            ];
+        });
+    }
+
+    /**
+     * Tutup otomatis seluruh sesi Aktif yang tanggalnya sudah lewat atau batas waktu tutupnya telah terlewati.
+     */
+    public function autoCloseExpiredSessions(): int
+    {
+        $now = now();
+        $today = $now->toDateString();
+
+        $expiredSessions = AttendanceSession::where('status', 'Aktif')
+            ->where(function ($q) use ($today, $now) {
+                $q->whereDate('tanggal', '<', $today)
+                  ->orWhere(function ($sub) use ($now) {
+                      $sub->whereNotNull('waktu_tutup_presensi')
+                          ->where('waktu_tutup_presensi', '<', $now);
+                  });
+            })
+            ->get();
+
+        $closedCount = 0;
+        foreach ($expiredSessions as $sess) {
+            $this->closeSession($sess, null, true);
+            $closedCount++;
+        }
+
+        return $closedCount;
+    }
+
+    /**
+     * Hitung statistik kehadiran untuk satu sesi tertentu.
+     */
+    public function getSessionStatistics(AttendanceSession $session): array
+    {
+        $allPesertas = $this->getEnrolledPesertas($session);
         $totalPeserta = $allPesertas->count();
 
         // Ambil presensi yang sudah tercatat pada sesi ini
@@ -655,10 +930,12 @@ class AttendanceService
         $alpa = 0;
         $dispensasi = 0;
         $belumPresensi = 0;
+        $pendingDirectVerifications = 0;
 
         foreach ($allPesertas as $pst) {
             if (isset($presensis[$pst->id])) {
-                $status = $presensis[$pst->id]->status_kehadiran;
+                $rec = $presensis[$pst->id];
+                $status = $rec->status_kehadiran;
                 match ($status) {
                     'Hadir' => $hadir++,
                     'Terlambat' => $terlambat++,
@@ -668,6 +945,9 @@ class AttendanceService
                     'Dispensasi' => $dispensasi++,
                     default => $belumPresensi++,
                 };
+                if ($rec->status_verifikasi === 'Menunggu Verifikasi') {
+                    $pendingDirectVerifications++;
+                }
             } else {
                 $belumPresensi++;
             }
@@ -691,6 +971,7 @@ class AttendanceService
             'belum_presensi' => $belumPresensi,
             'persen_kehadiran' => $persenKehadiran,
             'pending_requests' => $pendingRequests,
+            'pending_direct_verifications' => $pendingDirectVerifications,
             'pesertas' => $allPesertas,
             'presensis' => $presensis,
         ];

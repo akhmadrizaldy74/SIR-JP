@@ -13,6 +13,8 @@ use App\Models\Narasumber;
 use App\Models\Peserta;
 use App\Models\Jadwal;
 use App\Models\PenugasanPengajar;
+use App\Models\RealisasiPengajar;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class KelasMapelController extends Controller
@@ -208,21 +210,46 @@ class KelasMapelController extends Controller
         $tanggal = $kelasMapel->tanggal_mulai ? $kelasMapel->tanggal_mulai->format('Y-m-d') : date('Y-m-d');
         $ruanganNama = $kelasMapel->ruangan ? $kelasMapel->ruangan->nama_ruangan : 'Ruang Kelas Online';
         $metode = $kelasMapel->metode_pembelajaran === 'Klasikal' ? 'Tatap Muka / Klasikal' : 'Daring / Online';
+        $jamMulai = $kelasMapel->jam_mulai ?? '08:00:00';
+        $jamSelesai = $kelasMapel->jam_selesai ?? '12:00:00';
+        $keterangan = 'Sesi KCLC ' . $kelasMapel->nama_kelas . ' (' . ($kelasMapel->hari ?? 'Jadwal Mingguan') . ')';
+
+        $jadwal = Jadwal::where('kelas_mapel_id', $kelasMapel->id)->first();
+
+        if (!$jadwal) {
+            $jadwal = Jadwal::where('mata_pelatihan_id', $kelasMapel->mata_pelatihan_id)
+                ->whereNull('kelas_mapel_id')
+                ->whereDate('tanggal', $tanggal)
+                ->where('jam_mulai', $jamMulai)
+                ->where('jam_selesai', $jamSelesai)
+                ->where('keterangan', $keterangan)
+                ->first();
+        }
+
+        if ($jadwal) {
+            if (!$jadwal->kelas_mapel_id) {
+                $jadwal->update(['kelas_mapel_id' => $kelasMapel->id]);
+            }
+
+            return redirect()->route('kelas-mapel.show', ['kelas_mapel' => $kelasMapel->id, 'tab' => 'jadwal'])
+                ->with('success', 'Sesi Jadwal KCLC ini sudah tersinkron ke SIR-JP.');
+        }
 
         $existingCount = Jadwal::where('mata_pelatihan_id', $kelasMapel->mata_pelatihan_id)->count();
 
-        $jadwal = Jadwal::create([
+        Jadwal::create([
             'mata_pelatihan_id' => $kelasMapel->mata_pelatihan_id,
+            'kelas_mapel_id' => $kelasMapel->id,
             'penugasan_pengajar_id' => $penugasan?->id,
             'tanggal' => $tanggal,
-            'jam_mulai' => $kelasMapel->jam_mulai ?? '08:00:00',
-            'jam_selesai' => $kelasMapel->jam_selesai ?? '12:00:00',
+            'jam_mulai' => $jamMulai,
+            'jam_selesai' => $jamSelesai,
             'sesi_ke' => $existingCount + 1,
             'jp_rencana' => $kelasMapel->jp > 0 ? $kelasMapel->jp : 4,
             'ruangan' => $ruanganNama,
             'metode' => $metode,
             'status' => 'Terjadwal',
-            'keterangan' => 'Sesi KCLC ' . $kelasMapel->nama_kelas . ' (' . ($kelasMapel->hari ?? 'Jadwal Mingguan') . ')',
+            'keterangan' => $keterangan,
         ]);
 
         return redirect()->route('kelas-mapel.show', ['kelas_mapel' => $kelasMapel->id, 'tab' => 'jadwal'])
@@ -231,7 +258,50 @@ class KelasMapelController extends Controller
 
     public function destroyPengajar(KelasMapel $kelasMapel, KelasMapelPengajar $pengajar)
     {
-        $pengajar->delete();
+        abort_unless($pengajar->kelas_mapel_id === $kelasMapel->id, 404);
+
+        DB::transaction(function () use ($kelasMapel, $pengajar) {
+            $pengajar->delete();
+
+            if (!$kelasMapel->mata_pelatihan_id) {
+                return;
+            }
+
+            $jenisPengajar = $pengajar->pengajar_type === Widyaiswara::class ? 'Widyaiswara' : 'Narasumber';
+            $isWidyaiswara = $jenisPengajar === 'Widyaiswara';
+            $pengajarIdColumn = $isWidyaiswara ? 'widyaiswara_id' : 'narasumber_id';
+
+            $stillAssignedInKclc = KelasMapelPengajar::where('pengajar_type', $pengajar->pengajar_type)
+                ->where('pengajar_id', $pengajar->pengajar_id)
+                ->whereHas('kelasMapel', fn($query) => $query->where('mata_pelatihan_id', $kelasMapel->mata_pelatihan_id))
+                ->exists();
+
+            if ($stillAssignedInKclc) {
+                return;
+            }
+
+            $penugasan = PenugasanPengajar::where('mata_pelatihan_id', $kelasMapel->mata_pelatihan_id)
+                ->where('jenis_pengajar', $jenisPengajar)
+                ->where($pengajarIdColumn, $pengajar->pengajar_id)
+                ->where('keterangan', 'like', 'Penugasan terintegrasi KCLC Kelas %')
+                ->first();
+
+            if (!$penugasan) {
+                return;
+            }
+
+            $hasScheduleHistory = Jadwal::withTrashed()
+                ->where('penugasan_pengajar_id', $penugasan->id)
+                ->exists();
+            $hasRealizationHistory = RealisasiPengajar::withTrashed()
+                ->where('penugasan_pengajar_id', $penugasan->id)
+                ->exists();
+
+            if (!$hasScheduleHistory && !$hasRealizationHistory) {
+                $penugasan->delete();
+            }
+        });
+
         return redirect()->route('kelas-mapel.show', ['kelas_mapel' => $kelasMapel->id, 'tab' => 'pengajar'])
             ->with('success', 'Pengajar berhasil dihapus dari kelas ini !');
     }

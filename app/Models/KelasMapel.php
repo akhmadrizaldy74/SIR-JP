@@ -67,7 +67,7 @@ class KelasMapel extends Model
 
     public function jadwals()
     {
-        return $this->hasMany(Jadwal::class, 'angkatan_id', 'angkatan_id');
+        return $this->hasMany(Jadwal::class, 'kelas_mapel_id');
     }
 
     public function attendanceSessions()

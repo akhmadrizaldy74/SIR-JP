@@ -9,8 +9,11 @@ use App\Models\KelasMapel;
 use App\Models\Pelatihan;
 use App\Models\Angkatan;
 use App\Models\LogAktivitas;
+use App\Models\Presensi;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AttendanceSessionController extends Controller
@@ -24,6 +27,8 @@ class AttendanceSessionController extends Controller
 
     public function index(Request $request)
     {
+        $this->attendanceService->autoCloseExpiredSessions();
+
         $status = $request->get('status');
         $pelatihanId = $request->get('pelatihan_id');
         $tanggal = $request->get('tanggal');
@@ -175,14 +180,15 @@ class AttendanceSessionController extends Controller
 
         $jadwal = Jadwal::with('mataPelatihan')->findOrFail($validated['jadwal_id']);
 
-        // Jika kelas_mapel_id tidak dipilih/dikirim, cari kelas mapel terkait secara otomatis
-        $kelasMapelId = $request->input('kelas_mapel_id');
+        $kelasMapelId = $request->input('kelas_mapel_id') ?: $jadwal->kelas_mapel_id;
         if (!$kelasMapelId && $jadwal->mataPelatihan) {
-            $km = KelasMapel::where('mata_pelatihan_id', $jadwal->mata_pelatihan_id)
-                ->orWhere('angkatan_id', $jadwal->mataPelatihan->angkatan_id)
-                ->first();
-            if ($km) {
-                $kelasMapelId = $km->id;
+            $kelasMapels = KelasMapel::where('mata_pelatihan_id', $jadwal->mata_pelatihan_id)
+                ->where('angkatan_id', $jadwal->mataPelatihan->angkatan_id)
+                ->limit(2)
+                ->get();
+
+            if ($kelasMapels->count() === 1) {
+                $kelasMapelId = $kelasMapels->first()->id;
             }
         }
 
@@ -213,13 +219,18 @@ class AttendanceSessionController extends Controller
 
     public function show(AttendanceSession $attendanceSession)
     {
+        $this->attendanceService->autoCloseExpiredSessions();
+        $attendanceSession->refresh();
+
         $attendanceSession->load([
             'jadwal.mataPelatihan.angkatan.pelatihan',
             'jadwal.penugasanPengajar.widyaiswara',
             'jadwal.penugasanPengajar.narasumber',
+            'jadwal.realisasi',
             'kelasMapel.ruangan',
             'documentations',
             'requests.peserta',
+            'creator',
         ]);
 
         $stats = $this->attendanceService->getSessionStatistics($attendanceSession);
@@ -244,17 +255,87 @@ class AttendanceSessionController extends Controller
 
     public function close(AttendanceSession $attendanceSession)
     {
-        $attendanceSession->update([
-            'status' => 'Selesai',
-            'waktu_tutup_presensi' => now(),
+        $result = $this->attendanceService->closeSession($attendanceSession, auth()->id(), true);
+
+        LogAktivitas::catat(
+            'Presensi',
+            'Tutup Sesi Presensi',
+            "Menutup sesi presensi ID #{$attendanceSession->id} (Auto-Alpa: {$result['alpa_count']}, Sync Realisasi JP: " . ($result['realisasi_synced'] ? 'Ya' : 'Tidak/Sudah Ada') . ')'
+        );
+
+        $msgParts = ['Sesi presensi telah DITUTUP.'];
+        if ($result['alpa_count'] > 0) {
+            $msgParts[] = "{$result['alpa_count']} peserta yang belum presensi otomatis ditandai Alpa.";
+        }
+        if ($result['realisasi_synced']) {
+            $msgParts[] = 'Realisasi jadwal & JP pengajar otomatis disinkronkan ke Rekapitulasi JP.';
+        }
+
+        return back()->with('success', implode(' ', $msgParts));
+    }
+
+    public function verifyPresensi(Request $request, AttendanceSession $attendanceSession, Presensi $presensi)
+    {
+        if ((int) $presensi->attendance_session_id !== (int) $attendanceSession->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'keputusan' => 'required|in:Disetujui,Ditolak',
+            'catatan_verifikasi' => 'nullable|string|max:500',
         ]);
 
-        // Nonaktifkan semua token sesi ini
-        $attendanceSession->qrTokens()->update(['is_active' => false]);
+        $this->attendanceService->verifyDirectPresensi(
+            $presensi,
+            $validated['keputusan'],
+            $validated['catatan_verifikasi'] ?? null,
+            auth()->id()
+        );
 
-        LogAktivitas::catat('Presensi', 'Tutup Sesi Presensi', 'Menutup sesi presensi ID #' . $attendanceSession->id);
+        $namaPeserta = $presensi->peserta->nama ?? 'Peserta';
+        LogAktivitas::catat(
+            'Presensi',
+            'Verifikasi Bukti Presensi',
+            "Verifikasi presensi {$namaPeserta} pada sesi #{$attendanceSession->id}: {$validated['keputusan']}"
+        );
 
-        return back()->with('success', 'Sesi presensi telah DITUTUP. Presensi peserta untuk sesi ini telah diakhiri.');
+        return back()->with('success', "Status bukti presensi {$namaPeserta} berhasil diperbarui menjadi {$validated['keputusan']}.");
+    }
+
+    public function exportBapPdf(AttendanceSession $attendanceSession)
+    {
+        $attendanceSession->load([
+            'jadwal.mataPelatihan.angkatan.pelatihan',
+            'jadwal.penugasanPengajar.widyaiswara',
+            'jadwal.penugasanPengajar.narasumber',
+            'jadwal.realisasi',
+            'kelasMapel.ruangan',
+            'documentations',
+            'creator',
+        ]);
+
+        $stats = $this->attendanceService->getSessionStatistics($attendanceSession);
+
+        // Siapkan foto dokumentasi berbasis base64 agar DomPDF merender aman tanpa timeout HTTP
+        $docPhotos = [];
+        foreach ($attendanceSession->documentations->take(4) as $doc) {
+            if (Storage::disk('local')->exists($doc->path_file)) {
+                $raw = Storage::disk('local')->get($doc->path_file);
+                $docPhotos[] = [
+                    'src' => 'data:' . ($doc->mime_type ?: 'image/jpeg') . ';base64,' . base64_encode($raw),
+                    'kategori' => $doc->kategori,
+                    'keterangan' => $doc->keterangan ?: $doc->nama_file_asli,
+                ];
+            }
+        }
+
+        LogAktivitas::catat('Laporan', 'Cetak BAP Sesi PDF', "Mencetak Berita Acara Pembelajaran sesi #{$attendanceSession->id}");
+
+        $pdf = Pdf::loadView('presensi.sessions.bap_pdf', compact('attendanceSession', 'stats', 'docPhotos'))
+            ->setPaper('a4', 'portrait');
+
+        $safeTitle = Str::slug($attendanceSession->judul_sesi ?: 'sesi-' . $attendanceSession->id);
+        return $pdf->stream("BAP_{$safeTitle}.pdf");
     }
 
     public function qrDisplay(AttendanceSession $attendanceSession)

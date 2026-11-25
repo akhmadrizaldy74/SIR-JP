@@ -125,6 +125,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('attendance-sessions', AttendanceSessionController::class);
     Route::post('attendance-sessions/{attendance_session}/activate', [AttendanceSessionController::class, 'activate'])->name('attendance-sessions.activate');
     Route::post('attendance-sessions/{attendance_session}/close', [AttendanceSessionController::class, 'close'])->name('attendance-sessions.close');
+    Route::post('attendance-sessions/{attendance_session}/verify-presensi/{presensi}', [AttendanceSessionController::class, 'verifyPresensi'])->name('attendance-sessions.verify_presensi');
+    Route::get('attendance-sessions/{attendance_session}/bap-pdf', [AttendanceSessionController::class, 'exportBapPdf'])->name('attendance-sessions.bap_pdf');
     Route::patch('attendance-sessions/{attendance_session}/meeting-link', [AttendanceSessionController::class, 'updateMeetingLink'])->name('attendance-sessions.update_meeting_link');
     Route::get('attendance-sessions/{attendance_session}/qr-display', [AttendanceSessionController::class, 'qrDisplay'])->name('attendance-sessions.qr_display');
     Route::get('attendance-sessions/{attendance_session}/qr-token', [AttendanceSessionController::class, 'getLatestQrToken'])->name('attendance-sessions.qr_token');
